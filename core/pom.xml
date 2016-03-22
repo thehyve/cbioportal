@@ -293,7 +293,6 @@
 
 	<!-- plugins -->
 	<build>
-
 	  <plugins>
 
 		<!-- java 1.7 support -->

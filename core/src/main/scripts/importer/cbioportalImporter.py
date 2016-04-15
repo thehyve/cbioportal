@@ -19,6 +19,7 @@ from cbioportal_common import IMPORTER_CLASSNAME_BY_META_TYPE
 from cbioportal_common import IMPORTER_REQUIRES_METADATA
 from cbioportal_common import IMPORT_CANCER_TYPE_CLASS
 from cbioportal_common import IMPORT_STUDY_CLASS
+from cbioportal_common import UPDATE_STUDY_STATUS_CLASS
 from cbioportal_common import REMOVE_STUDY_CLASS
 from cbioportal_common import IMPORT_CASE_LIST_CLASS
 from cbioportal_common import ADD_CASE_LIST_CLASS
@@ -59,6 +60,14 @@ def import_study(jvm_args, meta_filename):
     args.append("--noprogress") # don't report memory usage and % progress
     run_java(*args)
 
+def update_study_status(jvm_args, study_id):
+    args = jvm_args.split(' ')
+    args.append(UPDATE_STUDY_STATUS_CLASS)
+    args.append(study_id)
+    args.append("AVAILABLE")
+    args.append("--noprogress") # don't report memory usage and % progress
+    run_java(*args)
+
 def remove_study(jvm_args, meta_filename):
     args = jvm_args.split(' ')
     args.append(REMOVE_STUDY_CLASS)
@@ -95,7 +104,9 @@ def import_study_data(jvm_args, meta_filename, data_filename):
         args.append("--loadMode")
         args.append("bulkload")
     if importer in ("org.mskcc.cbio.portal.scripts.ImportMutSigData", "org.mskcc.cbio.portal.scripts.ImportGisticData"):
+        args.append("--data")
         args.append(data_filename)
+        args.append("--study")
         args.append(meta_file_dict['cancer_study_identifier'])
     else:
         args.append("--data")
@@ -122,10 +133,11 @@ def add_global_case_list(jvm_args, study_id):
 def check_version(jvm_args):
     args = jvm_args.split(' ')
     args.append(VERSION_UTIL_CLASS)
-    ret_stat = run_java(*args)
-    if ret_stat[-1] != 0:
-        print >> OUTPUT_FILE, 'This version of the portal is out of sync with the database. You must run the database migration script located at PORTAL_HOME/core/src/main/scripts/migrate_db.py before continuing.'
-        sys.exit()
+    try:
+        run_java(*args)
+    except:
+        print >> OUTPUT_FILE, 'Error, probably due to this version of the portal being out of sync with the database. Run the database migration script located at PORTAL_HOME/core/src/main/scripts/migrate_db.py before continuing.'
+        raise
 
 def process_case_lists(jvm_args, case_list_dir):
     case_list_files = (os.path.join(case_list_dir, x) for
@@ -225,6 +237,9 @@ def process_directory(jvm_args, study_directory):
 
     if study_metadata.get('add_global_case_list', 'false').lower() == 'true':
         add_global_case_list(jvm_args, study_id)
+        
+    # enable study
+    update_study_status(jvm_args, study_id)
 
 
 def usage():
@@ -292,7 +307,7 @@ def main(args):
         portal_home = os.environ.get('PORTAL_HOME', None)
         if portal_home is None:
             # PORTAL_HOME also not set...quit trying with error: 
-            print 'Either --jar_path needs to be given or environment variable PORTAL_HOME needs to be set'
+            print 'Error: either --jar_path needs to be given or environment variable PORTAL_HOME needs to be set'
             sys.exit(2)
         else: 
             #find jar files in lib folder and add them to classpath:
@@ -302,7 +317,7 @@ def main(args):
                 print 'Expected to find 1 core-*.jar, but found: ' + str(len(jars))
                 sys.exit(2)
             args.jar_path = jars[0]
-            print args.jar_path
+            print '\nData loading step using: ' + args.jar_path
         
     # process the options
     jvm_args = "-Dspring.profiles.active=dbcp -cp " + args.jar_path

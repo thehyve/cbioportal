@@ -1226,7 +1226,7 @@ class MutationsExtendedValidator(Validator):
 
     def checkSwissProt(self, value):
         """Validate the name or accession in the SWISSPROT column."""
-        if value is None or value.strip() in ['', '[Not Available]']:
+        if value is None or value.strip() in ['', 'NA', '[Not Available]']:
             self.logger.warning(
                 'Missing value in SWISSPROT column; this column is '
                 'recommended to make sure that the Uniprot canonical isoform '
@@ -1248,12 +1248,12 @@ class MutationsExtendedValidator(Validator):
         else:
             # format described on http://www.uniprot.org/help/entry_name
             if not re.match(
-                        r'^[A-Z0-9]{2,5}_[A-Z0-9]{2,5}$',
+                        r'^[A-Z0-9]{1,5}_[A-Z0-9]{1,5}$',
                         value):
-                value_list = value.split(',')
+                value_list = value.strip('"').split(',')
                 if len(value_list) > 1:
                     if re.match(
-                                r'^[A-Z0-9]{2,5}_[A-Z0-9]{2,5}$',
+                                r'^[A-Z0-9]{1,5}_[A-Z0-9]{1,5}$',
                                 value_list[0]):
                                 self.logger.warning('This SWISSPROT value contains multiple names,'
                                                     ' thereby unable to obtain UNIPROT accession.'

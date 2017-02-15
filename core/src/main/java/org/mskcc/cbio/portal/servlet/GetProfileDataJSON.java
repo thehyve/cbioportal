@@ -50,6 +50,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import org.mskcc.cbio.portal.model.EntityType;
+import org.mskcc.cbio.portal.model.GeneticAlterationType;
 
 /**
  * Retrieves genomic profile data for one or more genes.
@@ -102,13 +104,14 @@ public class GetProfileDataJSON extends HttpServlet  {
         String cancerStudyIdentifier = httpServletRequest.getParameter("cancer_study_id");
         String sampleSetId = httpServletRequest.getParameter("case_set_id");
         String sampleIdsKey = httpServletRequest.getParameter("case_ids_key");
-        String rawGeneIdList;
+        String rawGeneticEntityIdList;
         if (httpServletRequest instanceof XssRequestWrapper) {
-            rawGeneIdList = ((XssRequestWrapper)httpServletRequest).getRawParameter("gene_list");
+            rawGeneticEntityIdList = ((XssRequestWrapper)httpServletRequest).getRawParameter("genetic_entity_list");
         } else {
-            rawGeneIdList = httpServletRequest.getParameter("gene_list");
+            rawGeneticEntityIdList = httpServletRequest.getParameter("genetic_entity_list");
         }
-        String[] geneIdList = rawGeneIdList.split("\\s+");
+
+        String[] geneticEntityIdList = rawGeneticEntityIdList.split("\\s+");
         String[] geneticProfileIds = httpServletRequest.getParameter("genetic_profile_id").split("\\s+");
         String forceDownload = httpServletRequest.getParameter("force_download");
         String format = httpServletRequest.getParameter("format");
@@ -152,10 +155,10 @@ public class GetProfileDataJSON extends HttpServlet  {
             List<String> stableSampleIds = InternalIdUtil.getStableSampleIds(internalSampleIds);
 
             //Get profile data
-            for (String geneId: geneIdList) {
+            for (String geneticEntityId: geneticEntityIdList) {
 
                 DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
-                Gene gene = daoGene.getGene(geneId);
+                Gene gene = daoGene.getGene(geneticEntityId);
 
                 JsonNode tmpGeneObj = mapper.createObjectNode();
 
@@ -169,10 +172,21 @@ public class GetProfileDataJSON extends HttpServlet  {
                 //Get raw data (plain text) for each profile
                 for (String geneticProfileId: geneticProfileIds) {
                     try {
-                        ArrayList<String> tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
-                                gene,
-                                internalSampleIds,
-                                DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId));
+                    	ArrayList<String> tmpProfileDataArr;
+                    	GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(geneticProfileId);
+                    	if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.GENESET_SCORE)) {
+                    		//use new API which supports geneset query:
+                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticDataRow(
+                    				geneticEntityId, 
+                    				stableSampleIds, 
+                    				EntityType.GENESET, 
+                    				geneticProfile);
+                    	} else {
+                    		tmpProfileDataArr = GeneticAlterationUtil.getGeneticAlterationDataRow(
+	                                gene,
+	                                internalSampleIds,
+	                                geneticProfile);
+                    	}
                         //Mapping sample Id and profile data
                         HashMap<String,String> tmpResultMap =
                                 new HashMap<String,String>();  //<"sample_id", "profile_data">
@@ -193,7 +207,7 @@ public class GetProfileDataJSON extends HttpServlet  {
                     ((ObjectNode)tmpGeneObj).put(stableSampleId, tmpObjMap.get(stableSampleId));
                 }
 
-                ((ObjectNode)result).put(geneId, tmpGeneObj);
+                ((ObjectNode)result).put(geneticEntityId, tmpGeneObj);
 
             }
         } catch (DaoException e) {
@@ -201,14 +215,17 @@ public class GetProfileDataJSON extends HttpServlet  {
         }
 
         if (forceDownload == null) {
+        	//write out in json format:
             httpServletResponse.setContentType("application/json");
             PrintWriter out = httpServletResponse.getWriter();
             mapper.writeValue(out, result);
         } else {
+        	//tabular format response: only for genes...no geneset support here:
+        	//TODO
             String result_str = "";
             if (format.equals("tab")) {
                 String sampleId_str = "GENE_ID" + "\t" + "COMMON" + "\t";
-                Iterator<String> sampleIds = result.get(geneIdList[0]).getFieldNames();
+                Iterator<String> sampleIds = result.get(geneticEntityIdList[0]).getFieldNames();
                 while (sampleIds.hasNext()) {
                     sampleId_str += sampleIds.next() + "\t";
                 }
@@ -247,16 +264,16 @@ public class GetProfileDataJSON extends HttpServlet  {
                     gene_str += gene.getEntrezGeneId() + "\t";
                 }
                 gene_str += "\n" + "COMMON" + "\t";
-                for(String geneId : geneIdList) {
+                for(String geneId : geneticEntityIdList) {
                     gene_str += geneId + "\t";
                 }
                 gene_str += "\n";
 
-                Iterator<String> sampleIds = result.get(geneIdList[0]).getFieldNames();
+                Iterator<String> sampleIds = result.get(geneticEntityIdList[0]).getFieldNames();
                 while (sampleIds.hasNext()) {
                     String sampleId = sampleIds.next();
                     val_str += sampleId + "\t";
-                    for (String geneId : geneIdList) {
+                    for (String geneId : geneticEntityIdList) {
                        String _val = result.get(geneId).get(sampleId).get(geneticProfileIds[0]).toString();
                         _val = _val.replaceAll("\"", "");
                         val_str += _val + "\t";

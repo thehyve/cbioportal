@@ -45,49 +45,102 @@
 
 var CoexpPlots = function() {
 
-    function init(divName, geneX, geneY, pearson, spearman, profileId)  {
-        getAlterationData(divName, geneX, geneY, pearson, spearman, profileId);
+    function init(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id)  {
+        getAlterationData(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id);
     }
 
-    function getAlterationData(divName, geneX, geneY, pearson, spearman, profileId) {
+    function getAlterationData(divName, entityX, entityY, pearson, spearman, profile1Id, profile2Id) {
         var paramsGetAlterationData = {
             cancer_study_id: window.QuerySession.getCancerStudyIds()[0],
-            gene_list: geneX + " " + geneY,
+            entity1: entityX, 
+            entity2: entityY,
             case_set_id: window.QuerySession.getCaseSetId(),
             case_ids_key: window.QuerySession.getCaseIdsKey(),
-            profile_id: profileId
+            entity1_profile: profile1Id,
+            entity2_profile: profile2Id
         };
+        //Check if the comparison contains gene sets
+        entityXIsGeneSet = false;
+        entityYIsGeneSet = false;
+        if (profile1Id.indexOf("mrna") == -1) {
+        	entityXIsGeneSet = true;
+        }
+        if (profile2Id.indexOf("mrna") == -1) {
+        	entityYIsGeneSet = true;
+        }
         $.post(
             "getAlterationData.json", 
             paramsGetAlterationData, 
-            getAlterationDataCallBack(divName, geneX, geneY, pearson, spearman), 
+            getAlterationDataCallBack(divName, entityX, entityY, pearson, spearman, entityXIsGeneSet, entityYIsGeneSet), 
             "json");
     }
 
-    function getAlterationDataCallBack(_divName, _geneX, _geneY, _pearson, _spearman) {
+    function getAlterationDataCallBack(_divName, _entityX, _entityY, _pearson, _spearman, entityXIsGeneSet, entityYIsGeneSet) {
         return function(result) {
             var alteration_data_result = jQuery.extend(result, {}, true);
-            //get mutation data
+            //get mutation data only for the genes (and not for the gene sets)
             if (CoExpView.has_mutation_data()) {
-                var proxy = DataProxyFactory.getDefaultMutationDataProxy();
-                var _genes = _geneX + " " + _geneY;
-                proxy.getMutationData(
-                    _genes, 
-                    getMutationDataCallBack(
-                        alteration_data_result, 
-                        _divName, 
-                        _geneX, 
-                        _geneY, 
-                        _pearson, 
-                        _spearman
-                    )
-                );                
+            	var proxy = DataProxyFactory.getDefaultMutationDataProxy();
+                var _genes = null;
+            	if (entityXIsGeneSet) {
+            		if (entityYIsGeneSet) { //Both are GeneSets: do a pseudo callback as if there were no mutations
+            			pseudo_callback(
+                                alteration_data_result, 
+                                _divName, 
+                                _entityX, 
+                                _entityY, 
+                                _pearson, 
+                                _spearman
+                            );
+            		} else { //EntityX is Gene Set and EntityY is Gene
+            			_genes = _entityY;
+            			proxy.getMutationData(
+            					_genes, 
+                                getMutationDataCallBack(
+                                    alteration_data_result, 
+                                    _divName, 
+                                    _entityX, 
+                                    _entityY, 
+                                    _pearson, 
+                                    _spearman
+                                )
+                            );
+            		}
+            	} else {
+            		if (entityYIsGeneSet) { //EntityX is Gene and EntityY is Gene Set
+            			_genes = _entityX;
+            			proxy.getMutationData(
+                        		_genes, 
+                                getMutationDataCallBack(
+                                    alteration_data_result, 
+                                    _divName, 
+                                    _entityX, 
+                                    _entityY, 
+                                    _pearson, 
+                                    _spearman
+                                )
+                            );
+            		} else { //Both are genes
+                        var _genes = _entityX + " " + _entityY;
+                        proxy.getMutationData(
+                        		_genes, 
+                                getMutationDataCallBack(
+                                    alteration_data_result, 
+                                    _divName, 
+                                    _entityX, 
+                                    _entityY, 
+                                    _pearson, 
+                                    _spearman
+                                )
+                            );
+            		}
+            	}                
             } else {
                 pseudo_callback(
                     alteration_data_result, 
                     _divName, 
-                    _geneX, 
-                    _geneY, 
+                    _entityX, 
+                    _entityY, 
                     _pearson, 
                     _spearman
                 );

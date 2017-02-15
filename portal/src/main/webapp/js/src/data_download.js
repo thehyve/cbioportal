@@ -160,7 +160,7 @@ var DataDownloadTab = (function() {
                         "<input type='hidden' name='case_set_id' value='" + window.QuerySession.getCaseSetId() + "'>" +
                         "<input type='hidden' name='case_ids_key' value='" + window.QuerySession.getCaseIdsKey() + "'>" + 
                         "<input type='hidden' name='genetic_profile_id' value='" + val + "'>" +
-                        "<input type='hidden' name='gene_list' value='" + window.QuerySession.getQueryGenes().join(" ") + "'>" +
+                        "<input type='hidden' name='genetic_entity_list' value='" + window.QuerySession.getQueryGenes().join(" ") + "'>" +
                         "<input type='hidden' name='force_download' value='true'>" +
                         "<input type='hidden' name='file_name' value='" + window.QuerySession.getCancerStudyIds()[0] + "_" + val + ".txt'>" +
                         "<input type='hidden' name='format' value='"  + inner_obj.value + "'>" +

@@ -1,4 +1,4 @@
-window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_ids, study_sample_map, z_score_threshold, rppa_score_threshold,
+window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, cancer_study_ids, study_sample_map, z_score_threshold, rppa_score_threshold,
 	case_set_properties) {
 
     var signOfDiff = function(a,b) {
@@ -1018,6 +1018,7 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 	'cancer_study_ids': cancer_study_ids,
 	'study_sample_map': study_sample_map,
 	'genetic_profile_ids': genetic_profile_ids,
+	'geneset_ids': geneset_ids,
 	'mutation_counts': {},
 	'getKnownMutationSettings': function () {
 	    return deepCopyObject(this.known_mutation_settings);
@@ -1036,7 +1037,16 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, cancer_study_
 	    return this.oql_query;
 	},
 	'getQueryGenes': function () {
-	    return OQL.genes(this.oql_query);
+		if (this.oql_query.trim().length > 0) {
+		    return OQL.genes(this.oql_query);
+		} 
+		return null;
+	},
+	'getQueryGenesets': function () {
+		if (this.geneset_ids.trim().length > 0) {
+			return this.geneset_ids.split(" ");
+		}
+		return null;
 	},
 	'getGeneticProfileIds': function () {
 	    return this.genetic_profile_ids;

@@ -74,6 +74,7 @@ public class QueryBuilder extends HttpServlet {
     public static final String SET_OF_CASE_IDS = "set_of_case_ids";
     public static final String CLINICAL_PARAM_SELECTION = "clinical_param_selection";
     public static final String GENE_LIST = "gene_list";
+    public static final String GENESET_LIST = "geneset_list";
     public static final String ACTION_NAME = "Action";
     public static final String XDEBUG = "xdebug";
     public static final String ACTION_SUBMIT = "Submit";
@@ -184,6 +185,14 @@ public class QueryBuilder extends HttpServlet {
 	    }
         geneList = servletXssUtil.getCleanInput(geneList);
         httpServletRequest.setAttribute(GENE_LIST, geneList);
+                
+        //  Get User Defined Gene Sets List
+	    String geneSetList = httpServletRequest.getParameter(GENESET_LIST);
+	    if (httpServletRequest instanceof XssRequestWrapper) {
+		    geneSetList = ((XssRequestWrapper)httpServletRequest).getRawParameter(GENESET_LIST);
+	    }
+        geneSetList = servletXssUtil.getCleanInput(geneSetList);
+        httpServletRequest.setAttribute(GENESET_LIST, geneSetList);
 
         //  Get all Cancer Types
         try {
@@ -251,7 +260,7 @@ public class QueryBuilder extends HttpServlet {
                     exampleStudyQueries);
 
             boolean errorsExist = validateForm(action, profileList, geneticProfileIdSet,
-                                               sampleSetId, sampleIds, httpServletRequest);
+                                               sampleSetId, sampleIds, httpServletRequest, geneList, geneSetList);
             if (action != null && action.equals(ACTION_SUBMIT) && (!errorsExist)) {
 
                 processData(cancerTypeId, geneList, geneticProfileIdSet, profileList, sampleSetId,
@@ -468,10 +477,11 @@ public class QueryBuilder extends HttpServlet {
      * validate the portal web input form.
      */
     private boolean validateForm(String action,
-                                ArrayList<GeneticProfile> profileList,
+                            	 ArrayList<GeneticProfile> profileList,
                                  HashSet<String> geneticProfileIdSet,
                                  String sampleSetId, String sampleIds,
-                                 HttpServletRequest httpServletRequest) throws DaoException {
+                                 HttpServletRequest httpServletRequest,
+                                 String geneList, String genesetList) throws DaoException {
         boolean errorsExist = false;
         String tabIndex = httpServletRequest.getParameter(QueryBuilder.TAB_INDEX);
         if (action != null) {
@@ -512,9 +522,7 @@ public class QueryBuilder extends HttpServlet {
                 	// empty patient list
                 	if (sampleIds.trim().length() == 0)
                 	{
-                		httpServletRequest.setAttribute(STEP3_ERROR_MSG,
-                				"Please enter at least one ID below. ");
-                		
+                		httpServletRequest.setAttribute(STEP3_ERROR_MSG, "Please enter at least one ID below. ");        		
                 		errorsExist = true;
                 	}
                 	else
@@ -533,14 +541,61 @@ public class QueryBuilder extends HttpServlet {
                     			sampleSetErrMsg += " " + sampleId;
                     		}
                     		
-                			httpServletRequest.setAttribute(STEP3_ERROR_MSG,
-                					sampleSetErrMsg);
-                    		
+                			httpServletRequest.setAttribute(STEP3_ERROR_MSG, sampleSetErrMsg);
                     		errorsExist = true;
                 		}
                 	}
                 }
+                
 
+                // Validate genes and gene sets
+                ArrayList<String> geneListArray = new ArrayList<>(Arrays.asList(geneList.split("( )|(\\n)")));
+                ArrayList<String> genesetListArray = new ArrayList<>(Arrays.asList(genesetList.split("( )|(\\n)")));
+                
+                // Validate if box of genes and genesets are empty
+                if (
+                		geneListArray.size() == 1 &&
+                		geneListArray.get(0).equals("") &&
+                		genesetListArray.size() == 1 && 
+                		genesetListArray.get(0).equals("")
+                		) {
+
+                	httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Please make selection for query. ");
+            		errorsExist = true;
+                }
+                
+                // Validate if gene sets are valid
+        		if (!genesetListArray.get(0).equals("")) {
+        			
+        			//TODO: Replace these hardcoded genesets with connection to database
+                    String[] genesetDatabaseArray = {"AKT_UP.V1_DN", "AKT_UP.V1_UP", "AKT_UP_MTOR_DN.V1_DN", "AKT_UP_MTOR_DN.V1_UP", "ALK_DN.V1_DN", "ALK_DN.V1_UP", "ATF2_S_UP.V1_DN", "ATF2_S_UP.V1_UP", "ATF2_UP.V1_DN", "ATF2_UP.V1_UP", "ATM_DN.V1_DN", "ATM_DN.V1_UP", "BCAT.100_UP.V1_DN", "BCAT.100_UP.V1_UP", "BCAT_BILD_ET_AL_DN", "BCAT_BILD_ET_AL_UP", "BCAT_GDS748_DN", "BCAT_GDS748_UP", "BMI1_DN.V1_DN", "BMI1_DN.V1_UP", "BMI1_DN_MEL18_DN.V1_DN", "BMI1_DN_MEL18_DN.V1_UP", "BRCA1_DN.V1_DN", "BRCA1_DN.V1_UP", "CAHOY_ASTROCYTIC", "CAHOY_ASTROGLIAL", "CAHOY_NEURONAL", "CAHOY_OLIGODENDROCUTIC", "CAMP_UP.V1_DN", "CAMP_UP.V1_UP", "CORDENONSI_YAP_CONSERVED_SIGNATURE", "CRX_DN.V1_DN", "CRX_DN.V1_UP", "CRX_NRL_DN.V1_DN", "CRX_NRL_DN.V1_UP", "CSR_EARLY_UP.V1_DN", "CSR_EARLY_UP.V1_UP", "CSR_LATE_UP.V1_DN", "CSR_LATE_UP.V1_UP", "CTIP_DN.V1_DN", "CTIP_DN.V1_UP", "CYCLIN_D1_KE_.V1_DN", "CYCLIN_D1_KE_.V1_UP", "CYCLIN_D1_UP.V1_DN", "CYCLIN_D1_UP.V1_UP", "DCA_UP.V1_DN", "DCA_UP.V1_UP", "E2F1_UP.V1_DN", "E2F1_UP.V1_UP", "E2F3_UP.V1_DN", "E2F3_UP.V1_UP", "EGFR_UP.V1_DN", "EGFR_UP.V1_UP", "EIF4E_DN", "EIF4E_UP", "ERB2_UP.V1_DN", "ERB2_UP.V1_UP", "ESC_J1_UP_EARLY.V1_DN", "ESC_J1_UP_EARLY.V1_UP", "ESC_J1_UP_LATE.V1_DN", "ESC_J1_UP_LATE.V1_UP", "ESC_V6.5_UP_EARLY.V1_DN", "ESC_V6.5_UP_EARLY.V1_UP", "ESC_V6.5_UP_LATE.V1_DN", "ESC_V6.5_UP_LATE.V1_UP", "GCNP_SHH_UP_EARLY.V1_DN", "GCNP_SHH_UP_EARLY.V1_UP", "GCNP_SHH_UP_LATE.V1_DN", "GCNP_SHH_UP_LATE.V1_UP", "GLI1_UP.V1_DN", "GLI1_UP.V1_UP", "HINATA_NFKB_IMMU_INF", "HINATA_NFKB_MATRIX", "HOXA9_DN.V1_DN", "HOXA9_DN.V1_UP", "IL15_UP.V1_DN", "IL15_UP.V1_UP", "IL21_UP.V1_DN", "IL21_UP.V1_UP", "IL2_UP.V1_DN", "IL2_UP.V1_UP", "JAK2_DN.V1_DN", "JAK2_DN.V1_UP", "JNK_DN.V1_DN", "JNK_DN.V1_UP", "KRAS.300_UP.V1_DN", "KRAS.300_UP.V1_UP", "KRAS.50_UP.V1_DN", "KRAS.50_UP.V1_UP", "KRAS.600.LUNG.BREAST_UP.V1_DN", "KRAS.600.LUNG.BREAST_UP.V1_UP", "KRAS.600_UP.V1_DN", "KRAS.600_UP.V1_UP", "KRAS.AMP.LUNG_UP.V1_DN", "KRAS.AMP.LUNG_UP.V1_UP", "KRAS.BREAST_UP.V1_DN", "KRAS.BREAST_UP.V1_UP", "KRAS.DF.V1_DN", "KRAS.DF.V1_UP", "KRAS.KIDNEY_UP.V1_DN", "KRAS.KIDNEY_UP.V1_UP", "KRAS.LUNG.BREAST_UP.V1_DN", "KRAS.LUNG.BREAST_UP.V1_UP", "KRAS.LUNG_UP.V1_DN", "KRAS.LUNG_UP.V1_UP", "KRAS.PROSTATE_UP.V1_DN", "KRAS.PROSTATE_UP.V1_UP", "LEF1_UP.V1_DN", "LEF1_UP.V1_UP", "LTE2_UP.V1_DN", "LTE2_UP.V1_UP", "MEK_UP.V1_DN", "MEK_UP.V1_UP", "MEL18_DN.V1_DN", "MEL18_DN.V1_UP", "MTOR_UP.N4.V1_DN", "MTOR_UP.N4.V1_UP", "MTOR_UP.V1_DN", "MTOR_UP.V1_UP", "MYC_UP.V1_DN", "MYC_UP.V1_UP", "NFE2L2.V2", "NOTCH_DN.V1_DN", "NOTCH_DN.V1_UP", "NRL_DN.V1_DN", "NRL_DN.V1_UP", "P53_DN.V1_DN", "P53_DN.V1_UP", "P53_DN.V2_DN", "P53_DN.V2_UP", "PDGF_ERK_DN.V1_DN", "PDGF_ERK_DN.V1_UP", "PDGF_UP.V1_DN", "PDGF_UP.V1_UP", "PIGF_UP.V1_DN", "PIGF_UP.V1_UP", "PKCA_DN.V1_DN", "PKCA_DN.V1_UP", "PRC1_BMI_UP.V1_DN", "PRC1_BMI_UP.V1_UP", "PRC2_EED_UP.V1_DN", "PRC2_EED_UP.V1_UP", "PRC2_EZH2_UP.V1_DN", "PRC2_EZH2_UP.V1_UP", "PRC2_SUZ12_UP.V1_DN", "PRC2_SUZ12_UP.V1_UP", "PTEN_DN.V1_DN", "PTEN_DN.V1_UP", "PTEN_DN.V2_DN", "PTEN_DN.V2_UP", "RAF_UP.V1_DN", "RAF_UP.V1_UP", "RAPA_EARLY_UP.V1_DN", "RAPA_EARLY_UP.V1_UP", "RB_DN.V1_DN", "RB_DN.V1_UP", "RB_P107_DN.V1_DN", "RB_P107_DN.V1_UP", "RB_P130_DN.V1_DN", "RB_P130_DN.V1_UP", "RELA_DN.V1_DN", "RELA_DN.V1_UP", "RPS14_DN.V1_DN", "RPS14_DN.V1_UP", "SINGH_KRAS_DEPENDENCY_SIGNATURE_", "SIRNA_EIF4GI_DN", "SIRNA_EIF4GI_UP", "SNF5_DN.V1_DN", "SNF5_DN.V1_UP", "SRC_UP.V1_DN", "SRC_UP.V1_UP", "STK33_DN", "STK33_NOMO_DN", "STK33_NOMO_UP", "STK33_SKM_DN", "STK33_SKM_UP", "STK33_UP", "TBK1.DF_DN", "TBK1.DF_UP", "TBK1.DN.48HRS_DN", "TBK1.DN.48HRS_UP", "TGFB_UP.V1_DN", "TGFB_UP.V1_UP", "VEGF_A_UP.V1_DN", "VEGF_A_UP.V1_UP", "WNT_UP.V1_DN", "WNT_UP.V1_UP", "YAP1_DN", "YAP1_UP"};
+                    ArrayList<String> genesetDatabaseListArray = new ArrayList<String>(Arrays.asList(genesetDatabaseArray));
+                    
+                    // Create array list to store invalid gene sets
+                    ArrayList<String> invalidGenesets = new ArrayList<String>();
+                    
+                    // Loop over gene sets in query 
+                    for (int i = 0; i < genesetListArray.size(); i++) {
+                    	String geneset = genesetListArray.get(i);
+                    	
+                    	// Add to list when genesets not in database
+                    	if (!genesetDatabaseListArray.contains(geneset)) {
+                    		invalidGenesets.add(geneset);
+                    	}
+                    }
+
+                    // Check number of invalid genesets and write error message
+        			if (invalidGenesets.size() > 0) {
+        				if (invalidGenesets.size() == 1) {
+        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Geneset not found in database: " + invalidGenesets.get(0));
+        				} else {
+        					httpServletRequest.setAttribute(STEP4_ERROR_MSG, "Genesets not found in database: " + String.join(", ", invalidGenesets));
+        				}
+	            		errorsExist = true;
+        			}
+        		}
+     
+                        
                 //  Additional validation rules
                 //  If we have selected mRNA Expression Data Check Box, but failed to
                 //  select an mRNA profile, this is an error.

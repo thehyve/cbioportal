@@ -1210,11 +1210,11 @@ class MutationsExtendedValidator(Validator):
         # may require bundling the hgvs package:
         # https://pypi.python.org/pypi/hgvs/
         if value not in self.NULL_AA_CHANGE_VALUES:
-            # give error if a white space is found in value (this leads to errors in
+            # give error if a trailing white space is found in value (this leads to errors in
             # other layers, e.g. COSMIC keywords will not be matched)
-            if ' ' in value:
+            if value.rstrip() != value:
                 # return with an error message
-                self.extra = 'White space found in amino acid change column'
+                self.extra = 'Trailing white space found in amino acid change column'
                 self.extra_exists = True
                 return False
 

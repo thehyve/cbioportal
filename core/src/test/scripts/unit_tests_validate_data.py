@@ -932,10 +932,10 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertIn('Amino_Acid_Change', record.getMessage())
         self.assertIn('HGVSp_Short', record.getMessage())
         self.assertEqual(record.line_number, 8)
-        # white space in column amino acid change column is not allowed:
+        # trailing white space in column amino acid change column is not allowed:
         record = record_iterator.next()
         self.assertEqual(record.levelno, logging.ERROR)
-        self.assertIn('White space', record.getMessage())
+        self.assertIn('white space', record.getMessage())
         self.assertEqual(record.line_number, 9)
 
     def test_isValidVariantClassification(self):

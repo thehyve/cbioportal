@@ -55,6 +55,7 @@ public final class DaoMutation {
         	if (newMutationEvent) {
         		//add event first, as mutation has a Foreign key constraint to the event:
         		result = addMutationEvent(mutation.getEvent())+1;
+        		MySQLbulkLoader.flushAll();
             } 
             MySQLbulkLoader.getMySQLbulkLoader("mutation").insertRecord(
                     Long.toString(mutation.getMutationEventId()),

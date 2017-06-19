@@ -172,6 +172,7 @@ def process_directory(jvm_args, study_directory):
     study_metadata = None
     cancer_type_filepairs = []
     sample_attr_filepair = None
+    fusion_filepair = None
     regular_filepairs = []
 
     # read all meta files (excluding case lists) to determine what to import
@@ -203,6 +204,10 @@ def process_directory(jvm_args, study_directory):
                         sample_attr_filepair[0], f))
             sample_attr_filepair = (
                 f, os.path.join(study_directory, metadata['data_filename']))
+        # Check for fusion data
+        elif meta_file_type == MetaFileTypes.FUSION:
+            fusion_filepair = (
+                (f, os.path.join(study_directory, metadata['data_filename'])))
         else:
             regular_filepairs.append(
                 (f, os.path.join(study_directory, metadata['data_filename'])))
@@ -228,6 +233,11 @@ def process_directory(jvm_args, study_directory):
 
     # Now, import everything else
     for meta_filename, data_filename in regular_filepairs:
+        import_study_data(jvm_args, meta_filename, data_filename)
+
+    # Import fusion data (after mutation)
+    if fusion_filepair is not None:
+        meta_filename, data_filename = fusion_filepair
         import_study_data(jvm_args, meta_filename, data_filename)
 
     # do the case lists

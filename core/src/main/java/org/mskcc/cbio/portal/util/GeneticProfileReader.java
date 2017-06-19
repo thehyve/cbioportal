@@ -132,11 +132,24 @@ public class GeneticProfileReader {
         if (stableId == null) {
             throw new IllegalArgumentException("stable_id is not specified.");
         }
+        // Workaround to import fusion data as mutation genetic profile. This way fusion data can be created
+        // and stored with 'stable_id: fusion'. The validator will check for 'stable_id: fusion', but this importer
+        // will import it as 'stable_id: mutations'. See https://github.com/cBioPortal/cbioportal/pull/2506
+        // TODO: This should be removed when other parts of cBioPortal use the fusion genetic profile.
+        
         //automatically add the cancerStudyIdentifier in front of stableId (since the rest of the
         //code still relies on this - TODO: this can be removed once the rest of the backend and frontend code
         //stop assuming cancerStudyIdentifier to be part of stableId):
         if (!stableId.startsWith(cancerStudyIdentifier + "_")) {
-            stableId = cancerStudyIdentifier + "_" + stableId;
+            String newStableId = cancerStudyIdentifier + "_" + stableId;
+            if (stableId.equals("fusion")) {
+            	newStableId = cancerStudyIdentifier + "_mutations";
+            	GeneticProfile existingGeneticProfile = DaoGeneticProfile.getGeneticProfileByStableId(newStableId);
+            	if (existingGeneticProfile == null) {
+            		throw new IllegalArgumentException("Wrong order: FUSION data should be loaded after MUTATION data");
+            	}
+            }
+            stableId = newStableId;
         }
         String profileName = properties.getProperty("profile_name");
         String profileDescription = properties.getProperty("profile_description");

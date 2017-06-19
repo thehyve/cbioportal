@@ -64,6 +64,8 @@ public class ImportFusionData {
         for (ExtendedMutation.MutationEvent event : DaoMutation.getAllMutationEvents()) {
             existingEvents.put(event, event);
         }
+        Map<ExtendedMutation,ExtendedMutation> mutations = new HashMap<ExtendedMutation,ExtendedMutation>();
+
         long mutationEventId = DaoMutation.getLargestMutationEventId();
         FileReader reader = new FileReader(this.fusionFile);
         BufferedReader buf = new BufferedReader(reader);
@@ -142,8 +144,14 @@ public class ImportFusionData {
                         existingEvents.put(mutation.getEvent(), mutation.getEvent());
                         addEvent = true;
                     }
-                    // add fusion (as a mutation)
-                    DaoMutation.addMutation(mutation, addEvent);
+                    ExtendedMutation exist = mutations.get(mutation);
+                    if (exist!=null) {
+                    	ProgressMonitor.logWarning("Duplicate fusion entry found: " + mutation.getGeneSymbol() + " for " + mutation.getProteinChange() + ". Skipping.");
+                    } else {
+                        // add fusion (as a mutation)
+                        DaoMutation.addMutation(mutation, addEvent);
+                        mutations.put(mutation, mutation);
+                    }
                 }
             }
         }

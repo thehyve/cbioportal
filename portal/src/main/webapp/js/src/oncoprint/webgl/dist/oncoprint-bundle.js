@@ -4962,10 +4962,6 @@ var LinearInterpRuleSet = (function () {
 
 var GradientRuleSet = (function () {
 
-    // window.isNaN() coerces non-number arguments to NaN and Number.isNaN()
-    // is missing in IE, but NaN can be identified by its self-inequality
-    var isNaNUncoerced = function (num) { return num !== num; };
-
     function GradientRuleSet(params) {
 	/* params
 	 * - colors || colormap_name
@@ -4982,17 +4978,15 @@ var GradientRuleSet = (function () {
 	if (this.colors.length === 0) {
 	    this.colors.push([0,0,0,1],[255,0,0,1]);
 	}
-	
 	this.value_stop_points = params.value_stop_points;
-
-	this.gradient_rule;
 	this.null_color = params.null_color || "rgba(211,211,211,1)";
 
 	var value_key = this.value_key;
 	this.na_rule = this.addRule(
-		function (d) { return (
+		function (d) {
+		    return (
 			d[NA_STRING] !== true
-			&& isNaNUncoerced(d[value_key]));
+			&& isNaN(d[value_key]));
 		},
 		{shapes: [{
 			    type: 'rectangle',
@@ -5043,9 +5037,8 @@ var GradientRuleSet = (function () {
 		var end_color = colors[end_interval_index];
 		return "rgba(" + linInterpColors(interval_t, begin_color, end_color).join(",") + ")";
 	    }
-	    
 	};
-    }
+    };
 
     GradientRuleSet.prototype.updateLinearRules = function () {
 	if (typeof this.gradient_rule !== "undefined") {
@@ -5056,9 +5049,10 @@ var GradientRuleSet = (function () {
 	var value_key = this.value_key;
 	
 	this.gradient_rule = this.addRule(
-		function (d) { return (
+		function (d) {
+		    return (
 			d[NA_STRING] !== true
-			&& !isNaNUncoerced(d[value_key]));
+			&& !isNaN(d[value_key]));
 		},
 		{shapes: [{
 			    type: 'rectangle',

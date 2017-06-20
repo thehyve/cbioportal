@@ -4985,10 +4985,11 @@ var GradientRuleSet = (function () {
 	
 	this.value_stop_points = params.value_stop_points;
 
-	this.gradient_rule;
 	this.null_color = params.null_color || "rgba(211,211,211,1)";
 
 	var value_key = this.value_key;
+	var nan_value_object = {};
+	nan_value_object[value_key] = NaN;
 	this.na_rule = this.addRule(
 		function (d) { return (
 			d[NA_STRING] !== true
@@ -5002,9 +5003,7 @@ var GradientRuleSet = (function () {
 			}],
 		    exclude_from_legend: !this.null_legend_entry,
 		    legend_label: NA_LABEL,
-		    // match all cells handled by this rule, which is just ones
-		    // that pass the is_missing_value condition
-		    legend_config: {'type': 'rule', 'target': {}}
+		    legend_config: {'type': 'rule', 'target': nan_value_object}
 		});
     }
     GradientRuleSet.prototype = Object.create(LinearInterpRuleSet.prototype);

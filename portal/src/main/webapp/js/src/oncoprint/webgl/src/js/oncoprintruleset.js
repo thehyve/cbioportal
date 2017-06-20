@@ -552,6 +552,11 @@ var LinearInterpRuleSet = (function () {
 })();
 
 var GradientRuleSet = (function () {
+
+    // window.isNaN() coerces non-number arguments to NaN and Number.isNaN()
+    // is missing in IE, but NaN can be identified by its self-inequality
+    var isNaNUncoerced = function (num) { return num !== num; };
+
     function GradientRuleSet(params) {
 	/* params
 	 * - colors || colormap_name
@@ -573,6 +578,25 @@ var GradientRuleSet = (function () {
 
 	this.gradient_rule;
 	this.null_color = params.null_color || "rgba(211,211,211,1)";
+
+	var value_key = this.value_key;
+	this.na_rule = this.addRule(
+		function (d) { return (
+			d[NA_STRING] !== true
+			&& isNaNUncoerced(d[value_key]));
+		},
+		{shapes: [{
+			    type: 'rectangle',
+			    fill: function() {
+				return this.null_color;
+			    }
+			}],
+		    exclude_from_legend: !this.null_legend_entry,
+		    legend_label: NA_LABEL,
+		    // match all cells handled by this rule, which is just ones
+		    // that pass the is_missing_value condition
+		    legend_config: {'type': 'rule', 'target': {}}
+		});
     }
     GradientRuleSet.prototype = Object.create(LinearInterpRuleSet.prototype);
 
@@ -621,20 +645,17 @@ var GradientRuleSet = (function () {
 	var interpFn = this.makeInterpFn();
 	var colorFn = this.makeColorFn(this.colors, interpFn);
 	var value_key = this.value_key;
-	var null_color = this.null_color;
 	
-	this.gradient_rule = this.addRule(function (d) {
-	    return d[NA_STRING] !== true;
-	},
+	this.gradient_rule = this.addRule(
+		function (d) { return (
+			d[NA_STRING] !== true
+			&& !isNaNUncoerced(d[value_key]));
+		},
 		{shapes: [{
 			    type: 'rectangle',
 			    fill: function(d) {
-				if (d[value_key]) {
-				    var t = interpFn(d[value_key]);
-				    return colorFn(t);
-				} else {
-				    return null_color;
-				}
+				var t = interpFn(d[value_key]);
+				return colorFn(t);
 			    }
 			}],
 		    exclude_from_legend: false,

@@ -54,6 +54,7 @@ public class MySQLbulkLoader {
    private static final Map<String,MySQLbulkLoader> mySQLbulkLoaders = new LinkedHashMap<String,MySQLbulkLoader>();
    /**
     * Get a MySQLbulkLoader
+    * TODO Refactor this method name, since it initializes a list of items to add.
     * @param dbName database name
     * @return 
     */

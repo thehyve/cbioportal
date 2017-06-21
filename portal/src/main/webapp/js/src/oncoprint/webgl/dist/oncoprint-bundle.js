@@ -4984,9 +4984,7 @@ var GradientRuleSet = (function () {
 	var value_key = this.value_key;
 	this.na_rule = this.addRule(
 		function (d) {
-		    return (
-			d[NA_STRING] !== true
-			&& isNaN(d[value_key]));
+		    return d[NA_STRING] !== true && d[value_key] === null;
 		},
 		{shapes: [{
 			    type: 'rectangle',
@@ -5050,9 +5048,7 @@ var GradientRuleSet = (function () {
 	
 	this.gradient_rule = this.addRule(
 		function (d) {
-		    return (
-			d[NA_STRING] !== true
-			&& !isNaN(d[value_key]));
+		    return d[NA_STRING] !== true && d[value_key] !== null;
 		},
 		{shapes: [{
 			    type: 'rectangle',

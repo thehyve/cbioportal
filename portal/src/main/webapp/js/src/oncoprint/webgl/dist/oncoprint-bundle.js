@@ -4977,11 +4977,9 @@ var GradientRuleSet = (function () {
 	if (this.colors.length === 0) {
 	    this.colors.push([0,0,0,1],[255,0,0,1]);
 	}
-	
 	this.value_stop_points = params.value_stop_points;
-
-	this.gradient_rule;
 	this.null_color = params.null_color || "rgba(211,211,211,1)";
+	this.gradient_rules = [];
     }
     GradientRuleSet.prototype = Object.create(LinearInterpRuleSet.prototype);
 
@@ -5019,36 +5017,54 @@ var GradientRuleSet = (function () {
 		var end_color = colors[end_interval_index];
 		return "rgba(" + linInterpColors(interval_t, begin_color, end_color).join(",") + ")";
 	    }
-	    
 	};
-    }
+    };
 
     GradientRuleSet.prototype.updateLinearRules = function () {
-	if (typeof this.gradient_rule !== "undefined") {
-	    this.removeRule(this.gradient_rule);
-	}
+	// deactivate any GradientRuleSet rules currently in effect
+	this.gradient_rules.forEach(this.removeRule.bind(this));
+	this.gradient_rules = [];
+
+	// bind properties to close over in callbacks
 	var interpFn = this.makeInterpFn();
 	var colorFn = this.makeColorFn(this.colors, interpFn);
 	var value_key = this.value_key;
 	var null_color = this.null_color;
 	
-	this.gradient_rule = this.addRule(function (d) {
-	    return d[NA_STRING] !== true;
-	},
+	// set a rule for cells coloured as part of the gradient
+	this.gradient_rules.push(this.addRule(
+		function (d) {
+		    return d[NA_STRING] !== true && d[value_key] !== null;
+		},
 		{shapes: [{
 			    type: 'rectangle',
 			    fill: function(d) {
-				if (d[value_key]) {
-				    var t = interpFn(d[value_key]);
-				    return colorFn(t);
-				} else {
-				    return null_color;
-				}
+				var t = interpFn(d[value_key]);
+				return colorFn(t);
 			    }
 			}],
 		    exclude_from_legend: false,
 		    legend_config: {'type': 'gradient', 'range': this.getEffectiveValueRange(), 'colorFn':colorFn}
-		});
+		}));
+	// set a rule for cells with null (applicable but missing) values,
+	// making the legend appear *after* the gradient legend since the
+	// null values are the exception to the 'happy path'
+	this.gradient_rules.push(this.addRule(
+		function (d) {
+		    return d[NA_STRING] !== true && d[value_key] === null;
+		},
+		{shapes: [{
+			    type: 'rectangle',
+			    fill: function() {
+				return null_color;
+			    }
+			}],
+		    exclude_from_legend: false,
+		    legend_label: NA_LABEL,
+		    // match all cells handled by this rule, which is just ones
+		    // that pass the is_missing_value condition
+		    legend_config: {'type': 'rule', 'target': {}}
+		}));
     };
 
     return GradientRuleSet;

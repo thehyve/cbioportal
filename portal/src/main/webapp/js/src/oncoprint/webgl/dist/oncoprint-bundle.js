@@ -4981,15 +4981,17 @@ var GradientRuleSet = (function () {
 	this.value_stop_points = params.value_stop_points;
 	this.null_color = params.null_color || "rgba(211,211,211,1)";
 
+	// bind instance properties to close over them in callbacks
 	var value_key = this.value_key;
-	this.na_rule = this.addRule(
+	var null_color = this.null_color;
+	this.addRule(
 		function (d) {
 		    return d[NA_STRING] !== true && d[value_key] === null;
 		},
 		{shapes: [{
 			    type: 'rectangle',
 			    fill: function() {
-				return this.null_color;
+				return null_color;
 			    }
 			}],
 		    exclude_from_legend: !this.null_legend_entry,

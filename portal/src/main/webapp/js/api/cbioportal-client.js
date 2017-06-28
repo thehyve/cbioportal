@@ -83,6 +83,18 @@ window.cbioportal_client = (function() {
 					}
 					return result;
 				}
+			},
+			'GenesetMetadata': {
+				endpoint: function (args) {
+					// append an explicit final slash, without which Spring's
+					// useSuffixPatternMatch feature might "helpfully" parse a
+					// dot near the end of the URL as a filename extension and
+					// strip it off
+					return ('api/genesets/'
+							+ encodeURIComponent(args.geneset_id)
+							+ '/');
+				},
+				type: 'GET', send_json: false
 			}
 		};
 		var ret = {}, fn_name;
@@ -575,6 +587,8 @@ window.cbioportal_client = (function() {
 		}, [["study_id"]]),                
 		getClinicalAttributes: enforceRequiredArguments(makeOneIndexService('attr_ids', function(d) { return d.attr_id; }, 'getClinicalAttributes'), [[], ["attr_ids"], ["study_id"]]),
 		getMutationCounts: raw_service.getMutationCounts,
+		// no applicable index service as this retrieves one ID rather than an array
+		getGenesetMetadataById: raw_service.getGenesetMetadata
 	};
 	return cached_service;
 })();

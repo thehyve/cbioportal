@@ -964,7 +964,7 @@ class MutationsExtendedValidator(Validator):
     REQUIRE_COLUMN_ORDER = False
     ALLOW_BLANKS = True
 
-    # MutationFilter.java filters these types. Therefore, there is no reason to add warnings and errors for them 
+    # MutationFilter.java filters these types. Therefore, there is no reason to add warnings and errors for them
     SKIP_VARIANT_TYPES = [
         'Silent', 
         'Intron', 
@@ -1247,7 +1247,11 @@ class MutationsExtendedValidator(Validator):
         """Test whether the mutation is silent and should be skipped."""
         is_silent = False
         variant_classification = data[self.cols.index('Variant_Classification')]
-
+        if 'variant_classification_filter' in self.meta_dict:
+            self.SKIP_VARIANT_TYPES = [x.strip() 
+                                       for x 
+                                       in self.meta_dict['variant_classification_filter'].split(',')]
+        
         hugo_symbol = data[self.cols.index('Hugo_Symbol')]
         entrez_id = '0'
         if 'Entrez_Gene_Id' in self.cols:
@@ -1266,8 +1270,8 @@ class MutationsExtendedValidator(Validator):
                        'cause': "Gene symbol 'Unknown', Entrez gene id 0"})
             is_silent = True
         elif variant_classification in self.SKIP_VARIANT_TYPES:
-            self.logger.info("Validation of line skipped due to cBioPortal's filtering. "
-                             "Filtered types: [%s]",
+            self.logger.info("Line will not be loaded due to the variant "
+                             "classification filter. Filtered types: [%s]",
                              ', '.join(self.SKIP_VARIANT_TYPES),
                              extra={'line_number': self.line_number,
                                     'cause': variant_classification})

@@ -1,8 +1,8 @@
 window.cbioportal_client = (function() {
 	var raw_service = (function() {
-		var getApiCallPromise = function(endpt, args, type, newApi) {
+		var getApiCallPromise = function(endpt, args, type, send_json) {
 			var arg_strings, arg_string, k;
-			if (newApi) {
+			if (send_json) {
 				return $.ajax({
 					type: type || "POST",
 					url: endpt,
@@ -84,10 +84,10 @@ window.cbioportal_client = (function() {
 					return result;
 				}
 			}
-		}
-		var ret = {};
+		};
+		var ret = {}, fn_name;
 		//legacy API
-		for (var fn_name in functionNameToEndpointProperties) {
+		for (fn_name in functionNameToEndpointProperties) {
 			if (functionNameToEndpointProperties.hasOwnProperty(fn_name)) {
 				ret['get'+fn_name] = (function(props) {
 					return function(args) {
@@ -97,11 +97,15 @@ window.cbioportal_client = (function() {
 			}
 		}
 		//new API
-		for (var fn_name in newApiFunctionNameToEndpointProperties) {
+		for (fn_name in newApiFunctionNameToEndpointProperties) {
 			if (newApiFunctionNameToEndpointProperties.hasOwnProperty(fn_name)) {
 				ret['get'+fn_name] = (function(props) {
 					return function(args) {
-						return getApiCallPromise(props.endpoint(args), props.args(args), 'POST', true);
+						return getApiCallPromise(
+								props.endpoint(args),
+								(props.hasOwnProperty('args') ? props.args(args) : {}),
+								props.type,
+								(props.hasOwnProperty('send_json') ? props.send_json : true));
 					};
 				})(newApiFunctionNameToEndpointProperties[fn_name]);
 			}

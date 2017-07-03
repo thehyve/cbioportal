@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 
 import org.cbioportal.model.Geneset;
 import org.cbioportal.service.GenesetService;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,5 +72,24 @@ public class GenesetController {
         return new ResponseEntity<>(genesetService.getGeneset(genesetId), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/genesets/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Fetch gene sets by ID")
+    public ResponseEntity<List<Geneset>> fetchGenes(
+        @ApiParam(required = true, value = "List of gene set IDs")
+        @Size(min = 1)
+        @RequestBody List<String> genesetIds,
+        @ApiParam("Level of detail of the response")
+        @RequestParam(defaultValue = "SUMMARY") Projection projection) {
 
+        if (projection == Projection.META) {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.add(HeaderKeyConstants.TOTAL_COUNT, genesetService.fetchMetaGenesets(genesetIds)
+                .getTotalCount().toString());
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(genesetService.fetchGenesets(genesetIds, projection.name()),
+                HttpStatus.OK);
+        }
+    }
 }

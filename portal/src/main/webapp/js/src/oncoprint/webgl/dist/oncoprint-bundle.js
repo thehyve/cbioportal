@@ -1656,15 +1656,14 @@ var OncoprintLabelView = (function () {
 		} else {
 		    var hovered_track = isMouseOnLabel(view, evt.pageY - view.$canvas.offset().top);
 		    if (hovered_track !== null) {
-			var render_tooltip = function (descr_text) {
+			var render_tooltip = function (descr_html) {
 			    var $tooltip_div = $('<div>');
 			    var offset = view.$canvas.offset();
 			    if (isNecessaryToShortenLabel(view, view.labels[hovered_track])) {
 				$tooltip_div.append($('<b>'+view.labels[hovered_track]+'</b>'));
 			    }
-			    var track_description = descr_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-			    if (track_description.length > 0) {
-				$tooltip_div.append(track_description + "<br>");
+			    if (descr_html.length > 0) {
+				$tooltip_div.append(descr_html + "<br>");
 			    }
 			    if (model.getContainingTrackGroup(hovered_track).length > 1) {
 				view.$canvas.css('cursor', 'move');
@@ -1676,7 +1675,7 @@ var OncoprintLabelView = (function () {
 			if (typeof track_description == 'function') {
 			    track_description = track_description(render_tooltip);
 			} else {
-                            render_tooltip(track_description);
+                            render_tooltip(track_description.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 			}
 		    } else {
 			view.$canvas.css('cursor', 'auto');

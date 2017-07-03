@@ -55,20 +55,28 @@ var OncoprintLabelView = (function () {
 		} else {
 		    var hovered_track = isMouseOnLabel(view, evt.pageY - view.$canvas.offset().top);
 		    if (hovered_track !== null) {
-			var $tooltip_div = $('<div>');
-			var offset = view.$canvas.offset();   
-			if (isNecessaryToShortenLabel(view, view.labels[hovered_track])) {
-			    $tooltip_div.append($('<b>'+view.labels[hovered_track]+'</b>'));
+			var render_tooltip = function (descr_text) {
+			    var $tooltip_div = $('<div>');
+			    var offset = view.$canvas.offset();
+			    if (isNecessaryToShortenLabel(view, view.labels[hovered_track])) {
+				$tooltip_div.append($('<b>'+view.labels[hovered_track]+'</b>'));
+			    }
+			    var track_description = descr_text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			    if (track_description.length > 0) {
+				$tooltip_div.append(track_description + "<br>");
+			    }
+			    if (model.getContainingTrackGroup(hovered_track).length > 1) {
+				view.$canvas.css('cursor', 'move');
+				$tooltip_div.append("<b>hold to drag</b>");
+			    }
+			    view.tooltip.fadeIn(200, renderedLabelWidth(view, view.labels[hovered_track]) + offset.left, view.cell_tops[hovered_track] + offset.top - view.scroll_y, $tooltip_div);
+			};
+			var track_description = view.track_descriptions[hovered_track];
+			if (typeof track_description == 'function') {
+			    track_description = track_description(render_tooltip);
+			} else {
+                            render_tooltip(track_description);
 			}
-			var track_description = view.track_descriptions[hovered_track].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-			if (track_description.length > 0) {
-			    $tooltip_div.append(track_description + "<br>");
-			}
-			if (model.getContainingTrackGroup(hovered_track).length > 1) {
-			    view.$canvas.css('cursor', 'move');
-			    $tooltip_div.append("<b>hold to drag</b>");
-			}
-			view.tooltip.fadeIn(200, renderedLabelWidth(view, view.labels[hovered_track]) + offset.left, view.cell_tops[hovered_track] + offset.top - view.scroll_y, $tooltip_div);
 		    } else {
 			view.$canvas.css('cursor', 'auto');
 			view.tooltip.hide();

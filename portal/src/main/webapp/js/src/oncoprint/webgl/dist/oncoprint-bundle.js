@@ -1673,7 +1673,7 @@ var OncoprintLabelView = (function () {
 			};
 			var track_description = view.track_descriptions[hovered_track];
 			if (typeof track_description == 'function') {
-			    track_description = track_description(render_tooltip);
+			    track_description(render_tooltip);
 			} else {
                             render_tooltip(track_description.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 			}

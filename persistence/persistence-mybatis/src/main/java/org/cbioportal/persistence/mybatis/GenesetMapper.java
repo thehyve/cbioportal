@@ -27,6 +27,8 @@ public interface GenesetMapper {
 
     List<Geneset> getGenesetsByGenesetIds(List<String> genesetIds,
             String projection);
-    
+
+    BaseMeta getMetaGenesetsByGenesetIds(List<String> genesetIds);
+
     List<Gene> getGenesByGenesetId(String genesetId, String projection);
 }

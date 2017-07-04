@@ -37,11 +37,20 @@ public class GenesetMyBatisRepository implements GenesetRepository {
 		return genesetMapper.getGenesetByGenesetId(genesetId, PersistenceConstants.DETAILED_PROJECTION);
 	}
 	
+    @Override
+    public List<Geneset> fetchGenesets(List<String> genesetIds, String projection) {
+		return genesetMapper.getGenesetsByGenesetIds(genesetIds, projection);
+    }
+
 	@Override
 	public List<Geneset> fetchGenesets(List<String> genesetIds) {
-		
-		return genesetMapper.getGenesetsByGenesetIds(genesetIds, PersistenceConstants.SUMMARY_PROJECTION);
+		return fetchGenesets(genesetIds, PersistenceConstants.SUMMARY_PROJECTION);
 	}
+
+    @Override
+    public BaseMeta fetchMetaGenesets(List<String> genesetIds) {
+        return genesetMapper.getMetaGenesetsByGenesetIds(genesetIds);
+    }
 
 	@Override
 	public List<Gene> getGenesByGenesetId(String genesetId) {

@@ -13,8 +13,12 @@ public interface GenesetRepository {
     BaseMeta getMetaGenesets();
 
     Geneset getGeneset(String genesetId);
-    
+
+    List<Geneset> fetchGenesets(List<String> genesetIds, String projection);
     List<Geneset> fetchGenesets(List<String> genesetIds);
-    
+
+    BaseMeta fetchMetaGenesets(List<String> genesetIds);
+
     List<Gene> getGenesByGenesetId(String genesetId);
+
 }

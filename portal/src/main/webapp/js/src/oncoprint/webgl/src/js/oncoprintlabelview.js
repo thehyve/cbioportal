@@ -60,7 +60,9 @@ var OncoprintLabelView = (function () {
 			if (isNecessaryToShortenLabel(view, view.labels[hovered_track])) {
 			    $tooltip_div.append($('<b>'+view.labels[hovered_track]+'</b>'));
 			}
-			var track_description = view.track_descriptions[hovered_track].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			var track_description = (
+					view.track_descriptions[hovered_track].html_content ||
+					view.track_descriptions[hovered_track].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
 			if (track_description.length > 0) {
 			    $tooltip_div.append(track_description + "<br>");
 			}

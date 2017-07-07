@@ -55,10 +55,12 @@ var OncoprintLabelView = (function () {
 		} else {
 		    var hovered_track = isMouseOnLabel(view, evt.pageY - view.$canvas.offset().top);
 		    if (hovered_track !== null) {
-			var $tooltip_div = $('<div>');
+			var $tooltip_div = $('<section>');
 			var offset = view.$canvas.offset();   
 			if (isNecessaryToShortenLabel(view, view.labels[hovered_track])) {
-			    $tooltip_div.append($('<b>').text(view.labels[hovered_track]));
+			    $tooltip_div.append(
+				    $('<h5 style="font-weight: bold; margin: 0; font-size: inherit;">')
+				    .text(view.labels[hovered_track]));
 			}
 			var track_description = view.track_descriptions[hovered_track];
 			if (track_description.length > 0) {

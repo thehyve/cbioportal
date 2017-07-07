@@ -8,7 +8,7 @@ This document focuses mainly on the steps to configure the keycloak for **authen
 
 ## Authorization configuration
 
-For just the authorization section: [authorization with keycloak](#authorization-with-keycloak).
+For just the authorization section see: [authorization with keycloak](#authorization-with-keycloak).
 
 ## Why keycloak?
 
@@ -111,9 +111,7 @@ keytool -genkey -alias secure-key -keyalg RSA -keystore samlKeystore.jks
 When integrating keycloak with your company-wide authentication service, the user credentials will reside at your institute's users directory and keycloak
 will work as a proxy between your LDAP (or SAML) service and cBioPortal.
 
-This is an example of integrating keycloak with your local LDAP/SAML service:
-
-TODO
+Please refer to keycloack documentation [http://www.keycloak.org/documentation.html](http://www.keycloak.org/documentation.html) for more information on how to integrate keycloak with your local LDAP/SAML service.
 
 ## Authorization with keycloak
 

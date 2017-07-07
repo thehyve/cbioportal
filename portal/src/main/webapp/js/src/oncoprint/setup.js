@@ -1341,20 +1341,9 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'addGenesetTracks': function (genetic_profile_id, geneset_ids, geneset_link_map) {
 		oncoprint.suppressRendering();
 		var track_ids = [];
-		var html_profile_id = genetic_profile_id.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-		var i, track_geneset_id, track_params, new_track_id, track_description;
+		var i, track_geneset_id, track_params, new_track_id;
 		for (i = 0; i < geneset_ids.length; i++) {
 		    track_geneset_id = geneset_ids[i];
-		    track_description = new String(track_geneset_id + ' gene set scores from ' + genetic_profile_id);
-		    if (geneset_link_map[track_geneset_id]) {
-			track_description.html_content = (
-				'<a href="'
-				+ geneset_link_map[track_geneset_id].replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-				+ '" target="_blank" rel="noopener noreferrer">'
-				+ track_geneset_id.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-				+ '</a> gene set scores from '
-				+ html_profile_id);
-		    }
 		    track_params = {
 			'rule_set_params': {
 			    'type': 'gradient',
@@ -1391,7 +1380,8 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 			'track_padding': 0,
 			'label': track_geneset_id,
 			'target_group': this.GENESET_HEATMAP_TRACK_GROUP_INDEX,
-			'description': track_description,
+			'description': 'gene set scores from ' + genetic_profile_id,
+			'link_url': geneset_link_map[track_geneset_id],
 			'removeCallback': makeRemoveGenesetTrackHandler(track_geneset_id),
 			'expandCallback': makeGenesetExpandHandler(track_geneset_id),
 			'expandButtonTextGetter': function (is_expanded) {

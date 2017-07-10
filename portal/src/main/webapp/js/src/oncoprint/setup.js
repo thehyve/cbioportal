@@ -1341,7 +1341,7 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 	    'addGenesetTracks': function (genetic_profile_id, geneset_ids, geneset_link_map) {
 		oncoprint.suppressRendering();
 		var track_ids = [];
-		var i, track_geneset_id, track_params, new_track_id, track_label;
+		var i, track_geneset_id, track_params, new_track_id, track_label_obj;
 		for (i = 0; i < geneset_ids.length; i++) {
 		    track_geneset_id = geneset_ids[i];
 		    track_label_obj = new String(track_geneset_id);

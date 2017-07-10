@@ -64,9 +64,7 @@ var OncoprintLabelView = (function () {
 				    view.labels[hovered_track],
 				    view.track_link_urls[hovered_track])));
 			}
-			var track_description = (
-					view.track_descriptions[hovered_track].html_content ||
-					encodeHtml(view.track_descriptions[hovered_track]));
+			var track_description = encodeHtml(view.track_descriptions[hovered_track]);
 			if (track_description.length > 0) {
 			    $tooltip_div.append(track_description + "<br>");
 			}

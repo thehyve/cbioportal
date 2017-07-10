@@ -153,11 +153,11 @@ var OncoprintLabelView = (function () {
 	if (link_url) {
 	    header_contents = (
 		    $('<a target="_blank" rel="noopener noreferrer">')
-		    .attr('href', link_url)
-		    .text(label));
+		    .attr('href', link_url));
 	} else {
-	    header_contents = document.createTextNode(label);
+	    header_contents = $('<span>');
 	}
+	header_contents.append(label.html_content || document.createTextNode(label));
 	return ($('<h5 style="font-weight: bold; margin: 0; font-size: inherit;">')
 		.append(header_contents));
     };

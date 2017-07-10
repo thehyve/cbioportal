@@ -1758,14 +1758,15 @@ var OncoprintLabelView = (function () {
 		.replace(/>/g, '&gt;'));
     };
     var formatTooltipHeader = function (label, link_url) {
+	var html_label = label.html_content || encodeHtml(label)
 	var header_contents;
 	if (link_url) {
 	    header_contents = (
 		    '<a href="' + encodeHtml(link_url) + '" target="_blank" rel="noopener noreferrer">'
-		    + encodeHtml(label)
+		    + html_label
 		    + '</a>');
 	} else {
-	    header_contents = encodeHtml(label);
+	    header_contents = html_label;
 	}
 	return ('<h5 style="font-weight: bold; margin: 0; font-size: inherit;">'
 		+ header_contents

@@ -1,25 +1,26 @@
 # Introduction
 
-The cBioPortal includes support for Keycloak SAML (Security Assertion Markup Language) authentication. This document explains why you might find keycloak SAML authentication useful for storing your user login information outside 
+The cBioPortal includes support for Keycloak SAML (Security Assertion Markup Language) authentication. This document explains why you might find Keycloak SAML authentication useful for storing your user login information outside 
 the cBioPortal database. It also shows you how to configure Keycloak to communicate with your instance of cBioPortal.
 
-Please note that configuring your local instance to use keycloak SAML authentication requires a local/remote keycloak Identity Provider. For details on how to set up a keycloak server, please read online document at (https://keycloak.gitbooks.io/documentation/server_installation/index.html) .  
-This document focuses mainly on the steps to configure the keycloak for **authenticating** and **authorizing** cBioPortal users.  
+Please note that configuring your local instance to use Keycloak SAML authentication requires a local/remote Keycloak Identity Provider. For details on how to set up a Keycloak server, please read online document at (https://keycloak.gitbooks.io/documentation/server_installation/index.html) .
+
+This document focuses mainly on the steps to configure Keycloak for **authenticating** and **authorizing** cBioPortal users.
 
 ## Authorization configuration
 
-For just the authorization section see: [authorization with keycloak](#authorization-with-keycloak).
+For just the authorization section see: [authorization with Keycloak](#authorization-with-keycloak).
 
-## Why keycloak?
+## Why Keycloak?
 
-keycloak is an open source identity and access management solution. It has a build-in RDBM system for storing login information. It can help build a security layer on top of cBioPortal web application.
+Keycloak is an open source identity and access management solution. It has a build-in RDBM system for storing login information. It can help build a security layer on top of the cBioPortal web application.
 
 Keycloak boils down to three simple terms:
 * **realm**: A realm secures and manages security metadata for a set of users, application, and registered auth clients.
 * **client**: Clients are entities that can request authentication of a user within a realm.
 * **role**: Roles identify a type or category of user. Keycloak often assigns access and permissions to specific roles rather than individual users for a fine-grained access control. 
 
-KeyCloak offers three types of roles: 
+Keycloak offers three types of roles: 
 * Realm-level roles are in global namespace shared by all clients. 
 * Client roles have basically a namespace dedicated to a client. 
 * A composite role is a role that has one or more additional roles associated with it. 
@@ -27,11 +28,11 @@ KeyCloak offers three types of roles:
 
 ## How does Keycloak SAML Authentication work?
 
-KeyCloak supports both OpenID-Connect and SAML authentication. When you use SAML authentication, the KeyCloak server exchanges XML documents with a web application. XML signatures and encryption are then used to verify requests from the application.
+Keycloak supports both OpenID-Connect and SAML authentication. When you use SAML authentication, the Keycloak server exchanges XML documents with a web application. XML signatures and encryption are then used to verify requests from the application.
 
-# Configure keycloak to authenticate your cbioportal instance
-**you will need to login into your keycloak server as an admin user to complete the following tasks.**
-1. login to your keycloak Identity Provider e.g http://localhost:8080/auth as an admin user
+# Configure Keycloak to authenticate your cbioportal instance
+**you will need to login into your Keycloak server as an admin user to complete the following tasks.**
+1. login to your Keycloak Identity Provider e.g http://localhost:8080/auth as an admin user
 2. Hover over the top left corner drop down menu that is titled with Master to create a new realm. 
 ![](images/previews/add-realm.png)
 Please Note if you are logged in the master realm, this drop down menu lists all the realms created. The last entry of this drop down menu is always Add Realm. Click this to add a realm. Then type 'demo' in the name field and click on create button.
@@ -43,7 +44,7 @@ Enter 'http://localhost:8080/auth/realms/demo/protocol/saml' in the **Root URL**
 ![](images/previews/edit-client.png)
 
 4. Select **saml** in the Client Protocol drop down box and use **email** for your Name ID. 
-5. Next, enter a redirect URL for keycloak to use upon a successful authentication e.g http://localhost:8081/cbioportal/*, and leave everything else as it is. 
+5. Next, enter a redirect URL for Keycloak to use upon a successful authentication e.g http://localhost:8081/cbioportal/*, and leave everything else as it is. 
 6. Set "Force POST Binding" and "Front Channel Logout" to "OFF" and "Force Name ID Format" to "ON"
 7. Finally enter in the Client SAML Endpoint URL. Enter the URL you want the Keycloak server to send requests and responses to e.g http://localhost:8080/auth/realms/demo/protocol/saml. Click Save. 
 
@@ -60,7 +61,7 @@ Accept everything and type a password e.g. apollo1 in the Store Password textbox
  
 ![](images/previews/export-SAML-keys.png)
 When done, click on the **Download** button. Move the downloaded jks file to **portal/src/main/resources/**.
-Please note you can also use the java 'keytool' to generate keystore and then import to the keycloak to customize your keystore attributes.
+Please note you can also use the java 'keytool' to generate keystore and then import to the Keycloak to customize your keystore attributes.
 ```
 keytool -genkey -alias secure-key -keyalg RSA -keystore samlKeystore.jks
 ```
@@ -106,16 +107,16 @@ keytool -genkey -alias secure-key -keyalg RSA -keystore samlKeystore.jks
     saml.logout.url=/
 ```
 
-## Integrating keycloak with your company-wide authentication service
+## Integrating Keycloak with your company-wide authentication service
 
-When integrating keycloak with your company-wide authentication service, the user credentials will reside at your institute's users directory and keycloak
+When integrating Keycloak with your company-wide authentication service, the user credentials will reside at your institute's users directory and Keycloak
 will work as a proxy between your LDAP (or SAML) service and cBioPortal.
 
-Please refer to keycloack documentation [http://www.keycloak.org/documentation.html](http://www.keycloak.org/documentation.html) for more information on how to integrate keycloak with your local LDAP/SAML service.
+Please refer to Keycloak documentation [http://www.keycloak.org/documentation.html](http://www.keycloak.org/documentation.html) for more information on how to integrate Keycloak with your local LDAP/SAML service.
 
-## Authorization with keycloak
+## Authorization with Keycloak
 
-### Local keycloak users: create users and assigning roles
+### Local Keycloak users: create users and assigning roles
 
 1. To create a user, click on Users in the left menu bar. This menu option brings you to the user list page. On the right side of the empty user list,
  you should see an Add User button. Click that to start creating your new user.
@@ -127,7 +128,7 @@ Please refer to keycloack documentation [http://www.keycloak.org/documentation.h
 
 ### Institute's IDP users: assigning roles
 
-When integrating keycloak with your company-wide authentication service, the user credentials will reside at your institute's users directory and keycloak
+When integrating Keycloak with your company-wide authentication service, the user credentials will reside at your institute's users directory and Keycloak
 will work as a proxy between your LDAP (or SAML) IDP service and cBioPortal. Nevertheless, the authorization roles
 should still be configured for the users. The steps below detail how to do this.
 

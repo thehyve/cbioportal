@@ -76,7 +76,6 @@ public class JdbcUtil {
         String password = dbProperties.getDbPassword();
         String database = dbProperties.getDbName();
         String url ="jdbc:mysql://" + host + "/" + database +
-                        "?user=" + userName + "&password=" + password +
                         "&zeroDateTimeBehavior=convertToNull";
         //  Set up poolable data source
         BasicDataSource dataSource = new BasicDataSource();

@@ -60,7 +60,7 @@
                 <p>
                     <span>You are logged in as <span class="username"><sec:authentication property='<%=principal%>' /></span> | 
                     <% if (authenticationMethod.equals("saml")) { %>
-                        <a href="<c:url value='<%=samlLogoutURL%>'/>">Sign out</a>
+                        <a href="<c:url value="/saml/logout?local=true"/>">Sign out</a>
                     <%} else { %>
                         <a href="j_spring_security_logout">Sign out</a>
                     <% } %>

@@ -124,7 +124,34 @@ The first four rows of the clinical data file contain tab-delimited metadata abo
 - Row 1: **The attribute Display Names**: The display name for each clinical attribute
 - Row 2: **The attribute Descriptions**: Long(er) description of each clinical attribute
 - Row 3: **The attribute Datatype**: The datatype of each clinical attribute (must be one of:  STRING, NUMBER, BOOLEAN)
-- Row 4: **The attribute Priority**: A number which indicates the importance of each attribute.  In the future, higher priority attributes will appear in more prominent places than lower priority ones on relevant pages (such as the [Study View](http://www.cbioportal.org/study?id=brca_tcga)). A lower number indicates a higher priority.
+- Row 4: **The attribute Priority**: A number which indicates the importance of each attribute.  In the future, higher priority attributes will appear in more prominent places than lower priority ones on relevant pages (such as the [Study View](http://www.cbioportal.org/study?id=brca_tcga)). A higher number indicates a higher priority.
+    ```
+    To promote certain chart in study view, please increase priority to a certain number. The higher the score, the higher priority it will be displayed in the study view.
+    If you want to hide chart, please set the priority to 0. For combination chart, as long as one of the clinical attribute has been set to 0, it will be hidden.
+    
+    Currently, we preassigned priority to few charts, but as long as you assign a priority except than 1, these preassigned priorities will be overwritten.
+    
+    CANCER_TYPE: 3000, CANCER_TYPE_DETAILED: 2000,
+    Overall survival plot: 400 (This is combination of OS_MONTH and OS_STATUS) 
+    Disease Free Survival Plot: 300 (This is combination of DFS_MONTH and DFS_STATUS) 
+    Mutation Count vs. CNA Scatter Plot: 200,
+    Mutated Genes Table: 90, CNA Genes Table: 80, study_id: 70, # of Samples Per Patient: 40,
+    With Mutation Data Pie Chart: 60, With CNA Data Pie Chart: 50, 
+    Mutation Count Bar Chart: 30, CNA Bar Chart: 20,
+    GENDER: 9, SEX: 9, AGE: 8
+    ```
+    
+    Please note: 
+    Priority is not the sole factor determining which chart will be displayed first.
+    A layout algorithm in study view also makes a minor adjustment on the layout.
+    The algorithm tries to fit all charts into a 2 by 2 matrix (Mutated Genes Table occupies 2 by 2 space).
+    When a chart can not be fitted in the first matrix, the second matrixed will be generated. 
+    And the second matrix will have lower priority than the first one. 
+    If later chart can fit into the first matrix, then its priority will be promoted.
+    
+    Please see [here](Study-View.md) for more detailed information about how study view utilize priority and how the layout is calculated based on priority.
+ 
+    
 
 #### Example metadata rows
 Below is an example of the first 4 rows with the respective metadata for the attributes defined in the 5th row. 
@@ -388,23 +415,26 @@ The expression metadata file should contain the following fields:
 #### Supported stable_id values for MRNA_EXPRESSION
 For historical reasons, cBioPortal expects the `stable_id` to be one of those listed in the following static set.
 
-datatype | stable_id | description
---- | --- | ---
-CONTINUOUS|mrna_U133|Affymetrix U133 Array
-Z-SCORE|mrna_U133_Zscores|Affymetrix U133 Array
-CONTINUOUS|rna_seq_mrna|RNA-seq data
-Z-SCORE|rna_seq_mrna_median_Zscores|RNA-seq data
-CONTINUOUS|rna_seq_v2_mrna|RNA-seq data
-Z-SCORE|rna_seq_v2_mrna_median_Zscores|RNA-seq data
-CONTINUOUS|mirna|MicroRNA data
-Z-SCORE|mirna_median_Zscores|MicroRNA data
-Z-SCORE|mrna_merged_median_Zscores|?
-CONTINUOUS|mrna|mRNA data
-Z-SCORE|mrna_median_Zscores|mRNA data
-DISCRETE|mrna_outliers|mRNA data of outliers
-Z-SCORE|mrna_zbynorm|?
-CONTINUOUS|rna_seq_mrna_capture|data from Roche mRNA Capture Kit
-Z-SCORE|rna_seq_mrna_capture_Zscores|data from Roche mRNA Capture Kit
+<table>
+<thead>
+<tr><th>datatype</th><th>stable_id</th><th>description</th></tr>
+</thead>
+<tr><td>CONTINUOUS</td><td>mrna_U133</td><td>Affymetrix U133 Array</td></tr>
+<tr><td>Z-SCORE</td><td>mrna_U133_Zscores</td><td>Affymetrix U133 Array</td></tr>
+<tr><td>Z-SCORE</td><td>rna_seq_mrna_median_Zscores</td><td>RNA-seq data</td></tr>
+<tr><td>Z-SCORE</td><td>mrna_median_Zscores</td><td>mRNA data</td></tr>
+<tr><td>CONTINUOUS</td><td>rna_seq_mrna</td><td>RNA-seq data</td></tr>
+<tr><td>CONTINUOUS</td><td>rna_seq_v2_mrna</td><td>RNA-seq data</td></tr>
+<tr><td>Z-SCORE</td><td>rna_seq_v2_mrna_median_Zscores</td><td>RNA-seq data</td></tr>
+<tr><td>CONTINUOUS</td><td>mirna</td><td>MicroRNA data</td></tr>
+<tr><td>Z-SCORE</td><td>mirna_median_Zscores</td><td>MicroRNA data</td></tr>
+<tr><td>Z-SCORE</td><td>mrna_merged_median_Zscores</td><td>?</td></tr>
+<tr><td>CONTINUOUS</td><td>mrna</td><td>mRNA data</td></tr>
+<tr><td>DISCRETE</td><td>mrna_outliers</td><td>mRNA data of outliers</td></tr>
+<tr><td>Z-SCORE</td><td>mrna_zbynorm</td><td>?</td></tr>
+<tr><td>CONTINUOUS</td><td>rna_seq_mrna_capture</td><td>data from Roche mRNA Capture Kit</td></tr>
+<tr><td>Z-SCORE</td><td>rna_seq_mrna_capture_Zscores</td><td>data from Roche mRNA Capture Kit</td></tr>
+</table>
 
 
 #### Example
@@ -499,6 +529,9 @@ The mutation metadata file should contain the following fields:
 8. **data_filename**: your data file
 9. **gene_panel**: optional gene panel stable id
 10. **swissprot_identifier (optional)**: either `accession` or `name`, indicating the type of identifier in the `SWISSPROT` column
+11. **variant_classification_filter (optional)**: mutation types to be filtered out, separated by commas, using the allowed values specified below. By default, cBioPortal filters out the following mutation types: Silent, Intron, IGR, 3'UTR, 5'UTR, 3'Flank and 5'Flank, except the promoter mutations for the TERT gene. If no types want to be filtered out, include this field in the metadata file, but do not specify any type. If you want the cBioPortal default filtering, do not include this field in the metadata file.
+
+Allowed values to filter out (mainly from [Mutation Annotation Format page](https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification)): `Frame_Shift_Del, Frame_Shift_Ins, In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation, Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, 3'UTR, 3'Flank, 5'UTR, 5'Flank, IGR, Intron, RNA, Targeted_Region, De_novo_Start_InFrame, De_novo_Start_OutOfFrame, Splice_Region and Unknown`
 
 An example metadata file would be:
 
@@ -518,7 +551,7 @@ A minimal mutation annotations file can contain just three of the MAF columns pl
 
 * **Hugo_Symbol**: (MAF column) A [HUGO](http://www.genenames.org/) gene symbol.
 * **Tumor_Sample_Barcode**: (MAF column) This is the sample ID as listed in the clinical data file.
-* **Variant_Classification**: (MAF column) Translational effect of variant allele. Allowed values (from [Mutation Annotation Format page](https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification)): `Frame_Shift_Del, Frame_Shift_Ins, In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation, Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, 3'UTR, 3'Flank, 5'UTR, 5'Flank, IGR1 , Intron, RNA, Targeted_Region, De_novo_Start_InFrame, De_novo_Start_OutOfFrame`. cBioPortal skips the following types during the import: `Silent, Intron, 3'UTR, 3'Flank, 5'UTR, 5'Flank, IGR and RNA`. Two extra values are allowed by cBioPortal here as well: `Splice_Region, Unknown`. :warning: the values should be in the correct case. E.g. `missense_mutation` is not allowed, while `Missense_Mutation` is.
+* **Variant_Classification**: (MAF column) Translational effect of variant allele. Allowed values (from [Mutation Annotation Format page](https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification)): `Frame_Shift_Del, Frame_Shift_Ins, In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation, Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, 3'UTR, 3'Flank, 5'UTR, 5'Flank, IGR, Intron, RNA, Targeted_Region, De_novo_Start_InFrame, De_novo_Start_OutOfFrame`. cBioPortal skips the following types during the import: `Silent, Intron, 3'UTR, 3'Flank, 5'UTR, 5'Flank, IGR and RNA`. Two extra values are allowed by cBioPortal here as well: `Splice_Region, Unknown`. :warning: the values should be in the correct case. E.g. `missense_mutation` is not allowed, while `Missense_Mutation` is.
 * **HGVSp_Short**: (annotation column) Amino Acid Change, e.g. p.V600E.
 
 Note: next to Hugo_Symbol, it is recommended to have the Entrez gene ID:
@@ -701,7 +734,7 @@ stable_id: mutations
 profile_description: Fusions.
 show_profile_in_analysis_tab: true
 profile_name: Fusions
-data_filename: data_fusions.txt
+data_filename: data_fusion.txt
 ```
 
 #### Data file
@@ -1008,7 +1041,7 @@ description: Targeted (410 cancer genes) sequencing of various tumor types via M
 gene_list: ABL1    ACVR1   AKT1    AKT3 ...
 ```
 
-For information on importing gene panels please visit: [Importing-gene-panels](Importing-gene-panels.md).
+For information on importing gene panels please visit: [Import-Gene-Panels](Import-Gene-Panels.md).
 
 #### Sample-Profile Matrix
 
@@ -1089,11 +1122,12 @@ The first column is the GENESET_ID. This contains the EXTERNAL_ID or "stable id"
 
 The cells contain the GSVA(-like) score: which is real number, between -1.0 and 1.0, representing the score for the gene set in the respective sample, or NA when the score for the gene set in the respective sample could not be (or was not) calculated. Example with 2 gene sets and 3 samples: 
 
-| GENESET_ID                      | TCGA-AO-A0J | TCGA-A2-A0Y | TCGA-A2-A0S |
-|---------------------------------|-------------|-------------|-------------|
-| GO_POTASSIUM_ION_TRANSPOR       | -0.987      | 0.423       | -0.879      |
-| GO_GLUCURONATE_METABOLIC_PROCES | 0.546       | 0.654       | 0.123       |
-| ..                              |             |             |             |
+<table>
+<thead><tr><th>GENESET_ID</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>
+<tr><td>GO_POTASSIUM_ION_TRANSPOR</td><td>-0.987</td><td>0.423</td><td>-0.879</td></tr>
+<tr><td>GO_GLUCURONATE_METABOLIC_PROCES</td><td>0.546</td><td>0.654</td><td>0.123</td></tr>
+<tr><td>..</td><td></td><td></td><td></td></tr>
+</table>
 
 ### GSVA p-value meta file
 
@@ -1132,8 +1166,9 @@ The first column is the GENESET_ID. This contains the EXTERNAL_ID or "stable id"
 
 The cells contain the p-value for the GSVA score: A real number, between 0.0 and 1.0, representing the p-value for the GSVA score calculated for the gene set in the respective sample, or NA when the score for the gene is also NA. Example with 2 gene sets and 3 samples: 
 
-| GENESET_ID                      | TCGA-AO-A0J | TCGA-A2-A0Y | TCGA-A2-A0S |
-|---------------------------------|-------------|-------------|-------------|
-| GO_POTASSIUM_ION_TRANSPOR       | 0.0811      | 0.0431      | 0.0087      |
-| GO_GLUCURONATE_METABOLIC_PROCES | 0.6621      | 0.0031      | 1.52e-9     |
-| ..                              |             |             |             |
+<table>
+<thead><tr><th>GENESET_ID</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>
+<tr><td>GO_POTASSIUM_ION_TRANSPOR</td><td>0.0811</td><td>0.0431</td><td>0.0087</td></tr>
+<tr><td>GO_GLUCURONATE_METABOLIC_PROCES</td><td>0.6621</td><td>0.0031</td><td>1.52e-9</td></tr>
+<tr><td>..</td><td></td><td></td><td></td></tr>
+</table>

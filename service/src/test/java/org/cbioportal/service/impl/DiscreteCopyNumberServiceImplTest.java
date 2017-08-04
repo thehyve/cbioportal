@@ -2,12 +2,11 @@ package org.cbioportal.service.impl;
 
 import junit.framework.Assert;
 import org.cbioportal.model.CopyNumberCount;
-import org.cbioportal.model.CopyNumberSampleCountByGene;
+import org.cbioportal.model.CopyNumberCountByGene;
 import org.cbioportal.model.DiscreteCopyNumberData;
 import org.cbioportal.model.Gene;
 import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
-import org.cbioportal.model.GeneticProfile.DataType;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.DiscreteCopyNumberRepository;
 import org.cbioportal.service.GeneticDataService;
@@ -233,14 +232,14 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
     @Test
     public void getSampleCountByGeneAndAlteration() throws Exception {
         
-        List<CopyNumberSampleCountByGene> expectedCopyNumberSampleCountByGeneList = new ArrayList<>();
-        expectedCopyNumberSampleCountByGeneList.add(new CopyNumberSampleCountByGene());
+        List<CopyNumberCountByGene> expectedCopyNumberSampleCountByGeneList = new ArrayList<>();
+        expectedCopyNumberSampleCountByGeneList.add(new CopyNumberCountByGene());
 
         Mockito.when(discreteCopyNumberRepository.getSampleCountByGeneAndAlterationAndSampleIds(GENETIC_PROFILE_ID, 
             null, Arrays.asList(ENTREZ_GENE_ID), Arrays.asList(-2)))
             .thenReturn(expectedCopyNumberSampleCountByGeneList);
         
-        List<CopyNumberSampleCountByGene> result = discreteCopyNumberService
+        List<CopyNumberCountByGene> result = discreteCopyNumberService
             .getSampleCountByGeneAndAlterationAndSampleIds(GENETIC_PROFILE_ID, null, Arrays.asList(ENTREZ_GENE_ID), 
                 Arrays.asList(-2));
         
@@ -251,23 +250,23 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
         
         GeneticProfile geneticProfile = new GeneticProfile();
         geneticProfile.setGeneticAlterationType(GeneticProfile.GeneticAlterationType.COPY_NUMBER_ALTERATION);
-        geneticProfile.setDatatype(DataType.DISCRETE);
+        geneticProfile.setDatatype("DISCRETE");
         Mockito.when(geneticProfileService.getGeneticProfile(GENETIC_PROFILE_ID)).thenReturn(geneticProfile);
     }
 
     @Test
     public void fetchCopyNumberCounts() throws Exception {
 
-        List<CopyNumberSampleCountByGene> copyNumberSampleCountByGeneList = new ArrayList<>();
-        CopyNumberSampleCountByGene copyNumberSampleCountByGene = new CopyNumberSampleCountByGene();
+        List<CopyNumberCountByGene> copyNumberSampleCountByGeneList = new ArrayList<>();
+        CopyNumberCountByGene copyNumberSampleCountByGene = new CopyNumberCountByGene();
         copyNumberSampleCountByGene.setEntrezGeneId(ENTREZ_GENE_ID);
         copyNumberSampleCountByGene.setAlteration(-2);
-        copyNumberSampleCountByGene.setSampleCount(1);
+        copyNumberSampleCountByGene.setCount(1);
         copyNumberSampleCountByGeneList.add(copyNumberSampleCountByGene);
 
         GeneticProfile geneticProfile = new GeneticProfile();
         geneticProfile.setGeneticAlterationType(GeneticProfile.GeneticAlterationType.COPY_NUMBER_ALTERATION);
-        geneticProfile.setDatatype(DataType.DISCRETE);
+        geneticProfile.setDatatype("DISCRETE");
         Mockito.when(geneticProfileService.getGeneticProfile(GENETIC_PROFILE_ID)).thenReturn(geneticProfile);
 
         Mockito.when(geneticDataService.getNumberOfSamplesInGeneticProfile(GENETIC_PROFILE_ID)).thenReturn(2);

@@ -3,7 +3,6 @@ package org.cbioportal.service.impl;
 import org.cbioportal.model.GeneGeneticAlteration;
 import org.cbioportal.model.GeneGeneticData;
 import org.cbioportal.model.GeneticProfile;
-import org.cbioportal.model.GeneticProfile.DataType;
 import org.cbioportal.model.GeneticProfile.GeneticAlterationType;
 import org.cbioportal.model.Sample;
 import org.cbioportal.model.meta.BaseMeta;
@@ -36,8 +35,8 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 
     @Override
     @PreAuthorize("hasPermission(#geneticProfileId, 'GeneticProfile', 'read')")
-    public List<GeneGeneticData> getGeneticData(String geneticProfileId, String sampleListId, List<Integer> entrezGeneIds,
-                                                String projection)
+    public List<GeneGeneticData> getGeneticData(String geneticProfileId, String sampleListId, 
+                                                List<Integer> entrezGeneIds, String projection)
         throws GeneticProfileNotFoundException {
         
         validateGeneticProfile(geneticProfileId);
@@ -81,8 +80,8 @@ public class GeneticDataServiceImpl implements GeneticDataService {
             samples = sampleService.fetchSamples(studyIds, sampleIds, "ID");
         }
 
-        List<GeneGeneticAlteration> geneticAlterations = geneticDataRepository.getGeneGeneticAlterations(geneticProfileId,
-            entrezGeneIds, projection);
+        List<GeneGeneticAlteration> geneticAlterations = geneticDataRepository.getGeneGeneticAlterations(
+            geneticProfileId, entrezGeneIds, projection);
         
         for (Sample sample : samples) {
             int indexOfSampleId = internalSampleIds.indexOf(sample.getInternalId());
@@ -128,10 +127,8 @@ public class GeneticDataServiceImpl implements GeneticDataService {
 
         GeneticProfile geneticProfile = geneticProfileService.getGeneticProfile(geneticProfileId);
 
-        if ((geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.COPY_NUMBER_ALTERATION) && 
-            geneticProfile.getDatatype().equals(DataType.DISCRETE)) || geneticProfile.getGeneticAlterationType()
-            .equals(GeneticAlterationType.MUTATION_EXTENDED) || geneticProfile.getGeneticAlterationType()
-            .equals(GeneticAlterationType.FUSION)) {
+        if (geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.MUTATION_EXTENDED) || 
+            geneticProfile.getGeneticAlterationType().equals(GeneticAlterationType.FUSION)) {
 
             throw new GeneticProfileNotFoundException(geneticProfileId);
         }

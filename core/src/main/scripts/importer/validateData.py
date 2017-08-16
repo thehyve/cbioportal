@@ -1228,12 +1228,12 @@ class MutationsExtendedValidator(Validator):
                 return False
             # lines in this format are single mutations, so the haplotype
             # syntax supported by HGVS strings is not applicable
-            if ';' in value or '+' in value:
-                # return with an error message
-                self.extra = ("Unexpected ';' or '+' in amino acid change, "
-                              "multi-variant allele notation is not supported")
-                self.extra_exists = True
-                return False
+#             if ';' in value or '+' in value:
+#                 # return with an error message
+#                 self.extra = ("Unexpected ';' or '+' in amino acid change, "
+#                               "multi-variant allele notation is not supported")
+#                 self.extra_exists = True
+#                 return False
             # commas are not allowed. They are used internally in certain
             # servlets, via GeneticAlterationUtil.getMutationMap().
             if ',' in value:

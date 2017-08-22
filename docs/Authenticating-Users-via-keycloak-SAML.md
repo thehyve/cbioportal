@@ -153,6 +153,37 @@ and
 for more information on how to integrate Keycloak with your local LDAP
 or SAML service.
 
+#### Federate LDAP/AD user directories
+
+Some notes on user federation using LDAP/Active Directory:
+
+By specifying the **Vendor** of your LDAP server, Keycloak will choose
+sensible defaults for the required objectClasses and attributes of
+your user entries. Apart from the Dedicated Name of the tree in which
+to search for users and the DN and password that Keycloak should use
+to bind to the server, make sure to specify the following **Custom
+User LDAP Filter** to ensure that only user entries that have an email
+address are considered:
+
+```
+(mail=*)
+```
+
+When using LDAP to load users from your institute's user directory,
+you will most likely want Keycloak to refrain from trying to
+synchronise changes in user details back to the central directory. You
+should set **Edit Mode** to `READ_ONLY`, as the alternative `UNSYNCED`
+would mean that users can be changed in the Keycloak database once
+imported from LDAP, and start diverging. Also disable **Sync
+Registrations** unless you want Keycloak to add new users to the LDAP
+store.
+
+Do turn on **Import Users** to make Keycloak remember users after the
+first login, if you want to be able to assign non-default roles. If
+the LDAP tree holding your users is large and you do not want to
+import all users into Keycloak, make sure to disable **Periodic Full
+Sync** and **Periodic Changed Users Sync**.
+
 ## Authorization with Keycloak
 
 ### Create roles to authorize cBioPortal users

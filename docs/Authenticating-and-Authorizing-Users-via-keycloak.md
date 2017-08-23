@@ -1,4 +1,4 @@
-# Authenticating Users via Keycloak
+# Authenticating and Authorizing Users via Keycloak
 
 ## Introduction
 

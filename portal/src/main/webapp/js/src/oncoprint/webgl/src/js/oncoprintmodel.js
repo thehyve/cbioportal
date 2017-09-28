@@ -150,6 +150,7 @@ var OncoprintModel = (function () {
 	this.track_expand_callback = {}; // track id -> function that adds expansion tracks for its track if set
 	this.track_expand_button_getter = {}; // track id -> function from boolean to string if customized
 	this.track_expansion_tracks = {}; // track id -> array of track ids if applicable
+	this.track_expansion_parent = {}; // track id -> track id if applicable
 	
 	// Rule Set Properties
 	this.rule_sets = {}; // map from rule set id to rule set
@@ -713,6 +714,7 @@ var OncoprintModel = (function () {
 	    if (model.track_expansion_tracks[expansion_of].indexOf(track_id) !== -1) {
 		throw new Error('Illegal state: duplicate expansion track ID');
 	    }
+	    model.track_expansion_parent[track_id] = expansion_of;
 	    model.track_expansion_tracks[expansion_of].push(track_id);
 	}
 	if (typeof expandCallback !== 'undefined') {
@@ -823,16 +825,12 @@ var OncoprintModel = (function () {
 	    containing_track_group.splice(
 		    containing_track_group.indexOf(track_id), 1);
 	}
-	// remove any listing of the track as the expansion of another track
-	var group_track, index_in_group;
-	for (group_track in this.track_expansion_tracks) {
-	    if (this.track_expansion_tracks.hasOwnProperty(group_track)) {
-		index_in_group = this.track_expansion_tracks[group_track].indexOf(track_id);
-		if (index_in_group !== -1) {
-		    this.track_expansion_tracks[group_track].splice(index_in_group, 1);
-		}
-	    }
+	// remove listing of the track as an expansion of its parent track
+	var expansion_group = this.track_expansion_tracks[this.track_expansion_parent[track_id]]
+	if (expansion_group) {
+	    expansion_group.splice(expansion_group.indexOf(track_id), 1);
 	}
+	delete this.track_expansion_parent[track_id];
 	this.track_tops.update();
 	this.track_present_ids.update(this, track_id);
 	this.track_id_to_datum.update(this, track_id);

@@ -119,10 +119,10 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
      *   List<String> of molecular profile ids,
      *   or List<String> of sample list ids
      * @param targetType String 'CancerStudy', 
-     *   'MolecularProfile', 
+     *   'MolecularProfile' (or 'GeneticProfile' as a temp backwards compatibility for api-legacy), 
      *   'SampleList',
      *   'List<CancerStudyId>', 
-     *   'List<MolecularProfileId>', 
+     *   'List<MolecularProfileId>' (or List<GeneticProfileId> as a temp backwards compatibility for api-legacy), 
      *   or 'List<SampleListId>'
      * @param permission
      */
@@ -151,7 +151,8 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
                 return false;
             }
             return hasPermission(authentication, cancerStudy, permission);
-        } else if ("MolecularProfile".equals(targetType)) {
+        } else if ("MolecularProfile".equals(targetType)
+                || "GeneticProfile".equals(targetType)) { ////GeneticProfile is a temp backwards compatibility for api-legacy calls still being used by oncoprint
             MolecularProfile molecularProfile = molecularProfileRepository.getMolecularProfile(targetId.toString());
             if (molecularProfile == null) {
                 return false;
@@ -171,7 +172,8 @@ class CancerStudyPermissionEvaluator implements PermissionEvaluator {
                 }
             }
             return true;
-        } else if ("List<MolecularProfileId>".equals(targetType)) {
+        } else if ("List<MolecularProfileId>".equals(targetType) 
+                || "List<GeneticProfileId>".equals(targetType)) { //List<GeneticProfileId> is a temp backwards compatibility for api-legacy calls still being used by oncoprint
             List<String> molecularProfileIds = (List<String>) targetId;
             for (String molecularProfileId : molecularProfileIds) {
                 MolecularProfile molecularProfile = molecularProfileRepository.getMolecularProfile(molecularProfileId);

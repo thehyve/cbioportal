@@ -763,7 +763,7 @@ var OncoprintModel = (function () {
 	model.setIdOrder(Object.keys(model.present_ids.get()));
     }
 
-    var _getContainingTrackGroup = function (oncoprint_model, track_id, return_reference) {
+    var _getMajorTrackGroup = function (oncoprint_model, track_id) {
 	var group;
 	track_id = parseInt(track_id);
 	for (var i = 0; i < oncoprint_model.track_groups.length; i++) {
@@ -771,6 +771,16 @@ var OncoprintModel = (function () {
 		group = oncoprint_model.track_groups[i];
 		break;
 	    }
+	}
+	return group || null;
+    }
+    var _getEffectiveTrackGroup = function (oncoprint_model, track_id, return_reference) {
+	var group;
+	var parent_id = oncoprint_model.track_expansion_parent[track_id];
+	if (parent_id !== undefined) {
+	    group = oncoprint_model.track_expansion_tracks[parent_id];
+	} else {
+	    group = _getMajorTrackGroup(oncoprint_model, track_id);
 	}
 	if (group) {
 	    return (return_reference ? group : group.slice());
@@ -820,7 +830,7 @@ var OncoprintModel = (function () {
 	delete this.track_expand_button_getter[track_id];
 	delete this.track_expansion_tracks[track_id];
 
-	var containing_track_group = _getContainingTrackGroup(this, track_id, true);
+	var containing_track_group = _getMajorTrackGroup(this, track_id);
 	if (containing_track_group !== null) {
 	    containing_track_group.splice(
 		    containing_track_group.indexOf(track_id), 1);
@@ -914,7 +924,7 @@ var OncoprintModel = (function () {
     }
     
     OncoprintModel.prototype.getContainingTrackGroup = function (track_id) {
-	return _getContainingTrackGroup(this, track_id, false);
+	return _getEffectiveTrackGroup(this, track_id, false);
     }
 
     OncoprintModel.prototype.setTrackGroupHeader = function(track_group_id, text) {
@@ -1007,11 +1017,22 @@ var OncoprintModel = (function () {
 	return this.getOncoprintWidth();
     }
     OncoprintModel.prototype.moveTrack = function (track_id, new_previous_track) {
-	var track_group = _getContainingTrackGroup(this, track_id, true);
+	function moveValue(uniqArray, value, new_predecessor) {
+	    uniqArray.splice(uniqArray.indexOf(value), 1);
+	    var new_position = (new_predecessor === null ? 0 : uniqArray.indexOf(new_predecessor)+1);
+	    uniqArray.splice(new_position, 0, value);
+	}
+	var track_group = _getEffectiveTrackGroup(this, track_id, true);
 	if (track_group !== null) {
-	    track_group.splice(track_group.indexOf(track_id), 1);
-	    var new_position = (new_previous_track === null ? 0 : track_group.indexOf(new_previous_track)+1);
-	    track_group.splice(new_position, 0, track_id);
+	    moveValue(track_group, track_id, new_previous_track);
+	}
+	// move expansion tracks in their outer groups as well
+	if (this.track_expansion_parent[track_id] != undefined) {
+	    var major_group = _getMajorTrackGroup(this, track_id);
+	    if (new_previous_track === null) {
+		new_previous_track = this.track_expansion_parent[track_id];
+	    }
+	    moveValue(major_group, track_id, new_previous_track);
 	}
 	
 	this.track_tops.update();

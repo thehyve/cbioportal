@@ -3861,6 +3861,8 @@ var OncoprintModel = (function () {
 	model.setIdOrder(Object.keys(model.present_ids.get()));
     }
 
+    // get a reference to the array that stores the order of tracks in
+    // the same group
     var _getMajorTrackGroup = function (oncoprint_model, track_id) {
 	var group;
 	track_id = parseInt(track_id);
@@ -3872,19 +3874,16 @@ var OncoprintModel = (function () {
 	}
 	return group || null;
     }
-    var _getEffectiveTrackGroup = function (oncoprint_model, track_id, return_reference) {
-	var group;
-	var parent_id = oncoprint_model.track_expansion_parent[track_id];
+    // get an array listing the track IDs that a track can move around
+    var _getEffectiveTrackGroup = function (oncoprint_model, track_id) {
+	var group,
+	    parent_id = oncoprint_model.track_expansion_parent[track_id];
 	if (parent_id !== undefined) {
 	    group = oncoprint_model.track_expansion_tracks[parent_id];
 	} else {
 	    group = _getMajorTrackGroup(oncoprint_model, track_id);
 	}
-	if (group) {
-	    return (return_reference ? group : group.slice());
-	} else {
-	    return null;
-	}
+	return group ? group.slice() : null;
     }
 
     var isRuleSetUsed = function(model, rule_set_id) {
@@ -4022,7 +4021,7 @@ var OncoprintModel = (function () {
     }
     
     OncoprintModel.prototype.getContainingTrackGroup = function (track_id) {
-	return _getEffectiveTrackGroup(this, track_id, false);
+	return _getEffectiveTrackGroup(this, track_id);
     }
 
     OncoprintModel.prototype.setTrackGroupHeader = function(track_group_id, text) {
@@ -4115,26 +4114,33 @@ var OncoprintModel = (function () {
 	return this.getOncoprintWidth();
     }
     OncoprintModel.prototype.moveTrack = function (track_id, new_previous_track) {
+
 	function moveValue(uniqArray, value, new_predecessor) {
 	    uniqArray.splice(uniqArray.indexOf(value), 1);
 	    var new_position = (new_predecessor === null ? 0 : uniqArray.indexOf(new_predecessor)+1);
 	    uniqArray.splice(new_position, 0, value);
 	}
-	var track_group = _getEffectiveTrackGroup(this, track_id, true);
+
+	var track_group = _getMajorTrackGroup(this, track_id),
+	    expansion_parent = this.track_expansion_parent[track_id],
+	    outer_previous_track;
+
 	if (track_group !== null) {
-	    moveValue(track_group, track_id, new_previous_track);
+	    // if an expansion track moves above all other tracks it can,
+	    // place it directly below its expansion parent
+	    outer_previous_track = (expansion_parent !== undefined && new_previous_track === null)
+		    ? expansion_parent
+		    : new_previous_track;
+	    moveValue(track_group, track_id, outer_previous_track);
 	}
-	// move expansion tracks in their outer groups as well
-	if (this.track_expansion_parent[track_id] != undefined) {
-	    var major_group = _getMajorTrackGroup(this, track_id);
-	    if (new_previous_track === null) {
-		new_previous_track = this.track_expansion_parent[track_id];
-	    }
-	    moveValue(major_group, track_id, new_previous_track);
+
+	// keep the order of expansion siblings up-to-date as well
+	if (this.track_expansion_parent[track_id] !== undefined) {
+	    moveValue(this.track_expansion_tracks[expansion_parent], track_id, new_previous_track);
 	}
 	
 	this.track_tops.update();
-    }
+    };
 
     OncoprintModel.prototype.getTrackLabel = function (track_id) {
 	return this.track_label[track_id];

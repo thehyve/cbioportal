@@ -57,20 +57,10 @@
         </div>
         
         <div id="oncoprint_whole_body">
-        <div class="btn-group btn-group-sm" id="oncoprint-diagram-toolbar-buttons" style="float:right;margin-right:15px;display: none;height:33px">           
-            <div class="btn-group btn-group-sm" id="oncoprint_addclinical_attributes">
-                <button type="button" class="btn btn-default dropdown-toggle" id="oncoprint_diagram_showmorefeatures_icon" data-toggle="dropdown" style="background-color:#efefef;margin:0px">
-                 <span>Clinical Tracks</span>&nbsp;<span class="caret"></span>
-               </button>
-                <ul class="dropdown-menu" id="clinical_dropdown" style="height: 0px;background-color:rgba(255,255,255,.0)">
-                <li style="list-style-type:none;cursor:pointer;font-weight: bold;">
-                    <select data-placeholder="Add a clinical attribute track" id="select_clinical_attributes" class="select_clinical_attributes_from chosen-select" title="Add a clinical attribute track" style="float:left;width: 360px;height:30px;background-color:rgba(255,255,255,.8);margin:0px">
-                    <option value=""></option>
-                    </select>
-                </li>
-                </ul>
+        <div class="btn-group btn-group-sm" id="oncoprint-diagram-toolbar-buttons" style="float:right;margin-right:15px;height:33px">
+            <div class="btn-group btn-group-sm" id="oncoprint_add_clinical_new" style="width: 400px;height:33px;">
+                <div id="select-clinical-tracks"></div>
             </div>
-            
             <div class="btn-group btn-group-sm"   id="oncoprint_diagram_heatmap_menu">
                <button type="button" class="btn btn-default dropdown-toggle" id="oncoprint_diagram_heatmap_dropdown" data-toggle="dropdown" style="background-color:#efefef;margin:0px">
                  <span>Heatmap</span>&nbsp;<span class="caret"></span>

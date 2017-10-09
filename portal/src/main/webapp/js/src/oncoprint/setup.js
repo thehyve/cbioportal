@@ -13,6 +13,13 @@ var stringListUnique = function(list) {
     return ret;
 };
 
+// var options = [
+//     { value: 'one', label: 'One' },
+//     { value: 'two', label: 'Two' }
+// ];
+// var mySelect = React.createElement(Select, {context: $('body'), options: options});
+// ReactDOM.render(mySelect, document.getElementById('mood-container'));
+
 var utils = {
     'isWebGLAvailable': function() {
 	var canvas = document.createElement("canvas");
@@ -1496,7 +1503,12 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		});
 		var $selector = $(toolbar_selector + ' #select_clinical_attributes');
 		$selector.empty();
+		
+		var myOptions = [];
 		for (var i = 0; i < attributes_to_populate.length; i++) {
+		    
+            myOptions.push({value: attributes_to_populate[i].attr_id, label: attributes_to_populate[i].display_name});
+		    
 		    $("<option></option>").appendTo($selector)
 			.attr("value", attributes_to_populate[i].attr_id)
 			.text(attributes_to_populate[i].display_name);
@@ -1504,6 +1516,10 @@ window.CreateCBioPortalOncoprintWithToolbar = function (ctr_selector, toolbar_se
 		$(toolbar_selector + " #select_clinical_attributes").val('');
 		$(toolbar_selector + " #select_clinical_attributes").trigger("liszt:updated");
 		$(toolbar_selector + " #select_clinical_attributes_chzn").addClass("chzn-with-drop");
+            
+        var mySelect = React.createElement(Select, {context: $('#oncoprint_whole_body'), options: myOptions});
+        ReactDOM.render(mySelect, document.getElementById('select-clinical-tracks'));
+
 	    }
 	};
     })();

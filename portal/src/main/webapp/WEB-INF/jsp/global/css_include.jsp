@@ -53,6 +53,7 @@
 <link href="css/bootstrap-dialog.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link href="js/src/oncoprint/webgl/dist/oncoprint.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" rel="stylesheet" />
 <link rel="stylesheet" href="css/header.css?<%=GlobalProperties.getAppVersion()%>" type="text/css" />
+<link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
 <%
     String authenticationMethod = GlobalProperties.authenticationMethod();
     String global_style = GlobalProperties.getProperty("global_css");

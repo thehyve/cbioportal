@@ -780,10 +780,15 @@ var OncoprintModel = (function () {
     var _getEffectiveTrackGroup = function (oncoprint_model, track_id) {
 	var group,
 	    parent_id = oncoprint_model.track_expansion_parent[track_id];
-	if (parent_id !== undefined) {
-	    group = oncoprint_model.track_expansion_tracks[parent_id];
+	if (parent_id === undefined) {
+	    group = (function(major_group) {
+		return (major_group === null ? null
+			: major_group.filter(function (sibling_id) {
+			    return oncoprint_model.track_expansion_parent[sibling_id] === undefined;
+			}));
+	    })(_getMajorTrackGroup(oncoprint_model, track_id));
 	} else {
-	    group = _getMajorTrackGroup(oncoprint_model, track_id);
+	    group = oncoprint_model.track_expansion_tracks[parent_id];
 	}
 	return group ? group.slice() : null;
     }
@@ -1022,18 +1027,30 @@ var OncoprintModel = (function () {
 	    var new_position = (new_predecessor === null ? 0 : uniqArray.indexOf(new_predecessor)+1);
 	    uniqArray.splice(new_position, 0, value);
 	}
+	function getLastExpansion(track_expansion_tracks, track_id) {
+	    var direct_children = track_expansion_tracks[track_id];
+	    while (direct_children && direct_children.length > 0) {
+		track_id = direct_children[direct_children.length - 1];
+		direct_children = track_expansion_tracks[track_id];
+	    }
+	    return track_id;
+	}
 
 	var track_group = _getMajorTrackGroup(this, track_id),
 	    expansion_parent = this.track_expansion_parent[track_id],
-	    outer_previous_track;
+	    flat_previous_track;
 
 	if (track_group !== null) {
 	    // if an expansion track moves above all other tracks it can,
 	    // place it directly below its expansion parent
-	    outer_previous_track = (expansion_parent !== undefined && new_previous_track === null)
-		    ? expansion_parent
-		    : new_previous_track;
-	    moveValue(track_group, track_id, outer_previous_track);
+	    if (expansion_parent !== undefined && new_previous_track === null) {
+		flat_previous_track = expansion_parent;
+	    // otherwise, place the track under (the last expansion track of)
+	    // its sibling
+	    } else {
+		flat_previous_track = getLastExpansion(this.track_expansion_tracks, new_previous_track);
+	    }
+	    moveValue(track_group, track_id, flat_previous_track);
 	}
 
 	// keep the order of expansion siblings up-to-date as well

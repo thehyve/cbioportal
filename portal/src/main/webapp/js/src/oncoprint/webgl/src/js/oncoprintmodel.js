@@ -1022,10 +1022,13 @@ var OncoprintModel = (function () {
     }
     OncoprintModel.prototype.moveTrack = function (track_id, new_previous_track) {
 
-	function moveValue(uniqArray, value, new_predecessor) {
-	    uniqArray.splice(uniqArray.indexOf(value), 1);
+	function moveContiguousValues(uniqArray, first_value, last_value, new_predecessor) {
+	    var old_start_index = uniqArray.indexOf(first_value),
+		old_end_index = uniqArray.indexOf(last_value);
+	    var values = uniqArray.slice(old_start_index, old_end_index + 1);
+	    uniqArray.splice(old_start_index, values.length);
 	    var new_position = (new_predecessor === null ? 0 : uniqArray.indexOf(new_predecessor)+1);
-	    uniqArray.splice(new_position, 0, value);
+	    uniqArray.splice.bind(uniqArray, new_position, 0).apply(null, values);
 	}
 
 	var track_group = _getMajorTrackGroup(this, track_id),
@@ -1042,12 +1045,12 @@ var OncoprintModel = (function () {
 	    } else {
 		flat_previous_track = this.getLastExpansion(new_previous_track);
 	    }
-	    moveValue(track_group, track_id, flat_previous_track);
+	    moveContiguousValues(track_group, track_id, this.getLastExpansion(track_id), flat_previous_track);
 	}
 
 	// keep the order of expansion siblings up-to-date as well
 	if (this.track_expansion_parent[track_id] !== undefined) {
-	    moveValue(this.track_expansion_tracks[expansion_parent], track_id, new_previous_track);
+	    moveContiguousValues(this.track_expansion_tracks[expansion_parent], track_id, track_id, new_previous_track);
 	}
 	
 	this.track_tops.update();

@@ -1027,14 +1027,6 @@ var OncoprintModel = (function () {
 	    var new_position = (new_predecessor === null ? 0 : uniqArray.indexOf(new_predecessor)+1);
 	    uniqArray.splice(new_position, 0, value);
 	}
-	function getLastExpansion(track_expansion_tracks, track_id) {
-	    var direct_children = track_expansion_tracks[track_id];
-	    while (direct_children && direct_children.length > 0) {
-		track_id = direct_children[direct_children.length - 1];
-		direct_children = track_expansion_tracks[track_id];
-	    }
-	    return track_id;
-	}
 
 	var track_group = _getMajorTrackGroup(this, track_id),
 	    expansion_parent = this.track_expansion_parent[track_id],
@@ -1048,7 +1040,7 @@ var OncoprintModel = (function () {
 	    // otherwise, place the track under (the last expansion track of)
 	    // its sibling
 	    } else {
-		flat_previous_track = getLastExpansion(this.track_expansion_tracks, new_previous_track);
+		flat_previous_track = this.getLastExpansion(new_previous_track);
 	    }
 	    moveValue(track_group, track_id, flat_previous_track);
 	}
@@ -1145,6 +1137,21 @@ var OncoprintModel = (function () {
     OncoprintModel.prototype.isExpansionOf = function (expansion_track_id, set_track_id) {
 	return this.track_expansion_tracks.hasOwnProperty(set_track_id) &&
 	    this.track_expansion_tracks[set_track_id].indexOf(expansion_track_id) !== -1;
+    }
+    
+    /**
+     * Finds the bottom-most track in a track's expansion group
+     *
+     * @param track_id - the ID of the track to start from
+     * @returns the ID of its last expansion, or the unchanged param if none
+     */
+    OncoprintModel.prototype.getLastExpansion = function (track_id) {
+	var direct_children = this.track_expansion_tracks[track_id];
+	while (direct_children && direct_children.length) {
+	    track_id = direct_children[direct_children.length - 1];
+	    direct_children = this.track_expansion_tracks[track_id];
+	}
+	return track_id;
     }
     
     OncoprintModel.prototype.getRuleSet = function (track_id) {

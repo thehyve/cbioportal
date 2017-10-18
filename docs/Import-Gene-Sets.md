@@ -1,8 +1,10 @@
-# Import Gene Sets in cBioPortal
+# Gene Sets in cBioPortal
 
-Gene sets are collections of genes that are grouped together based on higher level function or system characteristics, such as being part of the same molecular process or found to be co-regulated for example. Assessing gene sets in cBioPortal is useful when the user wants to visualize the number of mutations in sets of genes, or wants to see if all genes in a set are up- or down-regulated. To visualize gene set variation in a sample, the user can calculate scores per gene set per sample using the Gene Set Variation Analysis (GSVA) algorithm ([Hänzelmann, 2013](#references)).
+Gene sets, also known as gene signatures, are collections of genes that are grouped together based on higher level function, such as being part of the same molecular process or found to be co-regulated. Assessing gene sets in cBioPortal is useful when the user wants to visualize the number of mutations in sets of genes, or wants to see if all genes in a set are up- or down-regulated. To visualize gene set variation in a sample, the user can calculate scores per gene set per sample using the Gene Set Variation Analysis (GSVA) algorithm ([Hänzelmann, 2013](#references)).
 
-Before loading a study with gene set data, gene set definitions have to be added to the database. These can be custom user-defined sets, or sets downloaded from external sources such as [MSigDB](#references). Additionally, a gene set hierarchy can be imported which is used on the cBioPortal Query page for selecting gene sets.
+There are two ways of using gene sets in cBioPortal:
+- Selecting gene sets on the query page to select multiple genes. To customize these gene sets, a JSON file has be added to the installation and the configuration must be specified in `portal.properties`.
+- Visualizing gene set enrichment scores calculated with GSVA. For adding gene sets used for GSVA, it is required to add gene sets to the database. This last feature has been implemented in the backend, but is currently
 
 ## Table of contents
 
@@ -16,6 +18,14 @@ Before loading a study with gene set data, gene set definitions have to be added
 	- [Running the gene set hierarchy importer](#running-the-gene-set-hierarchy-importer)
 - [Import a study with gene set data](#import-a-study-with-gene-set-data)
 - [References](#references)
+
+# Import gene sets for selection on the query page.
+On the Query page, gene sets can be selected
+
+# Import gene sets for gene set scoring analysis
+
+**This feature is not functioning yet in the refactored frontend**
+Before loading a study with gene set data, gene set definitions have to be added to the database. These can be custom user-defined sets, or sets downloaded from external sources such as [MSigDB](#references). Additionally, a gene set hierarchy can be imported which is used on the cBioPortal Query page for selecting gene sets. After the gene sets are loaded, study data can be imported.
 
 ## Quick example
 This example shows how the process of importing gene set data using test data.

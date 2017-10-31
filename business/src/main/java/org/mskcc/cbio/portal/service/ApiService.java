@@ -16,6 +16,7 @@ import org.mskcc.cbio.portal.model.AltCount;
 import org.mskcc.cbio.portal.model.DBAltCountInput;
 import org.mskcc.cbio.portal.model.DBCancerType;
 import org.mskcc.cbio.portal.model.DBClinicalField;
+import org.mskcc.cbio.portal.model.DBClinicalFieldWithStats;
 import org.mskcc.cbio.portal.model.DBClinicalPatientData;
 import org.mskcc.cbio.portal.model.DBClinicalSampleData;
 import org.mskcc.cbio.portal.model.DBGene;
@@ -556,5 +557,32 @@ public class ApiService {
 	public List<DBStudy> getStudies(List<String> study_ids) {
 		return studyMapperLegacy.getStudies(study_ids);
 	}
-
+    
+    
+    @Transactional
+    @PreAuthorize("hasPermission(#study_id, 'CancerStudy', 'read')")
+    public List<DBClinicalFieldWithStats> getSampleClinicalAttributesWithStats(String study_id) {
+        List<String> study_ids = new LinkedList<>();
+        study_ids.add(study_id);
+        List<DBStudy> studies = studyMapperLegacy.getStudies(study_ids);
+        if (studies.size() > 0) {
+            return clinicalFieldMapper.getSampleClinicalFieldsByStudyWithStats(studies.get(0).internal_id);
+        } else {
+            return new LinkedList<>();
+        }
+    }
+    
+    @Transactional
+    @PreAuthorize("hasPermission(#study_id, 'CancerStudy', 'read')")
+    public List<DBClinicalFieldWithStats> getPatientClinicalAttributesWithStats(String study_id) {
+        List<String> study_ids = new LinkedList<>();
+        study_ids.add(study_id);
+        List<DBStudy> studies = studyMapperLegacy.getStudies(study_ids);
+        if (studies.size() > 0) {
+            return clinicalFieldMapper.getPatientClinicalFieldsByStudyWithStats(studies.get(0).internal_id);
+        } else {
+            return new LinkedList<>();
+        }
+    }
+    
 }

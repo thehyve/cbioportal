@@ -4,6 +4,7 @@ package org.mskcc.cbio.portal.persistence;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.mskcc.cbio.portal.model.DBClinicalField;
+import org.mskcc.cbio.portal.model.DBClinicalFieldWithStats;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -30,4 +31,8 @@ public interface ClinicalFieldMapper {
 	List<DBClinicalField> getAllClinicalFields();
    List<DBClinicalField> getAllClinicalFieldsByStudy(@Param("study_id") Integer study_id);
 	List<DBClinicalField> getClinicalFieldsById(@Param("attr_ids") List<String> attr_ids);
+    
+    List<DBClinicalFieldWithStats> getSampleClinicalFieldsByStudyWithStats(@Param("study_id") Integer study_id);
+    List<DBClinicalFieldWithStats> getPatientClinicalFieldsByStudyWithStats(@Param("study_id") Integer study_id);
+    
 }

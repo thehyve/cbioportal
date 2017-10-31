@@ -12,6 +12,16 @@
     <result property="priority" column="PRIORITY"/>
 </resultMap>
 
+<resultMap id="ClinicalFieldResultWithStats" type="DBClinicalFieldWithStats">
+    <id property="attr_id" column="ATTR_ID"/>
+    <result property="display_name" column="DISPLAY_NAME"/>
+    <result property="description" column="DESCRIPTION"/>
+    <result property="datatype" column="DATATYPE"/>
+    <result property="is_patient_attribute" column="PATIENT_ATTRIBUTE"/>
+    <result property="priority" column="PRIORITY"/>
+    <result property="attribute_count" column="ATTRIBUTE_COUNT"/>
+</resultMap>
+
 <select id="getSampleClinicalFieldsByStudy" resultMap="ClinicalFieldResult">
     select clinical_attribute_meta.ATTR_ID,clinical_attribute_meta.DISPLAY_NAME,clinical_attribute_meta.DESCRIPTION,clinical_attribute_meta.DATATYPE,clinical_attribute_meta.PATIENT_ATTRIBUTE,clinical_attribute_meta.PRIORITY from clinical_attribute_meta
     where clinical_attribute_meta.CANCER_STUDY_ID=#{study_id} and clinical_attribute_meta.PATIENT_ATTRIBUTE=0    
@@ -60,8 +70,6 @@
     select * from clinical_attribute_meta where PATIENT_ATTRIBUTE=1
 </select>
 
-
-
 <select id="getClinicalFieldsById" resultMap="ClinicalFieldResult">
     select clinical_attribute_meta.ATTR_ID,clinical_attribute_meta.DISPLAY_NAME,clinical_attribute_meta.DESCRIPTION,clinical_attribute_meta.DATATYPE,clinical_attribute_meta.PATIENT_ATTRIBUTE,clinical_attribute_meta.PRIORITY from clinical_attribute_meta
     where clinical_attribute_meta.ATTR_ID in <foreach item="item" collection="attr_ids" open="(" separator="," close=")">#{item}</foreach>
@@ -69,6 +77,23 @@
 
 <select id="getAllClinicalFields" resultMap="ClinicalFieldResult">
     select * from clinical_attribute_meta
+</select>
+
+<select id="getSampleClinicalFieldsByStudyWithStats" resultMap="ClinicalFieldResultWithStats">
+    select clinical_attribute_meta.ATTR_ID,clinical_attribute_meta.DISPLAY_NAME,clinical_attribute_meta.DESCRIPTION,clinical_attribute_meta.DATATYPE,clinical_attribute_meta.PATIENT_ATTRIBUTE,clinical_attribute_meta.PRIORITY, COUNT(patient.INTERNAL_ID) AS ATTRIBUTE_COUNT from clinical_attribute_meta
+    left join clinical_sample on clinical_attribute_meta.ATTR_ID = clinical_sample.ATTR_ID
+    left join sample on clinical_sample.INTERNAL_ID = sample.INTERNAL_ID
+    left join patient on sample.PATIENT_ID = patient.INTERNAL_ID and patient.CANCER_STUDY_ID=#{study_id}
+    where clinical_attribute_meta.CANCER_STUDY_ID=#{study_id} and clinical_attribute_meta.PATIENT_ATTRIBUTE=0
+    group by clinical_attribute_meta.ATTR_ID
+</select>
+
+<select id="getPatientClinicalFieldsByStudyWithStats" resultMap="ClinicalFieldResultWithStats">
+    select clinical_attribute_meta.ATTR_ID,clinical_attribute_meta.DISPLAY_NAME,clinical_attribute_meta.DESCRIPTION,clinical_attribute_meta.DATATYPE,clinical_attribute_meta.PATIENT_ATTRIBUTE,clinical_attribute_meta.PRIORITY, COUNT(patient.INTERNAL_ID) AS ATTRIBUTE_COUNT from clinical_attribute_meta
+    left join clinical_patient ON clinical_attribute_meta.ATTR_ID = clinical_patient.ATTR_ID
+    left join patient on clinical_patient.INTERNAL_ID = patient.INTERNAL_ID and patient.CANCER_STUDY_ID=#{study_id}
+    where clinical_attribute_meta.PATIENT_ATTRIBUTE = 1 and clinical_attribute_meta.CANCER_STUDY_ID=#{study_id}
+    group by clinical_attribute_meta.ATTR_ID
 </select>
         
 </mapper>

@@ -12,6 +12,7 @@ import org.mskcc.cbio.portal.model.CosmicCount;
 import org.mskcc.cbio.portal.service.ApiService;
 import org.mskcc.cbio.portal.model.DBCancerType;
 import org.mskcc.cbio.portal.model.DBClinicalField;
+import org.mskcc.cbio.portal.model.DBClinicalFieldWithStats;
 import org.mskcc.cbio.portal.model.DBClinicalPatientData;
 import org.mskcc.cbio.portal.model.DBClinicalSampleData;
 import org.mskcc.cbio.portal.model.DBGene;
@@ -372,5 +373,29 @@ public class ApiController {
         } else {
             return service.getStudies(study_ids);
         }
+    }
+    
+    @ApiOperation(value = "Get clinical attribute identifiers, filtered by sample, including stats of attributes",
+                  nickname = "getSampleClinicalAttributesWithStats",
+                  notes = "")
+    @Transactional
+    @RequestMapping(value = "/clinicalattributes/sampleswithstats", method = {RequestMethod.GET, RequestMethod.POST})
+    public @ResponseBody List<DBClinicalFieldWithStats> getSampleClinicalAttributesWithStats(
+               @ApiParam(value = "A single study id, such as those returned by /api/studies. (example: brca_tcga). Empty string returns clinical attributes across all studies.")
+               @RequestParam(required = true)
+               String study_id) {
+            return service.getSampleClinicalAttributesWithStats(study_id);
+    }
+    
+    @ApiOperation(value = "Get clinical attribute identifiers, filtered by patient, including stats of attributes",
+                  nickname = "getPatientClinicalAttributesWithStats",
+                  notes = "")
+    @Transactional
+    @RequestMapping(value = "/clinicalattributes/patientswithstats", method = {RequestMethod.GET, RequestMethod.POST})
+    public @ResponseBody List<DBClinicalFieldWithStats> getPatientClinicalAttributesWithStats(
+             @ApiParam(value = "A single study id, such as those returned by /api/studies. (example: brca_tcga). Empty string returns clinical attributes across all studies.")
+             @RequestParam(required = true)
+                  String study_id) {
+        return service.getPatientClinicalAttributesWithStats(study_id);
     }
 }

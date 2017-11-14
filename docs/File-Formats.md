@@ -8,7 +8,7 @@
     * [Segmented Data](#segmented-data)
     * [Expression Data](#expression-data)
     * [Mutation Data](#mutation-data)
-    * [Fusion Data](#fusion-data)
+    * [Structural Variation Data](#structural-variation-data)
     * [Methylation Data](#methylation-data)
     * [Protein level Data](#protein-level-data)
     * [Case Lists](#case-lists)
@@ -77,7 +77,7 @@ The file is comprised of the following columns in the order specified:
 2. **name**: The name of the cancer type, e.g., "Breast Invasive Carcinoma".
 3. **clinical_trial_keywords**: A comma separated list of keywords used to identify this study, e.g., "breast,breast invasive".
 4. **dedicated_color**: CSS color name of the color associated with this cancer study, e.g., "HotPink". See [this list](https://www.w3.org/TR/css3-color/#svg-color) for supported names, and follow the [awareness ribbons](http://en.wikipedia.org/wiki/List_of_awareness_ribbons) color schema. This color is associated with the cancer study on various web pages within the cBioPortal.
-5. **parent_type_of_cancer**:  The `type_of_cancer` field of the cancer type of which this is a subtype, e.g., "Breast". :information_source: : you can set parent to `tissue`, which is the reserved word to place the given cancer type at "root" level in the "studies oncotree" that will be generated in the homepage (aka query page) of the portal. 
+5. **parent_type_of_cancer**:  The `type_of_cancer` field of the cancer type of which this is a subtype, e.g., "Breast". :information_source: : you can set parent to `tissue`, which is the reserved word to place the given cancer type at "root" level in the "studies oncotree" that will be generated in the homepage (aka query page) of the portal.
 
 ##### Example
 An example record would be:
@@ -117,7 +117,7 @@ data_filename: data_clinical_patients.txt
 ```
 
 #### Data files
-For both patients and samples, the clinical data file is a two dimensional matrix with multiple clinical attributes. When the attributes are defined in the *patient* file they are considered to be patient attributes; when they are defined in the *sample* file they are considered to be sample attributes. 
+For both patients and samples, the clinical data file is a two dimensional matrix with multiple clinical attributes. When the attributes are defined in the *patient* file they are considered to be patient attributes; when they are defined in the *sample* file they are considered to be sample attributes.
 
 The first four rows of the clinical data file contain tab-delimited metadata about the clinical attributes. These rows **have to start with a '#' symbol**. Each of these four rows contain different type of information regarding each of the attributes that are defined in the fifth row:
 
@@ -128,33 +128,33 @@ The first four rows of the clinical data file contain tab-delimited metadata abo
     ```
     To promote certain chart in study view, please increase priority to a certain number. The higher the score, the higher priority it will be displayed in the study view.
     If you want to hide chart, please set the priority to 0. For combination chart, as long as one of the clinical attribute has been set to 0, it will be hidden.
-    
+
     Currently, we preassigned priority to few charts, but as long as you assign a priority except than 1, these preassigned priorities will be overwritten.
-    
+
     CANCER_TYPE: 3000, CANCER_TYPE_DETAILED: 2000,
-    Overall survival plot: 400 (This is combination of OS_MONTH and OS_STATUS) 
-    Disease Free Survival Plot: 300 (This is combination of DFS_MONTH and DFS_STATUS) 
+    Overall survival plot: 400 (This is combination of OS_MONTH and OS_STATUS)
+    Disease Free Survival Plot: 300 (This is combination of DFS_MONTH and DFS_STATUS)
     Mutation Count vs. CNA Scatter Plot: 200,
     Mutated Genes Table: 90, CNA Genes Table: 80, study_id: 70, # of Samples Per Patient: 40,
-    With Mutation Data Pie Chart: 60, With CNA Data Pie Chart: 50, 
+    With Mutation Data Pie Chart: 60, With CNA Data Pie Chart: 50,
     Mutation Count Bar Chart: 30, CNA Bar Chart: 20,
     GENDER: 9, SEX: 9, AGE: 8
     ```
-    
-    Please note: 
+
+    Please note:
     Priority is not the sole factor determining which chart will be displayed first.
     A layout algorithm in study view also makes a minor adjustment on the layout.
     The algorithm tries to fit all charts into a 2 by 2 matrix (Mutated Genes Table occupies 2 by 2 space).
-    When a chart can not be fitted in the first matrix, the second matrixed will be generated. 
-    And the second matrix will have lower priority than the first one. 
+    When a chart can not be fitted in the first matrix, the second matrixed will be generated.
+    And the second matrix will have lower priority than the first one.
     If later chart can fit into the first matrix, then its priority will be promoted.
-    
+
     Please see [here](Study-View.md) for more detailed information about how study view utilize priority and how the layout is calculated based on priority.
- 
-    
+
+
 
 #### Example metadata rows
-Below is an example of the first 4 rows with the respective metadata for the attributes defined in the 5th row. 
+Below is an example of the first 4 rows with the respective metadata for the attributes defined in the 5th row.
 ```
 #Patient Identifier<TAB>Overall Survival Status<TAB>Overall Survival (Months)<TAB>Disease Free Status<TAB>Disease Free (Months)<TAB>...
 #Patient identifier<TAB>Overall survival status<TAB>Overall survival in months since diagnosis<TAB>Disease free status<TAB>Disease free in months since treatment<TAB>...
@@ -166,14 +166,14 @@ data - see examples below
 ....
 ```
 
-Following the metadata rows comes a tab delimited list of clinical attributes (column headers). The sixth row is the first row to contain actual data. 
+Following the metadata rows comes a tab delimited list of clinical attributes (column headers). The sixth row is the first row to contain actual data.
 
 ##### The patient file
 
 The file containing the patient attributes has one **required** column:
 - **PATIENT_ID (required)**: a unique patient ID.
 
-The following columns are used by the study view as well as the patient view. In the [study view](http://www.cbioportal.org/study?id=brca_tcga) they are used to create the survival plots. In the patient view they are used to add information to the [header](http://www.cbioportal.org/case.do#/patient?studyId=lgg_ucsf_2014&caseId=P05). 
+The following columns are used by the study view as well as the patient view. In the [study view](http://www.cbioportal.org/study?id=brca_tcga) they are used to create the survival plots. In the patient view they are used to add information to the [header](http://www.cbioportal.org/case.do#/patient?studyId=lgg_ucsf_2014&caseId=P05).
 - **OS_STATUS**:  Overall patient survival status
     - Possible values: DECEASED, LIVING
     - In the patient view, LIVING creates a green label, DECEASED a red label.
@@ -259,7 +259,7 @@ PATIENT_ID_2<TAB>SAMPLE_ID_2<TAB>Her2 enriched<TAB>...
 ## Discrete Copy Number Data
 The discrete copy number data file contain values that would be derived from copy-number analysis algorithms like [GISTIC](http://www.ncbi.nlm.nih.gov/sites/entrez?term=18077431) or [RAE](http://www.ncbi.nlm.nih.gov/sites/entrez?term=18784837). GISTIC can be [installed](http://www.broadinstitute.org/cgi-bin/cancer/publications/pub_paper.cgi?mode=view&paper_id=216&p=t) or run online using the GISTIC 2.0 module on [GenePattern](http://genepattern.broadinstitute.org/gp/pages/login.jsf). For some help on using GISTIC, check the [Data Loading: Tips and Best Practices](Data-Loading-Tips-and-Best-Practices.md) page.
 
-##### Meta file 
+##### Meta file
 The meta file is comprised of the following fields:
 
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
@@ -321,7 +321,7 @@ The continuous copy number metadata file should contain the following fields:
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
 2. **genetic_alteration_type**: COPY_NUMBER_ALTERATION.
 3. **datatype**: CONTINUOUS
-4. **stable_id**: linear_CNA 
+4. **stable_id**: linear_CNA
 5. **show_profile_in_analysis_tab**: false.
 6. **profile_name**: A name for the copy number data, e.g., "copy-number values".
 7. **profile_description**: A description of the copy number data, e.g., "copy-number values for each gene (from Affymetrix SNP6).".
@@ -331,7 +331,7 @@ The continuous copy number metadata file should contain the following fields:
 cBioPortal also supports log2 copy number data. If your data is in log2, change the following fields:
 
 3. **datatype**: LOG2-VALUE
-4. **stable_id**: log2CNA 
+4. **stable_id**: log2CNA
 
 ##### Example
 An example metadata file, e.g. meta_CNA_log2.txt, would be:
@@ -353,7 +353,7 @@ The log2 copy number data file follows the same format as expression data files.
 
 ## Segmented Data
 
-A SEG file (segmented data; .seg or .cbs) is a tab-delimited text file that lists loci and associated numeric values. The segmented data file format is the output of the Circular Binary Segmentation algorithm (Olshen et al., 2004).  **Segment data for import into the cBioPortal should be based on build 37 (hg19)**. This Segment data enables the 'CNA' lane in the Genomic overview of the Patient view (as [can be seen in this example](http://www.cbioportal.org/case.do#/patient?sampleId=TCGA-BH-A0E6-01&studyId=brca_tcga)). 
+A SEG file (segmented data; .seg or .cbs) is a tab-delimited text file that lists loci and associated numeric values. The segmented data file format is the output of the Circular Binary Segmentation algorithm (Olshen et al., 2004).  **Segment data for import into the cBioPortal should be based on build 37 (hg19)**. This Segment data enables the 'CNA' lane in the Genomic overview of the Patient view (as [can be seen in this example](http://www.cbioportal.org/case.do#/patient?sampleId=TCGA-BH-A0E6-01&studyId=brca_tcga)).
 
 #### Meta file
 The segmented metadata file should contain the following fields:
@@ -446,8 +446,8 @@ genetic_alteration_type: MRNA_EXPRESSION
 datatype: CONTINUOUS
 stable_id: rna_seq_mrna
 show_profile_in_analysis_tab: false
-profile_name: mRNA expression 
-profile_description: Expression levels 
+profile_name: mRNA expression
+profile_description: Expression levels
 data_filename: data_expression_file.txt
 ```
 
@@ -481,7 +481,7 @@ profile_description: Expression levels z-scores
 data_filename: data_expression_zscores_file.txt
 ```
 
-#### Examples of data files: 
+#### Examples of data files:
 
 An example data file which includes the required column header and *leaves out Hugo_Symbol* (recommended) would look like:
 
@@ -561,7 +561,7 @@ Note: next to Hugo_Symbol, it is recommended to have the Entrez gene ID:
 * **Entrez_Gene_Id (Optional, but recommended)**: An [Entrez Gene](http://www.ncbi.nlm.nih.gov/gene) identifier.
 
 Special case for **Entrez_Gene_Id=0** and **Hugo_Symbol=Unknown**: when this combination is given, the record is parsed in the same way as **Variant_Classification=IGR** and therefore filtered out.  
- 
+
 The following extra annotation columns are also important for making sure mutation specific UI functionality works well in the portal:
 
 * **Protein_position**: (annotation column) Required to initialize the 3D viewer in [mutations view](http://www.cbioportal.org/index.do?cancer_study_list=brca_tcga_pub&cancer_study_id=brca_tcga_pub&genetic_profile_ids_PROFILE_MUTATION_EXTENDED=brca_tcga_pub_mutations&genetic_profile_ids_PROFILE_COPY_NUMBER_ALTERATION=brca_tcga_pub_gistic&genetic_profile_ids_PROFILE_MRNA_EXPRESSION=brca_tcga_pub_mrna_median_Zscores&Z_SCORE_THRESHOLD=2.0&RPPA_SCORE_THRESHOLD=2.0&data_priority=0&case_set_id=brca_tcga_pub_complete&case_ids=&patient_case_select=sample&gene_set_choice=prostate-cancer%3A-ar-signaling-%2810-genes%29&gene_list=TP53&clinical_param_selection=null&tab_index=tab_visualize&Action=Submit#mutation_details)
@@ -575,8 +575,8 @@ The following extra annotation columns are also important for making sure mutati
 The MAF format recognized by the portal (excluding the annotation columns already mentioned above) has:
 * 32 columns from the [TCGA MAF format](https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification).
 * 1 column with the amino acid change.
-* 4 columns with information on reference and variant allele counts in tumor and normal samples. 
-* 4 columns with custom annotation of driver and passenger mutations (find more information [here](portal.properties-Reference.md#oncoprint). 
+* 4 columns with information on reference and variant allele counts in tumor and normal samples.
+* 4 columns with custom annotation of driver and passenger mutations (find more information [here](portal.properties-Reference.md#oncoprint).
 
 A more detailed example MAF can be found in [study_es_0](https://raw.githubusercontent.com/cBioPortal/cbioportal/master/core/src/test/scripts/test_data/study_es_0/brca_tcga_pub.maf). The description of each column is provided below:
 1. **Hugo_Symbol (Required)**: A [HUGO](http://www.genenames.org/) gene symbol.
@@ -612,7 +612,7 @@ A more detailed example MAF can be found in [study_es_0](https://raw.githubuserc
 31. **BAM_File (Optional)**: Not used.
 32. **Sequencer (Optional)**: Instrument used to produce primary data.
 33. **HGVSp_Short (Required)**: Amino Acid Change, e.g. p.V600E.
-34. **t_alt_count (Optional)**: Variant allele count (tumor). 
+34. **t_alt_count (Optional)**: Variant allele count (tumor).
 35. **t_ref_count (Optional)**: Reference allele count (tumor).
 36. **n_alt_count (Optional)**: Variant allele count (normal).
 37. **n_ref_count (Optional)**: Reference allele count (normal).
@@ -625,7 +625,7 @@ A more detailed example MAF can be found in [study_es_0](https://raw.githubuserc
 
 ##### Custom Putative Driver/Passenger mutations
 The "cbp_driver" columns are used in the OncoPrint, providing two customized annotations of driver and passenger mutations. The first one, `cbp_driver`, allows to define the mutation only as driver or passenger, whereas the second one (`cbp_driver_tiers`), allows to assign a tier to the mutation. When the tier where the mutation belongs is selected, the mutation is higlighted as driver. Both columns contain a second column with the suffix `_annotation`, to add more information about the classification. This information is displayed in the tooltip that appears when hovering over the mutation in the OncoPrint. You can learn more about the configuration of those annotations [here](). When properly configured, the customized annotations appear in the "Mutation Color" menu of the OncoPrint: \
-![schreenshot mutation color menu](images/screenshot-mutation-color-menu.png) 
+![schreenshot mutation color menu](images/screenshot-mutation-color-menu.png)
 
 ## Methylation Data
 The Portal expects a single value for each gene in each sample, usually a beta-value from the Infinium methylation array platform.
@@ -675,7 +675,7 @@ The protein level metadata file should contain the following fields:
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
 2. **genetic_alteration_type**: PROTEIN_LEVEL
 3. **datatype**: LOG2-VALUE or Z-SCORE
-4. **stable_id**: rppa, rppa_Zscores, protein_quantification or protein_quantification_zscores 
+4. **stable_id**: rppa, rppa_Zscores, protein_quantification or protein_quantification_zscores
 5. **show_profile_in_analysis_tab**: false (**true** for Z-SCORE datatype)
 6. **profile_name**: A name for the RPPA data, e.g., "RPPA data".
 7. **profile_description**: A description of the RPPA data, e.g., "RPPA levels.".
@@ -711,7 +711,7 @@ profile_name: Protein expression Z-scores (RPPA)
 
 A protein level data file is a two dimensional matrix with a RPPA antibody per row and a sample per column. For each antibody-sample pair, a real number represents the protein level for that sample.  The antibody information can contain one or more HUGO gene symbols and/or entrez gene identifiers, separated by a space, and an antibody ID pair separated by the "|" symbol.
 
-#### Example 
+#### Example
 
 An example data file which includes the required column header would look like:
 
@@ -724,63 +724,98 @@ AKT1 AKT2 10000|AKT<TAB>0.17071492725<TAB>0.264067254391
 ```
 
 
-## Fusion Data  
+## Structural Variation Data  
 
 #### Meta file
-The fusion metadata file should contain the following fields:
+The structural variation metadata file should contain the following fields:
 
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
-2. **genetic_alteration_type**: FUSION
-3. **datatype**: FUSION
-4. **stable_id**: fusion
-5. **show_profile_in_analysis_tab**: true.
-6. **profile_name**: A name for the fusion data, e.g., "Fusions".
-7. **profile_description**: A description of the fusion data.
+2. **genetic_alteration_type**: STRUCTURAL_VARIATION
+3. **datatype**: STRUCTURAL_VARIATION
+4. **stable_id**: structural_variation
+5. **show_profile_in_analysis_tab**: true
+6. **profile_name**: A name for the structural variation data, e.g., "Fusions"
+7. **profile_description**: A description of the structural variation data.
 8. **data_filename**: your datafile
 9. **gene_panel (Optional)**:  gene panel stable id
 
 #### Example
 An example metadata file would be:
 ```
-cancer_study_identifier: brca_tcga_pub
-genetic_alteration_type: FUSION
-datatype: FUSION
-stable_id: fusion
+cancer_study_identifier: study_es_0
+genetic_alteration_type: STRUCTURAL_VARIATION
+datatype: STRUCTURAL_VARIATION
+data_filename: data_structural_variation.txt
+stable_id: structural_variation
+profile_name: Targeted Fusion Assay data
+profile_description: Targeted Fusion Assay data sequenced with Ion Torrent.
 show_profile_in_analysis_tab: true
-profile_name: Fusions
-profile_description: Fusion data.
-data_filename: data_fusions.txt
 ```
 
 #### Data file
-A fusion data file is a two dimensional matrix with one gene per row.  For each gene (row) in the data file, the following tab-delimited values are required in the order specified:
+A structural variation data file is a two dimensional matrix with one structural variant per row. A small number of coloums is required, the others are optional.
 
-1. **Hugo_Symbol**: A [HUGO](http://www.genenames.org/) gene symbol.
-2. **Entrez_Gene_Id**: A [Entrez Gene](http://www.ncbi.nlm.nih.gov/gene) identifier.
-3. **Center**: The sequencing center.
-4. **Tumor_Sample_Barcode**: This is the sample ID.
-5. **Fusion**: A description of the fusion, e.g., "TMPRSS2-ERG fusion".
-6. **DNA_support**: Fusion detected from DNA sequence data, "yes" or "no".
-7. **RNA_support**: Fusion detected from RNA sequence data, "yes" or "no".
-8. **Method**: Fusion detected algorithm/tool.
-9. **Frame**: "in-frame" or "frameshift".
+Required columns in for every type of structural variation:
+- **Sample_ID**
+- **Annotation**
+- **Event_Info**
+- **Site1_Entrez_Gene_Id** and/or **Site1_Hugo_Symbol**
+- **Site1_Exon**
 
-An example data file which includes the required column header would look like:
+Additional required columns for fusion structural variation:
+- **Site2_Entrez_Gene_Id** and/or **Site2_Hugo_Symbol**
+- **Site2_Exon**
+
+Description of all allowed columns:
+1. **Sample_ID**: Sample ID, as defined in the clinical sample file.
+2. **Site1_Entrez_Gene_Id**: An [Entrez Gene](http://www.ncbi.nlm.nih.gov/gene) identifier.
+3. **Site1_Hugo_Symbol**: A [HUGO](http://www.genenames.org/) gene symbol.
+4. **Site1_Ensembl_Transcript_Id**: An ENSEMBL Transcript ID.
+5. **Site1_Exon**: The exon of the canonical transcript.
+6. **Site1_Chromosome**: Chromosome.
+7. **Site1_Position**: Genomic position.
+8. **Site1_Description**: Decription of this event.
+9. **Site2_Entrez_Gene_Id**: An [Entrez Gene](http://www.ncbi.nlm.nih.gov/gene) identifier.
+10. **Site2_Hugo_Symbol**: A [HUGO](http://www.genenames.org/) gene symbol.
+11. **Site2_Ensembl_Transcript_Id**: An ENSEMBL Transcript ID.
+12. **Site2_Exon**: The exon of the canonical transcript.
+13. **Site2_Chromosome**: Chromosome.
+14. **Site2_Position**: Genomic position.
+15. **Site2_Description**: Description of this event
+16. **Site2_Effect_On_Frame**: `Frame_Shift` or `InFrame`.
+17. **DNA_Support**: `yes`/`no`.
+18. **RNA_Support**: `yes`/`no`.
+19. **Normal_Read_Count**: The total number of reads of the normal tissue.
+20. **Tumor_Read_Count**: The total number of reads of the tumor tissue.
+21. **Normal_Variant_Count**: The number of reads of the normal tissue that have the variant/allele.
+22. **Tumor_Variant_Count**: The number of reads of the tumor tissue that have the variant/allele.
+23. **Normal_Paired_End_Read_Count**: The number of paired-end reads of the normal tissue that support the call.
+24. **Tumor_Paired_End_Read_Count**: The number of paired-end reads of the tumor tissue that support the call.
+25. **Normal_Split_Read_Count**: The number of split reads of the normal tissue that support the call.
+26. **Tumor_Split_Read_Count**: The number of split reads of the tumor tissue that support the call.
+27. **Annotation**: Description of the gene or transcript rearrangement, i.e.:
 ```
-Hugo_Symbol<TAB>Entrez_Gene_Id<TAB>Center<TAB>Tumor_Sample_Barcode<TAB>Fusion<TAB>DNA_support<TAB>RNA_support<TAB>Method<TAB>Frame>
-ALK<TAB>238<TAB>center.edu<TAB>SAMPLE_ID_1<TAB>Fusion<TAB>unknown<TAB>yes<TAB>unknown<TAB>in-frame
-ALK<TAB>238<TAB>center.edu<TAB>SAMPLE_ID_2<TAB>Fusion<TAB>unknown<TAB>yes<TAB>unknown<TAB>in-frame
-RET<TAB>5979<TAB>center.edu<TAB>SAMPLE_ID_3<TAB>Fusion<TAB>unknown<TAB>yes<TAB>unknown<TAB>in-frame
-...
-...
+PAX8 (NM_003466) rearrangement: c.1088-2028_c.25+11587del;
+TMPRSS2 (NM_001135099) - ERG (NM_182918) fusion: c.56-1943:TMPRSS2_c.18+13593:ERGdel
 ```
+28. **Breakpoint_Type**: `PRECISE` or `IMPRECISE` which explain the resolution. Fill in `PRECISE` if the breakpoint resolution is known down to the exact base pair.
+29. **Center**: The sequencing center.
+30. **Connection_Type**: `3to5` or `5to3`. Which direction the connection is made
+31. **Event_Info**: Description of the event, such as `Fusion` or `Deletion of 7 exons`.
+32. **Class**: [`DELETION`, `DUPLICATION`, `INSERTION`, `INVERSION` or `TRANSLOCATION`]
+33. **Length**: Length of the structural variation in number ofbasepairs.
+34. **Comments**: Any comments or free text.
+35. **External_Annotation**: COSMIC or GENBank ID. Cosmic IDs follow the format `COSMIC:COS1000`.
+
+##### Annotation
+
 
 ## Case Lists
 
-There should be 1 or more case lists associated with each cancer study. You should provide **at least one case list which contains all sample ids** (the importer can generate this for your if you set the attribute *add_global_case_list* to 'true' in the [Study metadata](#cancer-study). 
+There should be 1 or more case lists associated with each cancer study. You should provide **at least one case list which contains all sample ids** (the importer can generate this for your if you set the attribute *add_global_case_list* to 'true' in the [Study metadata](#cancer-study).
 
 When **not** using the *add_global_case_list* attribute in [Study metadata](#cancer-study), or if you want to add custom case lists:
-- the case list files should be placed in a sub-directory called "case_lists" which exists alongside all the other cancer study data. 
+- the case list files should be placed in a sub-directory called "case_lists" which exists alongside all the other cancer study data.
 
 The case list file should contain the following fields:
 
@@ -789,7 +824,7 @@ The case list file should contain the following fields:
 3. **case_list_name**: A name for the patient list, e.g., "All Tumors".
 4. **case_list_description**: A description of the patient list, e.g., "All tumor samples (825 samples).".
 5. **case_list_ids**: A tab-delimited list of sample ids from the dataset.
-6. **case_list_category**: Optional *alternative* way of linking your case list to a specific molecular profile. E.g. setting this to `all_cases_with_cna_data` will signal to the portal that this is the list of samples to be associated with CNA data in *some* of the analysis. 
+6. **case_list_category**: Optional *alternative* way of linking your case list to a specific molecular profile. E.g. setting this to `all_cases_with_cna_data` will signal to the portal that this is the list of samples to be associated with CNA data in *some* of the analysis.
 
 #### Example
 
@@ -812,7 +847,7 @@ _TODO: add missing data types to this list and clear up how exactly these relate
 * **mRNA (microarray)**: "_mrna".
 * **Methylation (HM27)**: "_methylation_hm27".
 * **RPPA**: "_rppa".
-* **Complete**: "_3way_complete" (mRNA, CNA, & sequencing). 
+* **Complete**: "_3way_complete" (mRNA, CNA, & sequencing).
 
 Finally, if you are not using *add_global_case_list* attribute in [Study metadata](#cancer-study), you need to generate the "All samples" case list as well and give it the following stable_id:
 
@@ -849,7 +884,7 @@ Each event type requires its own data file, which contains all the events that e
 1. **PATIENT_ID**: the patient ID from the dataset
 2. **START_DATE**: the start point of any event, calculated in **_days_* from the date of diagnosis (which will act as point zero on the timeline scale)
 3. **STOP_DATE**: The end date of the event is calculated in days from the date of diagnosis (which will act as point zero on the timeline scale). If the event occurs over time (e.g. a Treatment, ...) the STOP_DATE column should have values. If the event occurs at a time point (e.g. a Lab_test, Imaging, ...) the STOP_DATE is still mandatory, but the values should be blanks.
-4. **EVENT_TYPE**: the category of the event. You are free to define any type of event here. For several event types cBioPortal has column naming suggestions and for several events there are column names which have special effects. See [event types](#event-types) for more information. 
+4. **EVENT_TYPE**: the category of the event. You are free to define any type of event here. For several event types cBioPortal has column naming suggestions and for several events there are column names which have special effects. See [event types](#event-types) for more information.
 
 And one optional columns with a special effect:
 
@@ -876,7 +911,7 @@ Suggested columns
  * **RESULT**: corresponding value of the test
  * Based on different cancer types you can add additional data here.
 
-Special: When using the TEST and RESULT columns, each test gets its own track and the dots are sized by the values of the RESULT if the TEST is PSA, ALK, TEST, HGB, PHOS or LDH. 
+Special: When using the TEST and RESULT columns, each test gets its own track and the dots are sized by the values of the RESULT if the TEST is PSA, ALK, TEST, HGB, PHOS or LDH.
 
 _**EVENT_TYPE: IMAGING**_
 
@@ -945,9 +980,9 @@ This will lead to a timeline track for Lab_test with an additional subtrack spec
 
 
 ## Gistic Data
-Running GISTIC 2.0 on e.g. GenePattern not only provides the [Discrete Copy Number Data](#discrete-copy-number-data), but also provides an amp_genes and a del_genes file. These cannot be directly imported into cBioPortal, but first have to be converted to a different file format. Currently, there is no easy way available to do this. However, the cBioPortal team is aiming to make the necessary [cbioportal_pipelines](https://github.com/cBioPortal/cbioportal-pipelines/blob/master/importer/src/main/java/org/mskcc/cbio/importer/converter/internal/GisticGenesConverterImpl.java) functionality available via issue [#873](https://github.com/cBioPortal/cbioportal/issues/873). 
+Running GISTIC 2.0 on e.g. GenePattern not only provides the [Discrete Copy Number Data](#discrete-copy-number-data), but also provides an amp_genes and a del_genes file. These cannot be directly imported into cBioPortal, but first have to be converted to a different file format. Currently, there is no easy way available to do this. However, the cBioPortal team is aiming to make the necessary [cbioportal_pipelines](https://github.com/cBioPortal/cbioportal-pipelines/blob/master/importer/src/main/java/org/mskcc/cbio/importer/converter/internal/GisticGenesConverterImpl.java) functionality available via issue [#873](https://github.com/cBioPortal/cbioportal/issues/873).
 
-After uploading a gistic_amp and/or gistic_del file, a new button becomes available in the Enter Gene Set section, called "Select Genes from Recurrent CNAs (Gistic)". 
+After uploading a gistic_amp and/or gistic_del file, a new button becomes available in the Enter Gene Set section, called "Select Genes from Recurrent CNAs (Gistic)".
 
 #### Meta file
 The Gistic metadata file should contain the following fields:
@@ -979,7 +1014,7 @@ The following fields from the generated Gistic file are used by the cBioPortal i
 * **cytoband**: cytogenetic band specification of the region, including chromosome (Giemsa stain)
 * **q_value**: the q-value of the peak region
 
-#### Example 
+#### Example
 An example data file which includes the required column header would look like:
 
 ```
@@ -993,11 +1028,11 @@ chromosome<TAB>peak_start<TAB>peak_end<TAB>genes_in_region<TAB>amp<TAB>cytoband<
 ## MutSig Data
 MutSig stands for "Mutation Significance".  MutSig analyzes lists of mutations discovered in DNA sequencing, to identify genes that were mutated more often than expected by chance given background mutation processes. You can download mutsig from [broadinstitute](https://www.broadinstitute.org/cancer/cga/mutsig_download) (MutSigCV 1.4 is available) or run mutsig (MutSigCV 1.2 is available) using [GenePattern](http://genepattern.broadinstitute.org/gp/pages/login.jsf).
 
-**Note:** The tcga files that are uploaded to cBioPortal are generated using MutSig2.0. This version is not available outside broadinstitute. 
+**Note:** The tcga files that are uploaded to cBioPortal are generated using MutSig2.0. This version is not available outside broadinstitute.
 
 _**The MutSigCV 1.2 output is different from the MutSig2.0 header. TODO: test the 1.4 version. Requires > 10GB of memory**_
 
-After uploading a MutSig file, a new button becomes available in the Enter Gene Set section, called "Select From Recurrently Mutated Genes (MutSig)". 
+After uploading a MutSig file, a new button becomes available in the Enter Gene Set section, called "Select From Recurrently Mutated Genes (MutSig)".
 
 This type data is not yet being validated. It can, however, be uploaded.
 
@@ -1029,7 +1064,7 @@ The following fields from a MutSig file are used by the cBioPortal importer:
 * **q**: p value correct for multiple testing
 
 
-#### Example 
+#### Example
 
 An example data file which includes the required column header would look like:
 
@@ -1062,7 +1097,7 @@ For information on importing gene panels please visit: [Import-Gene-Panels](Impo
 
 The second component to gene panel data is associating samples and profile to the panel which applies. The following column is required :
 
-- ***SAMPLE_ID***: Sample Id from the study 
+- ***SAMPLE_ID***: Sample Id from the study
 
 And:
 - An additional column for each profile in the dataset using the stable_id as the column header.
@@ -1097,24 +1132,24 @@ In both of these cases, the sample-profile matrix file does not need to be provi
 ## Gene Set Data
 A description of importing gene sets (which are required before loading gene set study) can be found [here](Import-Gene-Sets.md). This page also contains a decription to import gene set hierarchy data, which is required to show a hierarchical tree on the query page to select gene sets.
 
-cBioPortal supports GSVA scores and GSVA-like scores, such as ssGSEA. The [Gene Set Variation Analysis]([http://www.bioconductor.org/packages/release/bioc/html/GSVA.html]) method in R (GSVA, [Hänzelmann, 2013](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-7)) can calculate several types of scores (specified with the `methods=` argument) and outputs a score between -1 and 1. The GSVA method also calculates a p-value per score using a boothstrapping method. 
+cBioPortal supports GSVA scores and GSVA-like scores, such as ssGSEA. The [Gene Set Variation Analysis]([http://www.bioconductor.org/packages/release/bioc/html/GSVA.html]) method in R (GSVA, [Hänzelmann, 2013](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-7)) can calculate several types of scores (specified with the `methods=` argument) and outputs a score between -1 and 1. The GSVA method also calculates a p-value per score using a boothstrapping method.
 
 To import the GSVA(-like) data, a score and p-value data file are required. It is important that the dimensions of the score and p-value file are the same and that they contain the same gene sets and samples. Both data files require a meta file.
 
 ### GSVA score meta file
-The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For both GSVA and GSVA-like scores, `GSVA-SCORE` is used as `datatype` and `gsva_scores` is used as `stable_id`. 
+The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For both GSVA and GSVA-like scores, `GSVA-SCORE` is used as `datatype` and `gsva_scores` is used as `stable_id`.
 
-Required fields: 
+Required fields:
 ```
 cancer_study_identifier: Same value as specified in study meta file
 genetic_alteration_type: GENESET_SCORE
 datatype: GSVA-SCORE
 stable_id: Any unique identifier within the study
-source_stable_id: Stable id of the genetic profile (in this same study) that was used as the input source for calculating the GSVA scores. Typically this will be one of the mRNA expression genetic profiles. 
+source_stable_id: Stable id of the genetic profile (in this same study) that was used as the input source for calculating the GSVA scores. Typically this will be one of the mRNA expression genetic profiles.
 profile_name: A name describing the analysis.
 profile_description: A description of the data processing done.
 data_filename: <your GSVA score datafile>
-geneset_def_version: Version of the gene set definition this calculation was based on. 
+geneset_def_version: Version of the gene set definition this calculation was based on.
 ```
 
 Example:
@@ -1135,7 +1170,7 @@ The data file will be a simple tab separated format, similar to the expression d
 
 The first column is the GENESET_ID. This contains the EXTERNAL_ID or "stable id" (MsigDB calls this "standard name") of the gene set. The other colums are the sample columns: An additional column for each sample in the dataset using the sample id as the column header.
 
-The cells contain the GSVA(-like) score: which is real number, between -1.0 and 1.0, representing the score for the gene set in the respective sample, or NA when the score for the gene set in the respective sample could not be (or was not) calculated. Example with 2 gene sets and 3 samples: 
+The cells contain the GSVA(-like) score: which is real number, between -1.0 and 1.0, representing the score for the gene set in the respective sample, or NA when the score for the gene set in the respective sample could not be (or was not) calculated. Example with 2 gene sets and 3 samples:
 
 <table>
 <thead><tr><th>GENESET_ID</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>
@@ -1146,9 +1181,9 @@ The cells contain the GSVA(-like) score: which is real number, between -1.0 and 
 
 ### GSVA p-value meta file
 
-For both GSVA and GSVA-like p-values, `P-VALUE` is used as `datatype` and `gsva_pvalues` is used as `stable_id`. 
+For both GSVA and GSVA-like p-values, `P-VALUE` is used as `datatype` and `gsva_pvalues` is used as `stable_id`.
 
-Required fields: 
+Required fields:
 ```
 cancer_study_identifier: Same value as specified in study meta file
 genetic_alteration_type: GENESET_SCORE
@@ -1158,7 +1193,7 @@ source_stable_id: Stable id of the GSVA-SCORE genetic profile (see above).
 profile_name: A name describing the analysis.
 profile_description: A description of the data processing done.
 data_filename: <your GSVA p-value datafile>
-geneset_def_version: Version of the gene sets definition this calculation was based on. 
+geneset_def_version: Version of the gene sets definition this calculation was based on.
 ```
 
 Example:
@@ -1179,7 +1214,7 @@ The data file will be a simple tab separated format, similar to the score file: 
 
 The first column is the GENESET_ID. This contains the EXTERNAL_ID or "stable id" (MsigDB calls this "standard name") of the gene set. The other colums are the sample columns: An additional column for each sample in the dataset using the sample id as the column header.
 
-The cells contain the p-value for the GSVA score: A real number, between 0.0 and 1.0, representing the p-value for the GSVA score calculated for the gene set in the respective sample, or NA when the score for the gene is also NA. Example with 2 gene sets and 3 samples: 
+The cells contain the p-value for the GSVA score: A real number, between 0.0 and 1.0, representing the p-value for the GSVA score calculated for the gene set in the respective sample, or NA when the score for the gene is also NA. Example with 2 gene sets and 3 samples:
 
 <table>
 <thead><tr><th>GENESET_ID</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>

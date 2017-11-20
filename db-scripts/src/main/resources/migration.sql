@@ -542,12 +542,21 @@ UPDATE `info` SET `DB_SCHEMA_VERSION`="2.7.2";
 
 ##version: 2.7.3
 DELETE FROM `clinical_attribute_meta` WHERE clinical_attribute_meta.`ATTR_ID` = 'SAMPLE_COUNT';
+<<<<<<< HEAD
 INSERT INTO `clinical_attribute_meta` SELECT 'SAMPLE_COUNT', 'Number of Samples Per Patient',
 'Number of Samples Per Patient', 'STRING', 1, '1', patient.`CANCER_STUDY_ID` FROM patient
 GROUP BY patient.`CANCER_STUDY_ID`;
 
 DELETE FROM `clinical_patient` WHERE clinical_patient.`ATTR_ID` = 'SAMPLE_COUNT';
 INSERT INTO `clinical_patient` SELECT patient.`INTERNAL_ID`, 'SAMPLE_COUNT', COUNT(*) FROM sample
+=======
+INSERT INTO `clinical_attribute_meta` SELECT 'SAMPLE_COUNT', 'Number of Samples Per Patient', 
+'Number of Samples Per Patient', 'NUMBER', 1, '1', patient.`CANCER_STUDY_ID` FROM patient 
+GROUP BY patient.`CANCER_STUDY_ID`;
+
+DELETE FROM `clinical_patient` WHERE clinical_patient.`ATTR_ID` = 'SAMPLE_COUNT';
+INSERT INTO `clinical_patient` SELECT patient.`INTERNAL_ID`, 'SAMPLE_COUNT', COUNT(*) FROM sample 
+>>>>>>> b06161cac... Updated DB schema, importer and validator for structural variant data
 INNER JOIN patient ON sample.`PATIENT_ID` = patient.`INTERNAL_ID` GROUP BY patient.`INTERNAL_ID`;
 UPDATE `info` SET `DB_SCHEMA_VERSION`="2.7.3";
 
@@ -583,3 +592,56 @@ ALTER TABLE `mutation_event` MODIFY COLUMN `TUMOR_SEQ_ALLELE` TEXT;
 ALTER TABLE `mutation_event` MODIFY COLUMN `REFERENCE_ALLELE` TEXT;
 ALTER TABLE `mutation_event` ADD KEY `KEY_MUTATION_EVENT_DETAILS` (`CHR`, `START_POSITION`, `END_POSITION`, `TUMOR_SEQ_ALLELE`(255), `ENTREZ_GENE_ID`, `PROTEIN_CHANGE`, `MUTATION_TYPE`);
 UPDATE `info` SET `DB_SCHEMA_VERSION`="2.8.1";
+
+###version: 2.8.3 (skip 2.8.2 to be in sync)
+-- Previous structural_variant was never used, so recreate it
+DROP TABLE IF EXISTS structural_variant;
+CREATE TABLE `structural_variant` (
+  `INTERNAL_ID` int(11) NOT NULL auto_increment,
+  `GENETIC_PROFILE_ID` int(11) NOT NULL,
+  `SAMPLE_ID` int(11) NOT NULL,
+  `SITE1_ENTREZ_GENE_ID` int(11) NOT NULL,
+  `SITE1_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE1_EXON` int(4),
+  `SITE1_CHROMOSOME` varchar(5),
+  `SITE1_POSITION` int(11),
+  `SITE1_DESCRIPTION` varchar(255),
+  `SITE2_ENTREZ_GENE_ID` int(11),
+  `SITE2_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE2_EXON` int(4),
+  `SITE2_CHROMOSOME` varchar(5),
+  `SITE2_POSITION` int(11),
+  `SITE2_DESCRIPTION` varchar(255),
+  `SITE2_EFFECT_ON_FRAME` varchar(25),
+  `NCBI_BUILD` varchar(10),
+  `DNA_SUPPORT` varchar(3),
+  `RNA_SUPPORT` varchar(3),
+  `NORMAL_READ_COUNT` int(11),
+  `TUMOR_READ_COUNT` int(11),
+  `NORMAL_VARIANT_COUNT` int(11),
+  `TUMOR_VARIANT_COUNT` int(11),
+  `NORMAL_PAIRED_END_READ_COUNT` int(11),
+  `TUMOR_PAIRED_END_READ_COUNT` int(11),
+  `NORMAL_SPLIT_READ_COUNT` int(11),
+  `TUMOR_SPLIT_READ_COUNT` int(11),
+  `ANNOTATION` varchar(255),
+  `BREAKPOINT_TYPE` varchar(25),
+  `CENTER` varchar(25),
+  `CONNECTION_TYPE` varchar(25),
+  `EVENT_INFO` varchar(255),
+  `CLASS` varchar(25),
+  `LENGTH` int(11),
+  `COMMENTS` varchar(255),
+  `EXTERNAL_ANNOTATION` varchar(80),
+  `DRIVER_FILTER` VARCHAR(20),
+  `DRIVER_FILTER_ANNOTATION` VARCHAR(80),
+  `DRIVER_TIERS_FILTER` VARCHAR(50),
+  `DRIVER_TIERS_FILTER_ANNOTATION` VARCHAR(80),
+  PRIMARY KEY (`INTERNAL_ID`),
+  FOREIGN KEY (`SAMPLE_ID`) REFERENCES `sample` (`INTERNAL_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE1_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE2_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`GENETIC_PROFILE_ID`) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE CASCADE
+);
+
+UPDATE info SET DB_SCHEMA_VERSION="2.8.3";

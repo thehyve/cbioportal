@@ -95,18 +95,18 @@ CREATE TABLE `clinical_attribute_meta` (
   PRIMARY KEY (`ATTR_ID`, `CANCER_STUDY_ID`),
   FOREIGN KEY (`CANCER_STUDY_ID`) REFERENCES `cancer_study` (`CANCER_STUDY_ID`) ON DELETE CASCADE
 );
-INSERT INTO clinical_attribute_meta 
-  SELECT DISTINCT clinical_sample.attr_id, clinical_attribute.display_name, clinical_attribute.description, clinical_attribute.datatype, clinical_attribute.patient_attribute, clinical_attribute.priority, cancer_study.cancer_study_id 
-  FROM clinical_attribute 
-  INNER JOIN clinical_sample ON clinical_attribute.ATTR_ID = clinical_sample.ATTR_ID 
-  INNER JOIN sample ON clinical_sample.internal_id = sample.internal_id 
-  INNER JOIN patient ON sample.patient_id = patient.internal_id 
+INSERT INTO clinical_attribute_meta
+  SELECT DISTINCT clinical_sample.attr_id, clinical_attribute.display_name, clinical_attribute.description, clinical_attribute.datatype, clinical_attribute.patient_attribute, clinical_attribute.priority, cancer_study.cancer_study_id
+  FROM clinical_attribute
+  INNER JOIN clinical_sample ON clinical_attribute.ATTR_ID = clinical_sample.ATTR_ID
+  INNER JOIN sample ON clinical_sample.internal_id = sample.internal_id
+  INNER JOIN patient ON sample.patient_id = patient.internal_id
   INNER  JOIN cancer_study ON patient.cancer_study_id = cancer_study.cancer_study_id;
-INSERT INTO clinical_attribute_meta 
-  SELECT DISTINCT clinical_patient.attr_id, clinical_attribute.display_name, clinical_attribute.description, clinical_attribute.datatype, clinical_attribute.patient_attribute, clinical_attribute.priority, cancer_study.cancer_study_id 
-  FROM clinical_attribute 
-  INNER JOIN clinical_patient ON clinical_attribute.ATTR_ID = clinical_patient.ATTR_ID 
-  INNER JOIN patient ON clinical_patient.internal_id = patient.internal_id 
+INSERT INTO clinical_attribute_meta
+  SELECT DISTINCT clinical_patient.attr_id, clinical_attribute.display_name, clinical_attribute.description, clinical_attribute.datatype, clinical_attribute.patient_attribute, clinical_attribute.priority, cancer_study.cancer_study_id
+  FROM clinical_attribute
+  INNER JOIN clinical_patient ON clinical_attribute.ATTR_ID = clinical_patient.ATTR_ID
+  INNER JOIN patient ON clinical_patient.internal_id = patient.internal_id
   INNER JOIN cancer_study ON patient.cancer_study_id = cancer_study.cancer_study_id;
 DROP TABLE IF EXISTS clinical_attribute;
 CREATE TABLE `structural_variant` (
@@ -203,7 +203,7 @@ UPDATE info SET DB_SCHEMA_VERSION="1.4.0";
 
 ##version: 2.0.0
 -- ========================== start of genetic_entity related migration =============================================
--- add genetic_entity table 
+-- add genetic_entity table
 CREATE TABLE `genetic_entity` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ENTITY_TYPE` varchar(45) NOT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE `genetic_entity` (
 ALTER TABLE `gene` ADD COLUMN `GENETIC_ENTITY_ID` INT NULL AFTER `HUGO_GENE_SYMBOL`;
 
 -- add temporary column to support migration:
-ALTER TABLE `genetic_entity` 
+ALTER TABLE `genetic_entity`
 ADD COLUMN `TMP_GENE_ID` INT NOT NULL AFTER `ENTITY_TYPE`,
 ADD UNIQUE INDEX `TMP_GENE_ID_UNIQUE` (`TMP_GENE_ID` ASC);
 
@@ -226,15 +226,15 @@ INSERT INTO genetic_entity (entity_type, tmp_gene_id)
 UPDATE gene INNER JOIN genetic_entity ON gene.ENTREZ_GENE_ID = genetic_entity.TMP_GENE_ID SET GENETIC_ENTITY_ID = genetic_entity.ID;
 
 -- add UQ and FK constraint for GENETIC_ENTITY_ID in gene table:
-ALTER TABLE `gene` 
+ALTER TABLE `gene`
 CHANGE COLUMN `GENETIC_ENTITY_ID` `GENETIC_ENTITY_ID` INT NOT NULL,
 ADD UNIQUE INDEX `GENETIC_ENTITY_ID_UNIQUE` (`GENETIC_ENTITY_ID` ASC);
 
-ALTER TABLE `gene` 
+ALTER TABLE `gene`
 ADD FOREIGN KEY (`GENETIC_ENTITY_ID`) REFERENCES `genetic_entity` (`ID`) ON DELETE CASCADE;
 
--- migrate genetic_alteration table in a similar way, pointing to GENETIC_ENTITY_ID 
--- instead of ENTREZ_GENE_ID (note: the INSERT part can take some time [~20 min], 
+-- migrate genetic_alteration table in a similar way, pointing to GENETIC_ENTITY_ID
+-- instead of ENTREZ_GENE_ID (note: the INSERT part can take some time [~20 min],
 -- depending on how many studies you have in your DB):
 CREATE TABLE `genetic_alteration_new` (
   `GENETIC_PROFILE_ID` int(11) NOT NULL,
@@ -282,7 +282,7 @@ CREATE TABLE `mutation_count_by_keyword` (
 
 INSERT INTO mutation_count_by_keyword
     SELECT g2.`GENETIC_PROFILE_ID`, mutation_event.`KEYWORD`, m2.`ENTREZ_GENE_ID`,
-        IF(mutation_event.`KEYWORD` IS NULL, 0, COUNT(*)) AS KEYWORD_COUNT, 
+        IF(mutation_event.`KEYWORD` IS NULL, 0, COUNT(*)) AS KEYWORD_COUNT,
         (SELECT COUNT(*) FROM `mutation` AS m1 , `genetic_profile` AS g1
         WHERE m1.`GENETIC_PROFILE_ID` = g1.`GENETIC_PROFILE_ID`
         AND g1.`GENETIC_PROFILE_ID`= g2.`GENETIC_PROFILE_ID` AND m1.`ENTREZ_GENE_ID` = m2.`ENTREZ_GENE_ID`
@@ -381,3 +381,51 @@ ALTER TABLE `mutation` ADD COLUMN `DRIVER_TIERS_FILTER` VARCHAR(50) NULL;
 ALTER TABLE `mutation` ADD COLUMN `DRIVER_TIERS_FILTER_ANNOTATION` VARCHAR(80) NULL;
 
 UPDATE info SET DB_SCHEMA_VERSION="2.4.0";
+
+##version: 2.5.0
+-- Previous structural_variant was never used
+DROP TABLE IF EXISTS structural_variant;
+CREATE TABLE `structural_variant` (
+  `GENETIC_PROFILE_ID` int(11) NOT NULL,
+  `INTERNAL_ID` int(11) NOT NULL auto_increment,
+  `SAMPLE_ID` int(11) NOT NULL,
+  `SITE1_ENTREZ_GENE_ID` int(11),
+  `SITE1_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE1_EXON` int(11),
+  `SITE1_CHROMOMSOME` varchar(25),
+  `SITE1_POSITION` int(11),
+  `SITE1_DESCRIPTION` varchar(255),
+  `SITE2_ENTREZ_GENE_ID` int(11),
+  `SITE2_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE2_EXON` int(11),
+  `SITE2_CHROMOSOME` varchar(25),
+  `SITE2_POSITION` int(11),
+  `SITE2_DESCRIPTION` varchar(255),
+  `SITE2_EFFECT_ON_FRAME` varchar(25),
+  `DNA_SUPPORT` varchar(25),
+  `RNA_SUPPORT` varchar(25),
+  `NORMAL_READ_COUNT` int(11),
+  `TUMOR_READ_COUNT` int(11),
+  `NORMAL_VARIANT_COUNT` int(11),
+  `TUMOR_VARIANT_COUNT` int(11),
+  `NORMAL_PAIRED_END_READ_COUNT` int(11),
+  `TUMOR_PAIRED_END_READ_COUNT` int(11),
+  `NORMAL_SPLIT_READ_COUNT` int(11),
+  `TUMOR_SPLIT_READ_COUNT` int(11),
+  `ANNOTATION` varchar(255),
+  `BREAKPOINT_TYPE` varchar(25),
+  `CENTER` varchar(25),
+  `CONNECTION_TYPE` varchar(25),
+  `EVENT_INFO` varchar(255),
+  `CLASS` varchar(25),
+  `LENGTH` varchar(25),
+  `COMMENTS` varchar(2048),
+  `EXTERNAL_ANNOTATION` varchar(25),
+  PRIMARY KEY (`INTERNAL_ID`),
+  FOREIGN KEY (`SAMPLE_ID`) REFERENCES `sample` (`INTERNAL_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE1_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE2_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`GENETIC_PROFILE_ID`) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE CASCADE
+);
+
+UPDATE info SET DB_SCHEMA_VERSION="2.5.0";

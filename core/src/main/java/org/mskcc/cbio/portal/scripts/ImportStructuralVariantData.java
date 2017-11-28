@@ -72,10 +72,14 @@ public class ImportStructuralVariantData {
     public static final String LENGTH = "Length";
     public static final String COMMENTS = "Comments";
     public static final String EXTERNAL_ANNOTATION = "External_Annotation";
+    public static final String DRIVER_FILTER = "cbp_driver";
+    public static final String DRIVER_FILTER_ANNOTATION = "cbp_driver_annotation";
+    public static final String DRIVER_TIERS_FILTER = "cbp_driver_tiers";
+    public static final String DRIVER_TIERS_FILTER_ANNOTATION = "cbp_driver_tiers_annotation";
 
     // Other constants
     public static final String PROTEIN_CHANGE_FUSION = "FUSION";
-    
+
     // Initialize variables
     private File structuralVariantFile;
     private int geneticProfileId;
@@ -157,6 +161,10 @@ public class ImportStructuralVariantData {
                 structuralVariant.setLength(TabDelimitedFileUtil.getPartInt(getColumnIndex(LENGTH), parts));
                 structuralVariant.setComments(TabDelimitedFileUtil.getPartString(getColumnIndex(COMMENTS), parts));
                 structuralVariant.setExternalAnnotation(TabDelimitedFileUtil.getPartString(getColumnIndex(EXTERNAL_ANNOTATION), parts));
+                structuralVariant.setDriverFilter(TabDelimitedFileUtil.getPartString(getColumnIndex(DRIVER_FILTER), parts));
+                structuralVariant.setDriverFilterAnn(TabDelimitedFileUtil.getPartString(getColumnIndex(DRIVER_FILTER_ANNOTATION), parts));
+                structuralVariant.setDriverTiersFilter(TabDelimitedFileUtil.getPartString(getColumnIndex(DRIVER_TIERS_FILTER), parts));
+                structuralVariant.setDriverTiersFilterAnn(TabDelimitedFileUtil.getPartString(getColumnIndex(DRIVER_TIERS_FILTER_ANNOTATION), parts));
 
                 // get sample
                 Sample sample = DaoSample.getSampleByCancerStudyAndSampleId(

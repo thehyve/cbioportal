@@ -93,7 +93,11 @@ public class DaoStructuralVariant {
            structuralVariant.getVariantClass(),
            Integer.toString(structuralVariant.getLength()),
            structuralVariant.getComments(),
-           structuralVariant.getExternalAnnotation());
+           structuralVariant.getExternalAnnotation(),
+           structuralVariant.getDriverFilter(),
+           structuralVariant.getDriverFilterAnn(),
+           structuralVariant.getDriverTiersFilter(),
+           structuralVariant.getDriverTiersFilterAnn());
     }
 }
 

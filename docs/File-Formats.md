@@ -806,6 +806,10 @@ TMPRSS2 (NM_001135099) - ERG (NM_182918) fusion: c.56-1943:TMPRSS2_c.18+13593:ER
 33. **Length**: Length of the structural variation in number ofbasepairs.
 34. **Comments**: Any comments or free text.
 35. **External_Annotation**: COSMIC or GENBank ID. Cosmic IDs follow the format `COSMIC:COS1000`.
+36. **cbp_driver**: "Putative_Passenger", "Putative_Driver", "Unknown", "NA" or "" (empty value).
+37. **cbp_driver_annotation**: field to give more information about the cbp_driver value (limited to 80 characters). This field can only be present if the cbp_driver is also present in the MAF file. This field is free text. Example values for this field are: "Pathogenic" or "VUS".
+38. **cbp_driver_tiers**: free label/category that marks the mutation as a putative driver (limited to 20 characters). This field is free text. Example values for this field are: "Tier 1", Tier 2"... In the Oncoprint menu, the tiers are be ordered alphabetically. If you do not want to put specific mutations in any category, leave the field blank or type "NA".
+39. **cbp_driver_tiers_annotation**: field to give more information about the cbp_driver_tiers value (limited to 80 characters). This field can only be present if the cbp_driver_tiers is also present in the MAF file. This field is free text. Example values for this field are: "Highly Actionable", "Potentially Actionable", "Not currently actionable"...
 
 ##### Annotation
 

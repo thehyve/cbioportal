@@ -63,6 +63,10 @@ public class StructuralVariant {
     private Integer length;
     private String comments;
     private String externalAnnotation;
+    private String driverFilter;
+    private String driverFilterAnn;
+    private String driverTiersFilter;
+    private String driverTiersFilterAnn;
 
     public Integer getGeneticProfileId() {
         return geneticProfileId;
@@ -291,5 +295,29 @@ public class StructuralVariant {
     }
     public void setExternalAnnotation(String externalAnnotation) {
         this.externalAnnotation = externalAnnotation;
+    }
+    public String getDriverFilter() {
+        return driverFilter;
+    }
+    public void setDriverFilter(String driverFilter) {
+        this.driverFilter = driverFilter;
+    }
+    public String getDriverFilterAnn() {
+        return driverFilterAnn;
+    }
+    public void setDriverFilterAnn(String driverFilterAnn) {
+        this.driverFilterAnn = driverFilterAnn;
+    }
+    public String getDriverTiersFilter() {
+        return driverTiersFilter;
+    }
+    public void setDriverTiersFilter(String driverTiersFilter) {
+        this.driverTiersFilter = driverTiersFilter;
+    }
+    public String getDriverTiersFilterAnn() {
+        return driverTiersFilterAnn;
+    }
+    public void setDriverTiersFilterAnn(String driverTiersFilterAnn) {
+        this.driverTiersFilterAnn = driverTiersFilterAnn;
     }
 }

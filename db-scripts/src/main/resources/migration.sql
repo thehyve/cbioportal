@@ -428,3 +428,52 @@ FROM `gene`);
 
 UPDATE info SET DB_SCHEMA_VERSION="2.4.1";
 -- ========================= end of reference genes related tables ========================================================================
+
+##version: 2.5.0
+-- Previous structural_variant was never used
+DROP TABLE IF EXISTS structural_variant;
+CREATE TABLE `structural_variant` (
+  `GENETIC_PROFILE_ID` int(11) NOT NULL,
+  `INTERNAL_ID` int(11) NOT NULL auto_increment,
+  `SAMPLE_ID` int(11) NOT NULL,
+  `SITE1_ENTREZ_GENE_ID` int(11),
+  `SITE1_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE1_EXON` int(11),
+  `SITE1_CHROMOMSOME` varchar(25),
+  `SITE1_POSITION` int(11),
+  `SITE1_DESCRIPTION` varchar(255),
+  `SITE2_ENTREZ_GENE_ID` int(11),
+  `SITE2_ENSEMBL_TRANSCRIPT_ID` varchar(25),
+  `SITE2_EXON` int(11),
+  `SITE2_CHROMOSOME` varchar(25),
+  `SITE2_POSITION` int(11),
+  `SITE2_DESCRIPTION` varchar(255),
+  `SITE2_EFFECT_ON_FRAME` varchar(25),
+  `DNA_SUPPORT` varchar(25),
+  `RNA_SUPPORT` varchar(25),
+  `NORMAL_READ_COUNT` int(11),
+  `TUMOR_READ_COUNT` int(11),
+  `NORMAL_VARIANT_COUNT` int(11),
+  `TUMOR_VARIANT_COUNT` int(11),
+  `NORMAL_PAIRED_END_READ_COUNT` int(11),
+  `TUMOR_PAIRED_END_READ_COUNT` int(11),
+  `NORMAL_SPLIT_READ_COUNT` int(11),
+  `TUMOR_SPLIT_READ_COUNT` int(11),
+  `ANNOTATION` varchar(255),
+  `BREAKPOINT_TYPE` varchar(25),
+  `CENTER` varchar(25),
+  `CONNECTION_TYPE` varchar(25),
+  `EVENT_INFO` varchar(255),
+  `CLASS` varchar(25),
+  `LENGTH` varchar(25),
+  `COMMENTS` varchar(2048),
+  `EXTERNAL_ANNOTATION` varchar(25),
+  `DRIVER_FILTER` VARCHAR(20),
+  `DRIVER_FILTER_ANNOTATION` VARCHAR(80),
+  `DRIVER_TIERS_FILTER` VARCHAR(50),
+  `DRIVER_TIERS_FILTER_ANNOTATION` VARCHAR(80),
+  PRIMARY KEY (`INTERNAL_ID`),
+  FOREIGN KEY (`SAMPLE_ID`) REFERENCES `sample` (`INTERNAL_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE1_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`SITE2_ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE,
+  FOREIGN KEY (`GENETIC_PROFILE_ID`) REFERENCES `genetic_profile` (`GENETIC_PROFILE_ID`) ON DELETE CASCADE

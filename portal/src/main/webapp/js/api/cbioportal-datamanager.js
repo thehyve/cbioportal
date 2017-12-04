@@ -1281,6 +1281,9 @@ window.initDatamanager = function (genetic_profile_ids, oql_query, geneset_ids, 
 	'getOQLQuery': function () {
 	    return this.oql_query;
 	},
+	'getGenesetQuery': function () {
+	    return this.geneset_ids;
+	},
 	'getQueryGenes': function () {
 		if (this.oql_query.trim().length > 0) {
 		    return OQL.genes(this.oql_query);

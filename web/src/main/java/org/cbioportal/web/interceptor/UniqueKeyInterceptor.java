@@ -11,6 +11,7 @@ import org.cbioportal.model.MutationSpectrum;
 import org.cbioportal.model.NumericGeneMolecularData;
 import org.cbioportal.model.Patient;
 import org.cbioportal.model.Sample;
+import org.cbioportal.model.StructuralVariant;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -109,6 +110,11 @@ public class UniqueKeyInterceptor extends AbstractMappingJacksonResponseBodyAdvi
                     sample.setUniqueSampleKey(calculateBase64(sample.getStableId(), sample.getCancerStudyIdentifier()));
                     sample.setUniquePatientKey(calculateBase64(sample.getPatientStableId(), 
                         sample.getCancerStudyIdentifier()));
+                } else if (object instanceof StructuralVariant) {
+                    
+                    StructuralVariant structuralVariant = (StructuralVariant) object;
+                    structuralVariant.setUniqueSampleKey(calculateBase64(structuralVariant.getSampleId(), structuralVariant.getStudyId()));
+                    structuralVariant.setUniquePatientKey(calculateBase64(structuralVariant.getPatientId(), structuralVariant.getStudyId()));
                 }
             }
         }

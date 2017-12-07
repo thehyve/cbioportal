@@ -173,7 +173,7 @@ public class ImportStructuralVariantData {
                 } else {
                     // Set sample internal id
                     structuralVariant.setSampleIdInternal(sample.getInternalId());
-                    
+
                     // The current structural variant model, the input file always contains 2 genes, so in this implementation both are required.
                     
                     //  Assume we are dealing with Entrez Gene Ids
@@ -236,9 +236,9 @@ public class ImportStructuralVariantData {
             }
         }
         buf.close();
-        if( MySQLbulkLoader.isBulkLoad()) {
-            MySQLbulkLoader.flushAll();
-        }
+//        if( MySQLbulkLoader.isBulkLoad()) {
+        MySQLbulkLoader.flushAll();
+        
     }
 
 

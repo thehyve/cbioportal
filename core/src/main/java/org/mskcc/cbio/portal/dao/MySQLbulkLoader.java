@@ -130,10 +130,10 @@ public class MySQLbulkLoader {
    // TODO: make configurable
    private static final long numDebuggingRowsToPrint = 0;
    
-   MySQLbulkLoader( String tableName ){
+   private MySQLbulkLoader( String tableName ){
       try {
           openTempFile( tableName );
-         this.tableName = tableName;
+          this.tableName = tableName;
       } catch (Exception e) {
          e.printStackTrace();
       }

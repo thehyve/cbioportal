@@ -111,10 +111,7 @@ public class ImportStructuralVariantData {
             this.columnIndexMap.put(headerParts[i].toLowerCase(), i);
         }
 
-        // Retrieve largest StructuralVariant Internal ID
-        long largestInternalId = DaoStructuralVariant.getLargestInternalId();
-
-        // Genetic profile is read in first?
+        // Genetic profile is read in first
         GeneticProfile geneticProfile = DaoGeneticProfile.getGeneticProfileById(geneticProfileId);
         String line = new String();
         while ((line = buf.readLine()) != null) {
@@ -125,7 +122,6 @@ public class ImportStructuralVariantData {
                 StructuralVariant structuralVariant = new StructuralVariant();
                 
                 structuralVariant.setGeneticProfileId(geneticProfileId);
-                structuralVariant.setInternalId(++largestInternalId);
                 structuralVariant.setSampleId(TabDelimitedFileUtil.getPartString(getColumnIndex(Sample_ID), parts));
                 structuralVariant.setSite1EntrezGeneId(TabDelimitedFileUtil.getPartLong(getColumnIndex(SITE1_ENTREZ_GENE_ID), parts));
                 structuralVariant.setSite1HugoSymbol(TabDelimitedFileUtil.getPartString(getColumnIndex(SITE1_HUGO_SYMBOL), parts));

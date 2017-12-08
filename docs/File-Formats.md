@@ -745,7 +745,7 @@ An example metadata file would be:
 ```
 cancer_study_identifier: study_es_0
 genetic_alteration_type: STRUCTURAL_VARIATION
-datatype: STRUCTURAL_VARIATION
+datatype: SV
 data_filename: data_structural_variation.txt
 stable_id: structural_variation
 profile_name: Targeted Fusion Assay data

@@ -536,7 +536,7 @@ def get_meta_file_type(meta_dictionary, logger, filename):
         ("METHYLATION", "CONTINUOUS"): MetaFileTypes.METHYLATION,
         ("FUSION", "FUSION"): MetaFileTypes.FUSION,
         ("GENE_PANEL_MATRIX", "GENE_PANEL_MATRIX"): MetaFileTypes.GENE_PANEL_MATRIX,
-        ("STRUCTURAL_VARIANT", "STRUCTURAL_VARIANT"): MetaFileTypes.STRUCTURAL_VARIANT,
+        ("STRUCTURAL_VARIANT", "SV"): MetaFileTypes.STRUCTURAL_VARIANT,
         # cross-sample molecular statistics (for gene selection)
         ("GISTIC_GENES_AMP", "Q-VALUE"): MetaFileTypes.GISTIC_GENES,
         ("GISTIC_GENES_DEL", "Q-VALUE"): MetaFileTypes.GISTIC_GENES,

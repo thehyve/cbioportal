@@ -12,7 +12,8 @@ public class StructuralVariantFilter {
     private List<SampleIdentifier> sampleIdentifiers;
     
     @AssertTrue
-    private boolean bothGeneticProfileStableIdsAndHugoGeneSymbolsPresent() {
+    //private boolean bothGeneticProfileStableIdsAndHugoGeneSymbolsPresent() {
+    private boolean isEitherSampleListIdOrSampleIdsPresent() {
         return geneticProfileStableIds != null && hugoGeneSymbols != null;
     }
     

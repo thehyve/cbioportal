@@ -120,7 +120,7 @@ public class ImportStructuralVariantData {
             if( !line.startsWith("#") && line.trim().length() > 0) {
                 String parts[] = line.split("\t", -1);
                 StructuralVariant structuralVariant = new StructuralVariant();
-                
+
                 structuralVariant.setGeneticProfileId(geneticProfileId);
                 structuralVariant.setSampleId(TabDelimitedFileUtil.getPartString(getColumnIndex(Sample_ID), parts));
                 structuralVariant.setSite1EntrezGeneId(TabDelimitedFileUtil.getPartLong(getColumnIndex(SITE1_ENTREZ_GENE_ID), parts));
@@ -175,7 +175,7 @@ public class ImportStructuralVariantData {
                     structuralVariant.setSampleIdInternal(sample.getInternalId());
 
                     // The current structural variant model, the input file always contains 2 genes, so in this implementation both are required.
-                    
+
                     //  Assume we are dealing with Entrez Gene Ids
                     String site1HugoSymbol = structuralVariant.getSite1HugoSymbol();
                     String site2HugoSymbol = structuralVariant.getSite2HugoSymbol();
@@ -236,15 +236,11 @@ public class ImportStructuralVariantData {
             }
         }
         buf.close();
-//        if( MySQLbulkLoader.isBulkLoad()) {
         MySQLbulkLoader.flushAll();
-        
     }
-
 
     private int getColumnIndex(String colName) {
         Integer index = this.columnIndexMap.get(colName.toLowerCase());
-
         if (index == null) {
             index = -1;
         }

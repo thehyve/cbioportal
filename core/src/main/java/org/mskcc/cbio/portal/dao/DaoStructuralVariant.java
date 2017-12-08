@@ -38,11 +38,9 @@ public class DaoStructuralVariant {
      * @return number of records successfully added
      * @throws DaoException 
      */
-    
-    public static void addStructuralVariantToBulkLoader(StructuralVariant structuralVariant) throws DaoException {
 
+    public static void addStructuralVariantToBulkLoader(StructuralVariant structuralVariant) throws DaoException {
         MySQLbulkLoader bl =  MySQLbulkLoader.getMySQLbulkLoader("structural_variant");
-        
         String[] fieldNames = new String[]{
                                             "GENETIC_PROFILE_ID",
                                             "SAMPLE_ID",
@@ -84,7 +82,7 @@ public class DaoStructuralVariant {
                                             "DRIVER_TIERS_FILTER_ANNOTATION",
                                             };
         bl.setFieldNames(fieldNames );
-    
+
         // write to the temp file maintained by the MySQLbulkLoader
         bl.insertRecord(
            Integer.toString(structuralVariant.getGeneticProfileId()),

@@ -23,7 +23,9 @@
 
 package org.cbioportal.model;
 
-public class StructuralVariant {
+import java.io.Serializable;
+
+public class StructuralVariant implements Serializable {
 
     private int geneticProfileId;
     private long structuralVariantId;

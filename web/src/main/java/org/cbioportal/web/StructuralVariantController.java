@@ -28,32 +28,22 @@ import org.cbioportal.service.StructuralVariantService;
 import org.cbioportal.web.parameter.StructuralVariantFilter;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.web.config.annotation.PublicApi;
-import org.cbioportal.web.parameter.Direction;
-import org.cbioportal.web.parameter.HeaderKeyConstants;
-import org.cbioportal.web.parameter.PagingConstants;
-import org.cbioportal.web.parameter.Projection;
+import org.cbioportal.web.parameter.SampleIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 @PublicApi
 @RestController
@@ -69,6 +59,26 @@ public class StructuralVariantController {
             @ApiParam(required = true, value = "List of geneticProfileStableIds, hugoGeneSymbols and sampleIdentifiers")
             @Valid @RequestBody StructuralVariantFilter structuralVariantFilter) {
         
-        return new ResponseEntity<>(structuralVariantService.fetchStructuralVariants(), HttpStatus.OK);
+        List<StructuralVariant> structuralVariantList;
+        
+        if (structuralVariantFilter.getSampleIdentifiers() != null) {
+            List<SampleIdentifier> sampleIdentifiers = structuralVariantFilter.getSampleIdentifiers();
+            List<String> studyIds = new ArrayList<>();
+            List<String> sampleIds = new ArrayList<>();
+
+            for (SampleIdentifier sampleIdentifier : sampleIdentifiers) {
+                studyIds.add(sampleIdentifier.getStudyId());
+                sampleIds.add(sampleIdentifier.getSampleId());
+            }
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getGeneticProfileStableIds(), structuralVariantFilter.getHugoGeneSymbols(), studyIds, sampleIds);
+            
+        } else {
+            List<String> studyIds = new ArrayList<>();
+            List<String> sampleIds = new ArrayList<>();
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getGeneticProfileStableIds(), structuralVariantFilter.getHugoGeneSymbols(), studyIds, sampleIds);
+        }
+        
+        return new ResponseEntity<>(structuralVariantList, HttpStatus.OK);
+
     }
 }

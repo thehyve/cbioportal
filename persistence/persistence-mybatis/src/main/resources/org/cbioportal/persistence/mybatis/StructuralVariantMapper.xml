@@ -24,6 +24,7 @@
         structural_variant.SITE2_CHROMOSOME AS "${prefix}site2Chromosome",
         structural_variant.SITE2_POSITION AS "${prefix}site2Position",
         structural_variant.SITE2_DESCRIPTION AS "${prefix}site2Description",
+        structural_variant.SITE2_EFFECT_ON_FRAME AS "${prefix}site2EffectOnFrame",
         structural_variant.DNA_SUPPORT AS "${prefix}dnaSupport",
         structural_variant.RNA_SUPPORT AS "${prefix}rnaSupport",
         structural_variant.NORMAL_READ_COUNT AS "${prefix}normalReadCount",

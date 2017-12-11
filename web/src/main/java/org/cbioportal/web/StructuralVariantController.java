@@ -28,6 +28,7 @@ import org.cbioportal.service.StructuralVariantService;
 import org.cbioportal.web.parameter.StructuralVariantFilter;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.web.config.annotation.PublicApi;
 import org.cbioportal.web.parameter.SampleIdentifier;
@@ -53,8 +54,9 @@ public class StructuralVariantController {
     @Autowired
     private StructuralVariantService structuralVariantService;
     
-    @RequestMapping(method = RequestMethod.POST, value = "/structuralvariant/fetch", 
+    @RequestMapping(value = "/structuralvariant/fetch", method = RequestMethod.POST, 
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Fetch structural variants for geneticProfileIds, hugoGeneSymbols and also sampleIdentifiers")
     public ResponseEntity<List<StructuralVariant>> fetchStructuralVariants(
             @ApiParam(required = true, value = "List of geneticProfileStableIds, hugoGeneSymbols and sampleIdentifiers")
             @Valid @RequestBody StructuralVariantFilter structuralVariantFilter) {

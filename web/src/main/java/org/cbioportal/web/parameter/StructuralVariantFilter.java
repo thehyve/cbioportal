@@ -9,11 +9,11 @@ public class StructuralVariantFilter {
     @Size(min=1, max = PagingConstants.MAX_PAGE_SIZE)
     private List<String> geneticProfileStableIds;
     private List<String> hugoGeneSymbols;
+    @Size(min = 1, max = PagingConstants.MAX_PAGE_SIZE)
     private List<SampleIdentifier> sampleIdentifiers;
     
     @AssertTrue
-    //private boolean bothGeneticProfileStableIdsAndHugoGeneSymbolsPresent() {
-    private boolean isEitherSampleListIdOrSampleIdsPresent() {
+    private boolean isGeneticProfileStableIdsAndHugoGeneSymbolsPresent() {
         return geneticProfileStableIds != null && hugoGeneSymbols != null;
     }
     

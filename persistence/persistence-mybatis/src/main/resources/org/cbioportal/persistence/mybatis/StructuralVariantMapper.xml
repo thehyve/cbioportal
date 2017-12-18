@@ -81,6 +81,7 @@
             </foreach>
         </if>
         </where>
+        ORDER BY gene1.HUGO_GENE_SYMBOL, gene2.HUGO_GENE_SYMBOL
     </select>
 
 </mapper>

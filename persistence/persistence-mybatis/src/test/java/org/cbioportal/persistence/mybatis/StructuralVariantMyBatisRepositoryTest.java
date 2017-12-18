@@ -40,6 +40,7 @@ public class StructuralVariantMyBatisRepositoryTest {
         Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());
         Assert.assertEquals((int) 15, structuralVariantFirstResult.getSampleIdInternal());
+        Assert.assertEquals((String) "TCGA-A1-B0SO-01", structuralVariantFirstResult.getSampleId());
         Assert.assertEquals((Long) 207L, structuralVariantFirstResult.getSite1EntrezGeneId());
         Assert.assertEquals("AKT1", structuralVariantFirstResult.getSite1HugoSymbol());
         Assert.assertEquals(null, structuralVariantFirstResult.getSite1EnsemblTranscriptId());
@@ -98,7 +99,7 @@ public class StructuralVariantMyBatisRepositoryTest {
                 structuralVariantMyBatisRepository.fetchStructuralVariants(geneticProfileStableIds, 
                         hugoGeneSymbols, studyIds, sampleIds);
 
-        Assert.assertEquals(2,  result.size());
+        Assert.assertEquals(1,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);
         Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());

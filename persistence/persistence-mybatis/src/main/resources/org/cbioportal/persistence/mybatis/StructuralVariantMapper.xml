@@ -7,9 +7,7 @@
         structural_variant.GENETIC_PROFILE_ID AS "${prefix}geneticProfileId",
         structural_variant.INTERNAL_ID AS "${prefix}structuralVariantId",
         structural_variant.SAMPLE_ID AS "${prefix}sampleIdInternal",
-        <if test="studyIds.size() > 0 and sampleIds.size() > 0">
-            sample.STABLE_ID AS "${prefix}sampleId",
-        </if>
+        sample.STABLE_ID AS "${prefix}sampleId",
         structural_variant.SITE1_ENTREZ_GENE_ID AS "${prefix}site1EntrezGeneId",
         gene1.HUGO_GENE_SYMBOL AS "${prefix}site1HugoSymbol",
         structural_variant.SITE1_ENSEMBL_TRANSCRIPT_ID AS "${prefix}site1EnsemblTranscriptId",
@@ -59,11 +57,9 @@
         JOIN genetic_profile ON structural_variant.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
         JOIN gene gene1 ON structural_variant.SITE1_ENTREZ_GENE_ID = gene1.ENTREZ_GENE_ID
         JOIN gene gene2 ON structural_variant.SITE2_ENTREZ_GENE_ID = gene2.ENTREZ_GENE_ID
-        <if test="studyIds.size() > 0 and sampleIds.size() > 0">
-            JOIN sample ON structural_variant.SAMPLE_ID = sample.INTERNAL_ID
-            JOIN patient ON sample.patient_ID = patient.INTERNAL_ID
-            JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
-        </if>
+        JOIN sample ON structural_variant.SAMPLE_ID = sample.INTERNAL_ID
+        JOIN patient ON sample.patient_ID = patient.INTERNAL_ID
+        JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <where>
             genetic_profile.STABLE_ID IN 
             <foreach item="item" collection="geneticProfileStableIds" open="(" separator="," close=")">

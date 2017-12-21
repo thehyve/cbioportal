@@ -1,2 +1,3 @@
-SAMPLE_ID	study_es_0_mutations
-TCGA-A1-A0SB-01	example_gene_panel_stable_id
+SAMPLE_ID	mutations	structural_variants
+TCGA-A1-A0SB-01	example_gene_panel_stable_id	example_gene_panel_stable_id
+TCGA-A2-A04P-01	example_gene_panel_stable_id	example_gene_panel_stable_id

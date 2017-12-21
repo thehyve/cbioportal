@@ -35,6 +35,7 @@
 
 <%@ page import="org.mskcc.cbio.portal.servlet.QueryBuilder" %>
 <%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
+<%@ page import="org.mskcc.cbio.portal.dao.DaoGeneticProfile" %>
 
 <!DOCTYPE HTML>
 <html ng-app="menu" lang="eng" class="legacy">

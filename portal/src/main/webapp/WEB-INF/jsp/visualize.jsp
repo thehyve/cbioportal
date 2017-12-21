@@ -86,6 +86,7 @@ window.onReactAppReady(function() {
         Boolean showPlotsTab = true;
         Boolean showDownloadTab = true;
         Boolean showBookmarkTab = true;
+        Boolean showFusionTab = false;
         List<String> disabledTabs = GlobalProperties.getDisabledTabs();
 
             Enumeration paramEnum = request.getParameterNames();
@@ -175,6 +176,12 @@ window.onReactAppReady(function() {
                     }
                 }
             }
+            String cancerStudyId = request.getAttribute(QueryBuilder.CANCER_STUDY_ID);
+            List<GeneticProfile> studyProfiles = DaoGeneticProfile.getAllGeneticProfiles(cancerStudyId);
+            //iterate over profiles and check if there is a fusion profile:
+            //TODO
+            //if yes, set showFusionTab to true / insert fusion tab .jsp
+            //TODO
             
             if(isVirtualStudy){
             	showCoexpTab = false;

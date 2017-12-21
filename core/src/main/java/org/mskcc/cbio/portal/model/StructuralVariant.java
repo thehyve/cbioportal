@@ -44,6 +44,7 @@ public class StructuralVariant {
     private Integer site2Position;
     private String site2Description;
     private String site2EffectOnFrame;
+    private String ncbiBuild;
     private String dnaSupport;
     private String rnaSupport;
     private Integer normalReadCount;
@@ -181,6 +182,12 @@ public class StructuralVariant {
     }
     public void setSite2EffectOnFrame(String site2EffectOnFrame) {
         this.site2EffectOnFrame = site2EffectOnFrame;
+    }
+    public String getNcbiBuild() {
+        return ncbiBuild;
+    }
+    public void setNcbiBuild(String ncbiBuild) {
+        this.ncbiBuild = ncbiBuild;
     }
     public String getDnaSupport() {
         return dnaSupport;

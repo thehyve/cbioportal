@@ -8,7 +8,7 @@
     * [Segmented Data](#segmented-data)
     * [Expression Data](#expression-data)
     * [Mutation Data](#mutation-data)
-    * [Structural Variation Data](#structural-variation-data)
+    * [Structural Variants Data](#structural-variants-data)
     * [Methylation Data](#methylation-data)
     * [Protein level Data](#protein-level-data)
     * [Case Lists](#case-lists)
@@ -725,47 +725,46 @@ AKT1 AKT2 10000|AKT<TAB>0.17071492725<TAB>0.264067254391
 ```
 
 
-## Structural Variation Data  
+## Structural Variants data
 
 #### Meta file
-The structural variation metadata file should contain the following fields:
+The structural variants metadata file should contain the following fields:
 
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
-2. **genetic_alteration_type**: STRUCTURAL_VARIATION
-3. **datatype**: STRUCTURAL_VARIATION
-4. **stable_id**: structural_variation
+2. **genetic_alteration_type**: STRUCTURAL_VARIANT
+3. **datatype**: SV
+4. **stable_id**: structural_variants
 5. **show_profile_in_analysis_tab**: true
-6. **profile_name**: A name for the structural variation data, e.g., "Fusions"
-7. **profile_description**: A description of the structural variation data.
-8. **data_filename**: your datafile
+6. **profile_name**: Name of the structural variants data set.
+7. **profile_description**: Description of the variants data set.
+8. **data_filename**: Name of datafile
 9. **gene_panel (Optional)**:  gene panel stable id
 
 #### Example
 An example metadata file would be:
 ```
 cancer_study_identifier: study_es_0
-genetic_alteration_type: STRUCTURAL_VARIATION
+genetic_alteration_type: STRUCTURAL_VARIANT
 datatype: SV
-data_filename: data_structural_variation.txt
-stable_id: structural_variation
+data_filename: data_structural_variants.txt
+stable_id: structural_variants
 profile_name: Targeted Fusion Assay data
 profile_description: Targeted Fusion Assay data sequenced with Ion Torrent.
 show_profile_in_analysis_tab: true
 ```
 
 #### Data file
-A structural variation data file is a two dimensional matrix with one structural variant per row. A small number of coloums is required, the others are optional.
+A structural variants data file is a two dimensional matrix with one structural variant per row. A small number of columns are required; the others are optional.
 
-Required columns in for every type of structural variation:
+Required columns for each type of structural variant:
 - **Sample_ID**
-- **Annotation**
 - **Event_Info**
 - **Site1_Entrez_Gene_Id** and/or **Site1_Hugo_Symbol**
-- **Site1_Exon**
 
-Additional required columns for fusion structural variation:
+Additional required columns for fusion events:
 - **Site2_Entrez_Gene_Id** and/or **Site2_Hugo_Symbol**
-- **Site2_Exon**
+- **Site1_Chromosome** **Site1_Position** and/or **Site1_Exon** 
+- **Site2_Chromosome** **Site2_Position** and/or **Site2_Exon** 
 
 Description of all allowed columns:
 1. **Sample_ID**: Sample ID, as defined in the clinical sample file.
@@ -784,34 +783,30 @@ Description of all allowed columns:
 14. **Site2_Position**: Genomic position.
 15. **Site2_Description**: Description of this event
 16. **Site2_Effect_On_Frame**: `Frame_Shift` or `InFrame`.
-17. **DNA_Support**: `yes`/`no`.
-18. **RNA_Support**: `yes`/`no`.
-19. **Normal_Read_Count**: The total number of reads of the normal tissue.
-20. **Tumor_Read_Count**: The total number of reads of the tumor tissue.
-21. **Normal_Variant_Count**: The number of reads of the normal tissue that have the variant/allele.
-22. **Tumor_Variant_Count**: The number of reads of the tumor tissue that have the variant/allele.
-23. **Normal_Paired_End_Read_Count**: The number of paired-end reads of the normal tissue that support the call.
-24. **Tumor_Paired_End_Read_Count**: The number of paired-end reads of the tumor tissue that support the call.
-25. **Normal_Split_Read_Count**: The number of split reads of the normal tissue that support the call.
-26. **Tumor_Split_Read_Count**: The number of split reads of the tumor tissue that support the call.
-27. **Annotation**: Description of the gene or transcript rearrangement, i.e.:
+17. **NCBI_Build**: The NCBI assembly, e.g. `GRCh37`.
+18. **DNA_Support**: `yes`/`no`.
+19. **RNA_Support**: `yes`/`no`.
+20. **Normal_Read_Count**: The total number of reads of the normal tissue.
+21. **Tumor_Read_Count**: The total number of reads of the tumor tissue.
+22. **Normal_Variant_Count**: The number of reads of the normal tissue that have the variant/allele.
+23. **Tumor_Variant_Count**: The number of reads of the tumor tissue that have the variant/allele.
+24. **Normal_Paired_End_Read_Count**: The number of paired-end reads of the normal tissue that support the call.
+25. **Tumor_Paired_End_Read_Count**: The number of paired-end reads of the tumor tissue that support the call.
+26. **Normal_Split_Read_Count**: The number of split reads of the normal tissue that support the call.
+27. **Tumor_Split_Read_Count**: The number of split reads of the tumor tissue that support the call.
+28. **Annotation**: Free text description of the gene or transcript rearrangement, i.e.:
 ```
 PAX8 (NM_003466) rearrangement: c.1088-2028_c.25+11587del;
 TMPRSS2 (NM_001135099) - ERG (NM_182918) fusion: c.56-1943:TMPRSS2_c.18+13593:ERGdel
 ```
-28. **Breakpoint_Type**: `PRECISE` or `IMPRECISE` which explain the resolution. Fill in `PRECISE` if the breakpoint resolution is known down to the exact base pair.
-29. **Center**: The sequencing center.
-30. **Connection_Type**: `3to5` or `5to3`. Which direction the connection is made
-31. **Event_Info**: Description of the event, such as `Fusion` or `Deletion of 7 exons`.
-32. **Class**: [`DELETION`, `DUPLICATION`, `INSERTION`, `INVERSION` or `TRANSLOCATION`]
-33. **Length**: Length of the structural variation in number ofbasepairs.
-34. **Comments**: Any comments or free text.
-35. **External_Annotation**: COSMIC or GENBank ID. Cosmic IDs follow the format `COSMIC:COS1000`.
-36. **cbp_driver**: "Putative_Passenger", "Putative_Driver", "Unknown", "NA" or "" (empty value).
-37. **cbp_driver_annotation**: field to give more information about the cbp_driver value (limited to 80 characters). This field can only be present if the cbp_driver is also present in the MAF file. This field is free text. Example values for this field are: "Pathogenic" or "VUS".
-38. **cbp_driver_tiers**: free label/category that marks the mutation as a putative driver (limited to 20 characters). This field is free text. Example values for this field are: "Tier 1", Tier 2"... In the Oncoprint menu, the tiers are be ordered alphabetically. If you do not want to put specific mutations in any category, leave the field blank or type "NA".
-39. **cbp_driver_tiers_annotation**: field to give more information about the cbp_driver_tiers value (limited to 80 characters). This field can only be present if the cbp_driver_tiers is also present in the MAF file. This field is free text. Example values for this field are: "Highly Actionable", "Potentially Actionable", "Not currently actionable"...
-
+29. **Breakpoint_Type**: `PRECISE` or `IMPRECISE` which explain the resolution. Fill in `PRECISE` if the breakpoint resolution is known down to the exact base pair.
+30. **Center**: The sequencing center.
+31. **Connection_Type**: `3to5` or `5to3`. The direction of the second gene.
+32. **Event_Info**: Description of the event. For a fusion event, fill in `Fusion`.
+33. **Class**: [`DELETION`, `DUPLICATION`, `INSERTION`, `INVERSION` or `TRANSLOCATION`]
+34. **Length**: Length of the structural variant in number of basepairs.
+35. **Comments**: Any comments or free text.
+36. **External_Annotation**: COSMIC or GENBank ID. Cosmic IDs follow the format `COSMIC:COS1000`.
 
 ## Case Lists
 

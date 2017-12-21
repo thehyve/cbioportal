@@ -53,6 +53,7 @@ public class ImportStructuralVariantData {
     public static final String SITE2_POSITION = "Site2_Position";
     public static final String SITE2_DESCRIPTION = "Site2_Description";
     public static final String SITE2_EFFECT_ON_FRAME = "Site2_Effect_On_Frame";
+    public static final String NCBI_BUILD = "NCBI_Build";
     public static final String DNA_SUPPORT = "DNA_Support";
     public static final String RNA_SUPPORT = "RNA_Support";
     public static final String NORMAL_READ_COUNT = "Normal_Read_Count";
@@ -138,6 +139,7 @@ public class ImportStructuralVariantData {
                 structuralVariant.setSite2Position(TabDelimitedFileUtil.getPartInt(getColumnIndex(SITE2_POSITION), parts));
                 structuralVariant.setSite2Description(TabDelimitedFileUtil.getPartString(getColumnIndex(SITE2_DESCRIPTION), parts));
                 structuralVariant.setSite2EffectOnFrame(TabDelimitedFileUtil.getPartString(getColumnIndex(SITE2_EFFECT_ON_FRAME), parts));
+                structuralVariant.setNcbiBuild(TabDelimitedFileUtil.getPartString(getColumnIndex(NCBI_BUILD), parts));
                 structuralVariant.setDnaSupport(TabDelimitedFileUtil.getPartString(getColumnIndex(DNA_SUPPORT), parts));
                 structuralVariant.setRnaSupport(TabDelimitedFileUtil.getPartString(getColumnIndex(RNA_SUPPORT), parts));
                 structuralVariant.setNormalReadCount(TabDelimitedFileUtil.getPartInt(getColumnIndex(NORMAL_READ_COUNT), parts));

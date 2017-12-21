@@ -433,8 +433,8 @@ UPDATE info SET DB_SCHEMA_VERSION="2.4.1";
 -- Previous structural_variant was never used
 DROP TABLE IF EXISTS structural_variant;
 CREATE TABLE `structural_variant` (
-  `GENETIC_PROFILE_ID` int(11) NOT NULL,
   `INTERNAL_ID` int(11) NOT NULL auto_increment,
+  `GENETIC_PROFILE_ID` int(11) NOT NULL,
   `SAMPLE_ID` int(11) NOT NULL,
   `SITE1_ENTREZ_GENE_ID` int(11) NOT NULL,
   `SITE1_ENSEMBL_TRANSCRIPT_ID` varchar(25),
@@ -449,6 +449,7 @@ CREATE TABLE `structural_variant` (
   `SITE2_POSITION` int(11),
   `SITE2_DESCRIPTION` varchar(255),
   `SITE2_EFFECT_ON_FRAME` varchar(25),
+  `NCBI_BUILD` varchar(10),
   `DNA_SUPPORT` varchar(3),
   `RNA_SUPPORT` varchar(3),
   `NORMAL_READ_COUNT` int(11),

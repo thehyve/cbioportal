@@ -54,6 +54,7 @@ public class StructuralVariantControllerTest {
     private static final Integer TEST_SITE2_POSITION_1 = 1;
     private static final String TEST_SITE2_DESCRIPTION_1 = "test_site2_description_1";
     private static final String TEST_SITE2_EFFECT_ON_FRAME_1 = "test_site2_effect_on_frame_1";
+    private static final String TEST_NCBI_BUILD_1 = "test_ncbi_build_1";
     private static final String TEST_DNA_SUPPORT_1 = "test_dna_support_1";
     private static final String TEST_RNA_SUPPORT_1 = "test_rna_support_1";
     private static final Integer TEST_NORMAL_READ_COUNT_1 = 1;
@@ -135,6 +136,7 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Position").value(TEST_SITE2_POSITION_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Description").value(TEST_SITE2_DESCRIPTION_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2EffectOnFrame").value(TEST_SITE2_EFFECT_ON_FRAME_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].ncbiBuild").value(TEST_NCBI_BUILD_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].dnaSupport").value(TEST_DNA_SUPPORT_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].rnaSupport").value(TEST_RNA_SUPPORT_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].normalReadCount").value(TEST_NORMAL_READ_COUNT_1))
@@ -183,6 +185,7 @@ public class StructuralVariantControllerTest {
         structuralVariant1.setSite2Position(TEST_SITE2_POSITION_1);
         structuralVariant1.setSite2Description(TEST_SITE2_DESCRIPTION_1);
         structuralVariant1.setSite2EffectOnFrame(TEST_SITE2_EFFECT_ON_FRAME_1);
+        structuralVariant1.setNcbiBuild(TEST_NCBI_BUILD_1);
         structuralVariant1.setDnaSupport(TEST_DNA_SUPPORT_1);
         structuralVariant1.setRnaSupport(TEST_RNA_SUPPORT_1);
         structuralVariant1.setNormalReadCount(TEST_NORMAL_READ_COUNT_1);

@@ -42,8 +42,6 @@ import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.util.*;
 import org.mskcc.cbio.portal.web_api.GetGeneticProfiles;
 
-
-
 /**
  * This represents a cancer study, with a set of cases and some data sets.
  *
@@ -438,6 +436,23 @@ public class CancerStudy {
         Set<String> attrs = DaoClinicalData.getDistinctParameters(studyID);
         return attrs.contains(ClinicalAttribute.OS_STATUS) ||
                     attrs.contains(ClinicalAttribute.DFS_STATUS);
+    }
+
+    /**
+     * Check if study has fusion data 
+     * @return true if has fusion data, false when it's not
+     */
+    public boolean hasFusionData() {
+        ArrayList<GeneticProfile> geneticProfiles = DaoGeneticProfile.getAllGeneticProfiles(studyID);
+        boolean hasFusionData = false;
+        for (GeneticProfile geneticProfile : geneticProfiles) {
+            if (geneticProfile.getDatatype().equals("SV")) { // check if genetic profiles contains Structural Variant
+                                                             // data type
+                hasFusionData = true;
+                break;
+            }
+        }
+        return hasFusionData;
     }
 
     public String getShortName() {

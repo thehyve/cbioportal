@@ -201,6 +201,10 @@ window.loadReactApp({ defaultRoute: 'results' });
             if (showMutTab){
                 out.println ("<li><a href='#mutation_details' class='result-tab' id='mutation-result-tab'>Mutations</a></li>");
             }
+            if (has_fusion_data) {
+                out.println 
+                ("<li><a href='#fusion_data' class='result-tab' id='fusion-data-result-tab'>Fusion</a></li>");
+            }            
             if (showCoexpTab) {
                 out.println ("<li><a href='#coexp' class='result-tab' id='coexp-result-tab'>Co-Expression</a></li>");
             }

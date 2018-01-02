@@ -35,7 +35,7 @@ public class StructuralVariantMyBatisRepositoryTest {
                 structuralVariantMyBatisRepository.fetchStructuralVariants(geneticProfileStableIds, 
                         hugoGeneSymbols, studyIds, sampleIds);
 
-        Assert.assertEquals(1,  result.size());
+        Assert.assertEquals(2,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);
         Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());

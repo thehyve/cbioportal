@@ -664,7 +664,7 @@ class Validator(object):
 
         # check whether at least one is present
         if entrez_id is None and gene_symbol is None:
-            self.logger.error(
+            self.logger.warning(
                 'No Entrez gene id or gene symbol provided for gene.',
                 extra={'line_number': self.line_number})
             return None

@@ -31,7 +31,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.web.config.annotation.PublicApi;
-import org.cbioportal.web.parameter.SampleIdentifier;
+import org.cbioportal.web.parameter.SampleMolecularIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -58,26 +58,26 @@ public class StructuralVariantController {
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch structural variants for geneticProfileIds, hugoGeneSymbols and also sampleIdentifiers")
     public ResponseEntity<List<StructuralVariant>> fetchStructuralVariants(
-            @ApiParam(required = true, value = "List of geneticProfileStableIds, hugoGeneSymbols and sampleIdentifiers")
+            @ApiParam(required = true, value = "List of hugoGeneSymbols and molecularProfileId or sampleMolecularIdentifiers")
             @Valid @RequestBody StructuralVariantFilter structuralVariantFilter) {
         
         List<StructuralVariant> structuralVariantList;
-        
-        if (structuralVariantFilter.getSampleIdentifiers() != null) {
-            List<SampleIdentifier> sampleIdentifiers = structuralVariantFilter.getSampleIdentifiers();
-            List<String> studyIds = new ArrayList<>();
+
+        if (structuralVariantFilter.getSampleMolecularIdentifiers() != null) {
+            List<SampleMolecularIdentifier> sampleMolecularIdentifiers = structuralVariantFilter.getSampleMolecularIdentifiers();
+            List<String> molecularProfileIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
 
-            for (SampleIdentifier sampleIdentifier : sampleIdentifiers) {
-                studyIds.add(sampleIdentifier.getStudyId());
-                sampleIds.add(sampleIdentifier.getSampleId());
+            for (SampleMolecularIdentifier sampleMolecularIdentifier : sampleMolecularIdentifiers) {
+                molecularProfileIds.add(sampleMolecularIdentifier.getMolecularProfileId());
+                sampleIds.add(sampleMolecularIdentifier.getSampleId());
             }
-            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getGeneticProfileStableIds(), structuralVariantFilter.getHugoGeneSymbols(), studyIds, sampleIds);
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
             
         } else {
-            List<String> studyIds = new ArrayList<>();
+            List<String> molecularProfileIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
-            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getGeneticProfileStableIds(), structuralVariantFilter.getHugoGeneSymbols(), studyIds, sampleIds);
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
         }
         
         return new ResponseEntity<>(structuralVariantList, HttpStatus.OK);

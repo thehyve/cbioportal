@@ -23,17 +23,16 @@ public class StructuralVariantMyBatisRepositoryTest {
     @Test
     public void fetchStructuralVariantsNoSampleIdentifiers() throws Exception {
 
-        List<String> geneticProfileStableIds = new ArrayList<String>();
+        List<String> molecularProfileIds = new ArrayList<String>();
         List<String> hugoGeneSymbols = new ArrayList<String>();
-        List<String> studyIds = new ArrayList<String>();
         List<String> sampleIds = new ArrayList<String>();
 
-        geneticProfileStableIds.add("study_tcga_pub_sv");
+        molecularProfileIds.add("study_tcga_pub_sv");
         hugoGeneSymbols.add("KIAA1549");
 
         List<StructuralVariant> result = 
-                structuralVariantMyBatisRepository.fetchStructuralVariants(geneticProfileStableIds, 
-                        hugoGeneSymbols, studyIds, sampleIds);
+                structuralVariantMyBatisRepository.fetchStructuralVariants(molecularProfileIds, 
+                        hugoGeneSymbols, sampleIds);
 
         Assert.assertEquals(2,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);
@@ -86,19 +85,17 @@ public class StructuralVariantMyBatisRepositoryTest {
     @Test
     public void fetchStructuralVariantsWithSampleIdentifiers() throws Exception {
 
-        List<String> geneticProfileStableIds = new ArrayList<String>();
+        List<String> molecularProfileIds = new ArrayList<String>();
         List<String> hugoGeneSymbols = new ArrayList<String>();
-        List<String> studyIds = new ArrayList<String>();
         List<String> sampleIds = new ArrayList<String>();
 
-        geneticProfileStableIds.add("study_tcga_pub_sv");
+        molecularProfileIds.add("study_tcga_pub_sv");
         hugoGeneSymbols.add("KIAA1549");
-        studyIds.add("acc_tcga");
         sampleIds.add("TCGA-A1-B0SO-01");
 
         List<StructuralVariant> result = 
-                structuralVariantMyBatisRepository.fetchStructuralVariants(geneticProfileStableIds, 
-                        hugoGeneSymbols, studyIds, sampleIds);
+                structuralVariantMyBatisRepository.fetchStructuralVariants(molecularProfileIds, 
+                        hugoGeneSymbols, sampleIds);
 
         Assert.assertEquals(1,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);

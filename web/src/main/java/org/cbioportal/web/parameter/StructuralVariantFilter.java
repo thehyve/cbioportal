@@ -7,22 +7,22 @@ import java.util.List;
 public class StructuralVariantFilter {
     
     @Size(min=1, max = PagingConstants.MAX_PAGE_SIZE)
-    private List<String> geneticProfileStableIds;
+    private List<String> molecularProfileIds;
     private List<String> hugoGeneSymbols;
     @Size(min = 1, max = PagingConstants.MAX_PAGE_SIZE)
-    private List<SampleIdentifier> sampleIdentifiers;
+    private List<SampleMolecularIdentifier> sampleMolecularIdentifiers;
     
     @AssertTrue
-    private boolean isGeneticProfileStableIdsAndHugoGeneSymbolsPresent() {
-        return geneticProfileStableIds != null && hugoGeneSymbols != null;
+    private boolean isEitherMolecularProfileIdsOrSampleMolecularIdentifiersPresent() {
+        return molecularProfileIds != null ^ sampleMolecularIdentifiers != null;
     }
     
-    public List<String> getGeneticProfileStableIds(){
-        return geneticProfileStableIds;
+    public List<String> getMolecularProfileIds() {
+        return molecularProfileIds;
     }
-    
-    public void setGeneticProfileStableIds(List<String> geneticProfileStableIds) {
-        this.geneticProfileStableIds = geneticProfileStableIds;
+
+    public void setMolecularProfileIds(List<String> molecularProfileIds) {
+        this.molecularProfileIds = molecularProfileIds;
     }
     
     public List<String> getHugoGeneSymbols(){
@@ -33,11 +33,11 @@ public class StructuralVariantFilter {
         this.hugoGeneSymbols = hugoGeneSymbols;
     }
     
-    public List<SampleIdentifier> getSampleIdentifiers(){
-        return sampleIdentifiers;
+    public List<SampleMolecularIdentifier> getSampleMolecularIdentifiers(){
+        return sampleMolecularIdentifiers;
     }
     
-    public void setSampleIdentifiers(List<SampleIdentifier> sampleIdentifiers) {
-        this.sampleIdentifiers = sampleIdentifiers;
+    public void setSampleMolecularIdentifiers(List<SampleMolecularIdentifier> sampleMolecularIdentifiers) {
+        this.sampleMolecularIdentifiers = sampleMolecularIdentifiers;
     }
 } 

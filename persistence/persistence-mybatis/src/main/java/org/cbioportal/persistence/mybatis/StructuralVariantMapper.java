@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface StructuralVariantMapper {
 
-    List<StructuralVariant> fetchStructuralVariants(List<String> geneticProfileStableIds, 
-            List<String> hugoGeneSymbols, List<String> studyIds, List<String> sampleIds);
+    List<StructuralVariant> fetchStructuralVariants(List<String> molecularProfileIds, 
+            List<String> hugoGeneSymbols, List<String> sampleIds);
 }

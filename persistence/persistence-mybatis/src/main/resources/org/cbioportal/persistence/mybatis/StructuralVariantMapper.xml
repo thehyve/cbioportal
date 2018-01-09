@@ -60,10 +60,9 @@
         JOIN gene gene2 ON structural_variant.SITE2_ENTREZ_GENE_ID = gene2.ENTREZ_GENE_ID
         JOIN sample ON structural_variant.SAMPLE_ID = sample.INTERNAL_ID
         JOIN patient ON sample.patient_ID = patient.INTERNAL_ID
-        JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <where>
             genetic_profile.STABLE_ID IN 
-            <foreach item="item" collection="geneticProfileStableIds" open="(" separator="," close=")">
+            <foreach item="item" collection="molecularProfileIds" open="(" separator="," close=")">
                 #{item}
             </foreach>
             AND (gene1.HUGO_GENE_SYMBOL in 
@@ -75,12 +74,12 @@
                 #{item}
             </foreach>
             )
-            <if test="studyIds.size() > 0 and sampleIds.size() > 0">
-            AND (cancer_study.CANCER_STUDY_IDENTIFIER, sample.STABLE_ID) IN
-            <foreach index="i" collection="sampleIds" open="(" separator="," close=")"> 
-                (#{studyIds[${i}]}, #{sampleIds[${i}]}) 
-            </foreach>
-        </if>
+            <if test="molecularProfileIds.size() > 0 and sampleIds.size() > 0">
+                AND (genetic_profile.STABLE_ID, sample.STABLE_ID) IN
+                <foreach index="i" collection="sampleIds" open="(" separator="," close=")"> 
+                    (#{molecularProfileIds[${i}]}, #{sampleIds[${i}]}) 
+                </foreach>
+            </if>
         </where>
         ORDER BY gene1.HUGO_GENE_SYMBOL, gene2.HUGO_GENE_SYMBOL
     </select>

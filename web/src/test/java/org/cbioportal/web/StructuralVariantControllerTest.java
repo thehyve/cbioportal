@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.cbioportal.model.StructuralVariant;
 import org.cbioportal.service.StructuralVariantService;
-import org.cbioportal.web.parameter.SampleIdentifier;
+import org.cbioportal.web.parameter.SampleMolecularIdentifier;
 import org.cbioportal.web.parameter.StructuralVariantFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,7 +106,7 @@ public class StructuralVariantControllerTest {
         List<StructuralVariant> structuralVariant = createExampleStructuralVariant();
         
         Mockito.when(structuralVariantService.fetchStructuralVariants(Mockito.anyList(), 
-                Mockito.anyList(), Mockito.anyList(), Mockito.anyList())).thenReturn(structuralVariant);
+                Mockito.anyList(), Mockito.anyList())).thenReturn(structuralVariant);
         
         StructuralVariantFilter structuralVariantFilter = createStructuralVariantFilter();
         
@@ -217,20 +217,20 @@ public class StructuralVariantControllerTest {
 
         StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
 
-        List<String> geneticProfileStableIds = new ArrayList<>();
+//        List<String> molecularProfileIds = new ArrayList<>();
         List<String> hugoGeneSymbols = new ArrayList<>();
-        geneticProfileStableIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
+//        molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
         hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
 
-        List<SampleIdentifier> sampleIdentifierList = new ArrayList<>();
-        SampleIdentifier sampleIdentifier1 = new SampleIdentifier();
-        sampleIdentifier1.setSampleId(TEST_SAMPLE_ID_1);
-        sampleIdentifier1.setStudyId(TEST_STUDY_ID_1);
-        sampleIdentifierList.add(sampleIdentifier1);
+        List<SampleMolecularIdentifier> sampleMolecularIdentifierList = new ArrayList<>();
+        SampleMolecularIdentifier sampleMolecularIdentifier1 = new SampleMolecularIdentifier();
+        sampleMolecularIdentifier1.setSampleId(TEST_SAMPLE_ID_1);
+        sampleMolecularIdentifier1.setMolecularProfileId(TEST_GENETIC_PROFILE_STABLE_ID_1);
+        sampleMolecularIdentifierList.add(sampleMolecularIdentifier1);
 
-        structuralVariantFilter.setGeneticProfileStableIds(geneticProfileStableIds);
+//        structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
         structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
-        structuralVariantFilter.setSampleIdentifiers(sampleIdentifierList);
+        structuralVariantFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifierList);
         return structuralVariantFilter;
     }
 }

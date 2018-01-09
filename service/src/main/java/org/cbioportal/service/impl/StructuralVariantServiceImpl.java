@@ -15,10 +15,9 @@ public class StructuralVariantServiceImpl implements StructuralVariantService {
     private StructuralVariantRepository structuralVariantRepository;
     
     @Override
-    public List<StructuralVariant> fetchStructuralVariants(List<String> geneticProfileStableIds, 
-            List<String> hugoGeneSymbols, List<String> studyIds, List<String> sampleIds) {
+    public List<StructuralVariant> fetchStructuralVariants(List<String> molecularProfileIds, 
+            List<String> hugoGeneSymbols,  List<String> sampleIds) {
         
-        return structuralVariantRepository.fetchStructuralVariants(geneticProfileStableIds, hugoGeneSymbols,
-                studyIds, sampleIds);
+        return structuralVariantRepository.fetchStructuralVariants(molecularProfileIds, hugoGeneSymbols, sampleIds);
     }
 }

@@ -1725,7 +1725,7 @@ class ClinicalValidator(Validator):
                                                        'description'):
                     pass
                 elif self.METADATA_LINES[line_index] == 'datatype':
-                    VALID_DATATYPES = ('STRING', 'NUMBER', 'BOOLEAN')
+                    VALID_DATATYPES = ('STRING', 'NUMBER', 'BOOLEAN', 'URLS')
                     if value not in VALID_DATATYPES:
                         self.logger.error(
                             'Invalid data type definition, must be one of '

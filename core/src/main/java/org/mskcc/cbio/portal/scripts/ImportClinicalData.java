@@ -115,7 +115,8 @@ public class ImportClinicalData extends ConsoleRunnable {
     {
         STRING,
         NUMBER,
-        BOOLEAN;
+        BOOLEAN,
+        URLS;
     	
     	static public boolean has(String value) {
     		try { 

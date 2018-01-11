@@ -75,9 +75,8 @@ public class StructuralVariantController {
             structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
             
         } else {
-            List<String> molecularProfileIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
-            structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getMolecularProfileIds(), structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
         }
         
         return new ResponseEntity<>(structuralVariantList, HttpStatus.OK);

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.cbioportal.model.StructuralVariant;
 import org.cbioportal.service.StructuralVariantService;
+import org.cbioportal.service.exception.ClinicalAttributeNotFoundException;
 import org.cbioportal.web.parameter.SampleMolecularIdentifier;
 import org.cbioportal.web.parameter.StructuralVariantFilter;
 
@@ -99,17 +100,17 @@ public class StructuralVariantControllerTest {
         Mockito.reset(structuralVariantService);
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
-    
+
     @Test
-    public void fetchStructuralVariants() throws Exception {
+    public void fetchStructuralVariantsMolecularProfileId() throws Exception {
 
         List<StructuralVariant> structuralVariant = createExampleStructuralVariant();
-        
+
         Mockito.when(structuralVariantService.fetchStructuralVariants(Mockito.anyList(), 
                 Mockito.anyList(), Mockito.anyList())).thenReturn(structuralVariant);
-        
-        StructuralVariantFilter structuralVariantFilter = createStructuralVariantFilter();
-        
+
+        StructuralVariantFilter structuralVariantFilter = createStructuralVariantFilterMolecularProfileId();
+
         mockMvc.perform(MockMvcRequestBuilders.post("/structuralvariant/fetch")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +162,88 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverTiersFilter").value(TEST_DRIVER_TIERS_FILTER_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverTiersFilterAnn").value(TEST_DRIVER_TIERS_FILTER_ANN_1));
     }
-    
+
+    @Test
+    public void fetchStructuralVariantsSampleMolecularIdentifier() throws Exception {
+
+        List<StructuralVariant> structuralVariant = createExampleStructuralVariant();
+
+        Mockito.when(structuralVariantService.fetchStructuralVariants(Mockito.anyList(), 
+                Mockito.anyList(), Mockito.anyList())).thenReturn(structuralVariant);
+
+        StructuralVariantFilter structuralVariantFilter = createStructuralVariantFilterSampleMolecularIdentifier();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/structuralvariant/fetch")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(structuralVariantFilter)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].geneticProfileId").value(TEST_GENETIC_PROFILE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].structuralVariantId").value((int) TEST_STRUCTURAL_VARIANT_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleIdInternal").value(TEST_SAMPLE_ID_INTERNAL_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleId").value(TEST_SAMPLE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EntrezGeneId").value((int) TEST_SITE1_ENTREZ_GENE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1HugoSymbol").value(TEST_SITE1_HUGO_SYMBOL_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EnsemblTranscriptId").value(TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1Exon").value(TEST_SITE1_EXON_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1Chromosome").value(TEST_SITE1_CHROMOSOME_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1Position").value(TEST_SITE1_POSITION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1Description").value(TEST_SITE1_DESCRIPTION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2EntrezGeneId").value((int) TEST_SITE2_ENTREZ_GENE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2HugoSymbol").value(TEST_SITE2_HUGO_SYMBOL_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2EnsemblTranscriptId").value(TEST_SITE2_ENSEMBL_TRANSCRIPT_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Exon").value(TEST_SITE2_EXON_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Chromosome").value(TEST_SITE2_CHROMOSOME_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Position").value(TEST_SITE2_POSITION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2Description").value(TEST_SITE2_DESCRIPTION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].site2EffectOnFrame").value(TEST_SITE2_EFFECT_ON_FRAME_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].ncbiBuild").value(TEST_NCBI_BUILD_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].dnaSupport").value(TEST_DNA_SUPPORT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].rnaSupport").value(TEST_RNA_SUPPORT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].normalReadCount").value(TEST_NORMAL_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].tumorReadCount").value(TEST_TUMOR_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].normalVariantCount").value(TEST_NORMAL_VARIANT_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].tumorVariantCount").value(TEST_TUMOR_VARIANT_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].normalPairedEndReadCount").value(TEST_NORMAL_PAIRED_END_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].tumorPairedEndReadCount").value(TEST_TUMOR_PAIRED_END_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].normalSplitReadCount").value(TEST_NORMAL_SPLIT_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].tumorSplitReadCount").value(TEST_TUMOR_SPLIT_READ_COUNT_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].annotation").value(TEST_ANNOTATION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].breakpointType").value(TEST_BREAKPOINT_TYPE_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].center").value(TEST_CENTER_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].connectionType").value(TEST_CONNECTION_TYPE_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventInfo").value(TEST_EVENT_INFO_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].variantClass").value(TEST_VARIANT_CLASS_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].length").value(TEST_LENGTH_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].comments").value(TEST_COMMENTS_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].externalAnnotation").value(TEST_EXTERNAL_ANNOTATION_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverFilter").value(TEST_DRIVER_FILTER_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverFilterAnn").value(TEST_DRIVER_FILTER_ANN_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverTiersFilter").value(TEST_DRIVER_TIERS_FILTER_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].driverTiersFilterAnn").value(TEST_DRIVER_TIERS_FILTER_ANN_1));
+    }
+
+    @Test
+    public void fetchStructuralVariantsBothMolecularProfileIdAndSampleMolecularIdentifier() throws Exception {
+
+        List<StructuralVariant> structuralVariant = createExampleStructuralVariant();
+
+        Mockito.when(structuralVariantService.fetchStructuralVariants(Mockito.anyList(), 
+                Mockito.anyList(), Mockito.anyList())).thenReturn(structuralVariant);
+
+        StructuralVariantFilter structuralVariantFilter = createStructuralVariantFilterMolecularProfileIdAndSampleMolecularIdentifier();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/structuralvariant/fetch")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(structuralVariantFilter)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                        .value("eitherMolecularProfileIdsOrSampleMolecularIdentifiersPresent must be true"));
+    }
+
     private List<StructuralVariant> createExampleStructuralVariant() {
 
         List<StructuralVariant> structuralVariantList = new ArrayList<>();
@@ -213,13 +295,25 @@ public class StructuralVariantControllerTest {
         return structuralVariantList;
     }
 
-    private StructuralVariantFilter createStructuralVariantFilter( ) {
+    private StructuralVariantFilter createStructuralVariantFilterMolecularProfileId( ) {
 
         StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
 
-//        List<String> molecularProfileIds = new ArrayList<>();
+        List<String> molecularProfileIds = new ArrayList<>();
         List<String> hugoGeneSymbols = new ArrayList<>();
-//        molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
+        molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
+        hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
+
+        structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
+        structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
+        return structuralVariantFilter;
+    }
+
+    private StructuralVariantFilter createStructuralVariantFilterSampleMolecularIdentifier( ) {
+
+        StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
+
+        List<String> hugoGeneSymbols = new ArrayList<>();
         hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
 
         List<SampleMolecularIdentifier> sampleMolecularIdentifierList = new ArrayList<>();
@@ -228,7 +322,27 @@ public class StructuralVariantControllerTest {
         sampleMolecularIdentifier1.setMolecularProfileId(TEST_GENETIC_PROFILE_STABLE_ID_1);
         sampleMolecularIdentifierList.add(sampleMolecularIdentifier1);
 
-//        structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
+        structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
+        structuralVariantFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifierList);
+        return structuralVariantFilter;
+    }
+
+    private StructuralVariantFilter createStructuralVariantFilterMolecularProfileIdAndSampleMolecularIdentifier( ) {
+
+        StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        List<String> hugoGeneSymbols = new ArrayList<>();
+        molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
+        hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
+
+        List<SampleMolecularIdentifier> sampleMolecularIdentifierList = new ArrayList<>();
+        SampleMolecularIdentifier sampleMolecularIdentifier1 = new SampleMolecularIdentifier();
+        sampleMolecularIdentifier1.setSampleId(TEST_SAMPLE_ID_1);
+        sampleMolecularIdentifier1.setMolecularProfileId(TEST_GENETIC_PROFILE_STABLE_ID_1);
+        sampleMolecularIdentifierList.add(sampleMolecularIdentifier1);
+
+        structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
         structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
         structuralVariantFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifierList);
         return structuralVariantFilter;

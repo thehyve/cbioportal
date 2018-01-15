@@ -31,6 +31,8 @@ public class StructuralVariant implements Serializable {
     private long structuralVariantId;
     private int sampleIdInternal;
     private String sampleId;
+    private String patientId;
+    private String studyId;
     private Long site1EntrezGeneId;
     private String site1HugoSymbol;
     private String site1EnsemblTranscriptId;
@@ -94,6 +96,18 @@ public class StructuralVariant implements Serializable {
     }
     public void setSampleId(String tumorSampleBarcode) {
         this.sampleId = tumorSampleBarcode;
+    }
+    public String getPatientId() {
+        return patientId;
+    }
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+    public String getStudyId() {
+        return studyId;
+    }
+    public void setStudyId(String studyId) {
+        this.studyId = studyId;
     }
     public Long getSite1EntrezGeneId() {
         return site1EntrezGeneId;

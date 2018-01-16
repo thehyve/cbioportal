@@ -8,7 +8,7 @@ public class StructuralVariantFilter {
     
     @Size(min=1, max = PagingConstants.MAX_PAGE_SIZE)
     private List<String> molecularProfileIds;
-    private List<String> hugoGeneSymbols;
+    private List<Integer> entrezGeneIds;
     @Size(min = 1, max = PagingConstants.MAX_PAGE_SIZE)
     private List<SampleMolecularIdentifier> sampleMolecularIdentifiers;
     
@@ -25,12 +25,12 @@ public class StructuralVariantFilter {
         this.molecularProfileIds = molecularProfileIds;
     }
     
-    public List<String> getHugoGeneSymbols(){
-        return hugoGeneSymbols;
+    public List<Integer> getEntrezGeneIds(){
+        return entrezGeneIds;
     }
     
-    public void setHugoGeneSymbols(List<String> hugoGeneSymbols) {
-        this.hugoGeneSymbols = hugoGeneSymbols;
+    public void setEntrezGeneIds(List<Integer> entrezGeneIds) {
+        this.entrezGeneIds = entrezGeneIds;
     }
     
     public List<SampleMolecularIdentifier> getSampleMolecularIdentifiers(){

@@ -7,5 +7,5 @@ import java.util.List;
 public interface StructuralVariantRepository {
 
     List<StructuralVariant> fetchStructuralVariants(List<String> molecularProfileIds, 
-            List<String> hugoGeneSymbols, List<String> sampleIds);
+            List<Integer> entrezGeneIds, List<String> sampleIds);
 }

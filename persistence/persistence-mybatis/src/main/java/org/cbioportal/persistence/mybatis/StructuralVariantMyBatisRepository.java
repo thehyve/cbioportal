@@ -15,9 +15,9 @@ public class StructuralVariantMyBatisRepository implements StructuralVariantRepo
     
     @Override
     public List<StructuralVariant> fetchStructuralVariants(List<String> molecularProfileIds, 
-            List<String> hugoGeneSymbols, List<String> sampleIds) {
+            List<Integer> entrezGeneIds, List<String> sampleIds) {
 
         return structuralVariantmapper.fetchStructuralVariants(molecularProfileIds, 
-                hugoGeneSymbols, sampleIds);
+                entrezGeneIds, sampleIds);
     }
 }

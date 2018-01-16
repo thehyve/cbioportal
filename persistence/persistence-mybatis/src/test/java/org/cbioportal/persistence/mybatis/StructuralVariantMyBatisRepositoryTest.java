@@ -38,8 +38,10 @@ public class StructuralVariantMyBatisRepositoryTest {
         StructuralVariant structuralVariantFirstResult = result.get(0);
         Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());
-        Assert.assertEquals((int) 15, structuralVariantFirstResult.getSampleIdInternal());
-        Assert.assertEquals((String) "TCGA-A1-B0SO-01", structuralVariantFirstResult.getSampleId());
+        Assert.assertEquals((int) 1, structuralVariantFirstResult.getSampleIdInternal());
+        Assert.assertEquals((String) "TCGA-A1-A0SB-01", structuralVariantFirstResult.getSampleId());
+        Assert.assertEquals((String) "TCGA-A1-A0SB", structuralVariantFirstResult.getPatientId());
+        Assert.assertEquals((String) "study_tcga_pub", structuralVariantFirstResult.getStudyId());
         Assert.assertEquals((Long) 57670L, structuralVariantFirstResult.getSite1EntrezGeneId());
         Assert.assertEquals("KIAA1549", structuralVariantFirstResult.getSite1HugoSymbol());
         Assert.assertEquals("ENST00000242365", structuralVariantFirstResult.getSite1EnsemblTranscriptId());
@@ -91,7 +93,7 @@ public class StructuralVariantMyBatisRepositoryTest {
 
         molecularProfileIds.add("study_tcga_pub_sv");
         hugoGeneSymbols.add("KIAA1549");
-        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SB-01");
 
         List<StructuralVariant> result = 
                 structuralVariantMyBatisRepository.fetchStructuralVariants(molecularProfileIds, 
@@ -101,8 +103,10 @@ public class StructuralVariantMyBatisRepositoryTest {
         StructuralVariant structuralVariantFirstResult = result.get(0);
         Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());
-        Assert.assertEquals((int) 15, structuralVariantFirstResult.getSampleIdInternal());
-        Assert.assertEquals((String) "TCGA-A1-B0SO-01", structuralVariantFirstResult.getSampleId());
+        Assert.assertEquals((int) 1, structuralVariantFirstResult.getSampleIdInternal());
+        Assert.assertEquals((String) "TCGA-A1-A0SB-01", structuralVariantFirstResult.getSampleId());
+        Assert.assertEquals((String) "TCGA-A1-A0SB", structuralVariantFirstResult.getPatientId());
+        Assert.assertEquals((String) "study_tcga_pub", structuralVariantFirstResult.getStudyId());
         Assert.assertEquals((Long) 57670L, structuralVariantFirstResult.getSite1EntrezGeneId());
         Assert.assertEquals("KIAA1549", structuralVariantFirstResult.getSite1HugoSymbol());
         Assert.assertEquals("ENST00000242365", structuralVariantFirstResult.getSite1EnsemblTranscriptId());

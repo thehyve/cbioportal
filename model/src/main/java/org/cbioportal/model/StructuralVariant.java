@@ -34,14 +34,14 @@ public class StructuralVariant extends UniqueKeyBase implements Serializable{
     private String sampleId;
     private String patientId;
     private String studyId;
-    private Long site1EntrezGeneId;
+    private Integer site1EntrezGeneId;
     private String site1HugoSymbol;
     private String site1EnsemblTranscriptId;
     private Integer site1Exon;
     private String site1Chromosome;
     private Integer site1Position;
     private String site1Description;
-    private Long site2EntrezGeneId;
+    private Integer site2EntrezGeneId;
     private String site2HugoSymbol;
     private String site2EnsemblTranscriptId;
     private Integer site2Exon;
@@ -110,10 +110,10 @@ public class StructuralVariant extends UniqueKeyBase implements Serializable{
     public void setStudyId(String studyId) {
         this.studyId = studyId;
     }
-    public Long getSite1EntrezGeneId() {
+    public Integer getSite1EntrezGeneId() {
         return site1EntrezGeneId;
     }
-    public void setSite1EntrezGeneId(Long site1EntrezGeneId) {
+    public void setSite1EntrezGeneId(Integer site1EntrezGeneId) {
         this.site1EntrezGeneId = site1EntrezGeneId;
     }
     public String getSite1HugoSymbol() {
@@ -152,10 +152,10 @@ public class StructuralVariant extends UniqueKeyBase implements Serializable{
     public void setSite1Description(String site1Desc) {
         this.site1Description = site1Desc;
     }
-    public Long getSite2EntrezGeneId() {
+    public Integer getSite2EntrezGeneId() {
         return site2EntrezGeneId;
     }
-    public void setSite2EntrezGeneId(Long site2EntrezGeneId) {
+    public void setSite2EntrezGeneId(Integer site2EntrezGeneId) {
         this.site2EntrezGeneId = site2EntrezGeneId;
     }
     public String getSite2HugoSymbol() {

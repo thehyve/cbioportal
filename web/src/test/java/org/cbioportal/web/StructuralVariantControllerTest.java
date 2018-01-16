@@ -45,14 +45,14 @@ public class StructuralVariantControllerTest {
     private static final String TEST_UNIQUE_SAMPLE_KEY_1 = "dGVzdF9zYW1wbGVfaWRfMTp0ZXN0X3N0dWR5X2lkXzE";
     // TEST_UNIQUE_PATIENT_KEY_1 decoded: test_patient_id_1:test_study_id_1
     private static final String TEST_UNIQUE_PATIENT_KEY_1 = "dGVzdF9wYXRpZW50X2lkXzE6dGVzdF9zdHVkeV9pZF8x";
-    private static final long TEST_SITE1_ENTREZ_GENE_ID_1 = 1L;
+    private static final Integer TEST_SITE1_ENTREZ_GENE_ID_1 = 1;
     private static final String TEST_SITE1_HUGO_SYMBOL_1 = "test_site1_hugo_symbol_1";
     private static final String TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1 = "test_site1_ensembl_transcript_id_1";
     private static final Integer TEST_SITE1_EXON_1 = 1;
     private static final String TEST_SITE1_CHROMOSOME_1 = "test_site1_chromosome_1";
     private static final Integer TEST_SITE1_POSITION_1 = 1;
     private static final String TEST_SITE1_DESCRIPTION_1 = "test_site1_description_1";
-    private static final long TEST_SITE2_ENTREZ_GENE_ID_1 = 1L;
+    private static final Integer TEST_SITE2_ENTREZ_GENE_ID_1 = 1;
     private static final String TEST_SITE2_HUGO_SYMBOL_1 = "test_site2_hugo_symbol_1";
     private static final String TEST_SITE2_ENSEMBL_TRANSCRIPT_ID_1 = "test_site2_ensembl_transcript_id_1";
     private static final Integer TEST_SITE2_EXON_1 = 1;
@@ -317,12 +317,12 @@ public class StructuralVariantControllerTest {
         StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
 
         List<String> molecularProfileIds = new ArrayList<>();
-        List<String> hugoGeneSymbols = new ArrayList<>();
+        List<Integer> entrezGeneIds = new ArrayList<>();
         molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
-        hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
+        entrezGeneIds.add(TEST_SITE1_ENTREZ_GENE_ID_1);
 
         structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
-        structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
+        structuralVariantFilter.setEntrezGeneIds(entrezGeneIds);
         return structuralVariantFilter;
     }
 
@@ -330,8 +330,8 @@ public class StructuralVariantControllerTest {
 
         StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
 
-        List<String> hugoGeneSymbols = new ArrayList<>();
-        hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
+        List<Integer> entrezGeneIds = new ArrayList<>();
+        entrezGeneIds.add(TEST_SITE1_ENTREZ_GENE_ID_1);
 
         List<SampleMolecularIdentifier> sampleMolecularIdentifierList = new ArrayList<>();
         SampleMolecularIdentifier sampleMolecularIdentifier1 = new SampleMolecularIdentifier();
@@ -339,7 +339,7 @@ public class StructuralVariantControllerTest {
         sampleMolecularIdentifier1.setMolecularProfileId(TEST_GENETIC_PROFILE_STABLE_ID_1);
         sampleMolecularIdentifierList.add(sampleMolecularIdentifier1);
 
-        structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
+        structuralVariantFilter.setEntrezGeneIds(entrezGeneIds);
         structuralVariantFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifierList);
         return structuralVariantFilter;
     }
@@ -349,9 +349,9 @@ public class StructuralVariantControllerTest {
         StructuralVariantFilter structuralVariantFilter = new StructuralVariantFilter();
 
         List<String> molecularProfileIds = new ArrayList<>();
-        List<String> hugoGeneSymbols = new ArrayList<>();
+        List<Integer> entrezGeneIds = new ArrayList<>();
         molecularProfileIds.add(TEST_GENETIC_PROFILE_STABLE_ID_1);
-        hugoGeneSymbols.add(TEST_SITE1_HUGO_SYMBOL_1);
+        entrezGeneIds.add(TEST_SITE1_ENTREZ_GENE_ID_1);
 
         List<SampleMolecularIdentifier> sampleMolecularIdentifierList = new ArrayList<>();
         SampleMolecularIdentifier sampleMolecularIdentifier1 = new SampleMolecularIdentifier();
@@ -360,7 +360,7 @@ public class StructuralVariantControllerTest {
         sampleMolecularIdentifierList.add(sampleMolecularIdentifier1);
 
         structuralVariantFilter.setMolecularProfileIds(molecularProfileIds);
-        structuralVariantFilter.setHugoGeneSymbols(hugoGeneSymbols);
+        structuralVariantFilter.setEntrezGeneIds(entrezGeneIds);
         structuralVariantFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifierList);
         return structuralVariantFilter;
     }

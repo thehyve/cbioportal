@@ -56,9 +56,9 @@ public class StructuralVariantController {
     
     @RequestMapping(value = "/structuralvariant/fetch", method = RequestMethod.POST, 
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Fetch structural variants for geneticProfileIds, hugoGeneSymbols and also sampleIdentifiers")
+    @ApiOperation("Fetch structural variants for entrezGeneIds and molecularProfileIds or sampleMolecularIdentifiers")
     public ResponseEntity<List<StructuralVariant>> fetchStructuralVariants(
-            @ApiParam(required = true, value = "List of hugoGeneSymbols and molecularProfileId or sampleMolecularIdentifiers")
+            @ApiParam(required = true, value = "List of entrezGeneIds and molecularProfileIds or sampleMolecularIdentifiers")
             @Valid @RequestBody StructuralVariantFilter structuralVariantFilter) {
         
         List<StructuralVariant> structuralVariantList;
@@ -72,11 +72,11 @@ public class StructuralVariantController {
                 molecularProfileIds.add(sampleMolecularIdentifier.getMolecularProfileId());
                 sampleIds.add(sampleMolecularIdentifier.getSampleId());
             }
-            structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(molecularProfileIds, structuralVariantFilter.getEntrezGeneIds(), sampleIds);
             
         } else {
             List<String> sampleIds = new ArrayList<>();
-            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getMolecularProfileIds(), structuralVariantFilter.getHugoGeneSymbols(), sampleIds);
+            structuralVariantList = structuralVariantService.fetchStructuralVariants(structuralVariantFilter.getMolecularProfileIds(), structuralVariantFilter.getEntrezGeneIds(), sampleIds);
         }
         
         return new ResponseEntity<>(structuralVariantList, HttpStatus.OK);

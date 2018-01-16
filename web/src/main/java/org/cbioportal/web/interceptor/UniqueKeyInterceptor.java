@@ -119,6 +119,7 @@ public class UniqueKeyInterceptor extends AbstractMappingJacksonResponseBodyAdvi
                     sample.setUniquePatientKey(calculateBase64(sample.getPatientStableId(), 
                         sample.getCancerStudyIdentifier()));
                 } else if (object instanceof StructuralVariant) {
+                    
                     StructuralVariant structuralVariant = (StructuralVariant) object;
                     structuralVariant.setUniqueSampleKey(calculateBase64(structuralVariant.getSampleId(), structuralVariant.getStudyId()));
                     structuralVariant.setUniquePatientKey(calculateBase64(structuralVariant.getPatientId(), structuralVariant.getStudyId()));

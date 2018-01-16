@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.cbioportal.model.StructuralVariant;
 import org.cbioportal.service.StructuralVariantService;
-import org.cbioportal.service.exception.ClinicalAttributeNotFoundException;
 import org.cbioportal.web.parameter.SampleMolecularIdentifier;
 import org.cbioportal.web.parameter.StructuralVariantFilter;
 
@@ -35,11 +34,17 @@ import org.springframework.web.context.WebApplicationContext;
 public class StructuralVariantControllerTest {
 
     private static final String TEST_GENETIC_PROFILE_STABLE_ID_1 = "test_genetic_profile_stable_id_1";
-    private static final String TEST_STUDY_ID_1 = "test_study_id_1";
     private static final int TEST_GENETIC_PROFILE_ID_1 = 1;
     private static final long TEST_STRUCTURAL_VARIANT_ID_1 = 1L;
     private static final int TEST_SAMPLE_ID_INTERNAL_1 = 1;
     private static final String TEST_SAMPLE_ID_1 = "test_sample_id_1";
+    private static final String TEST_PATIENT_ID_1 = "test_patient_id_1";
+    private static final String TEST_STUDY_ID_1 = "test_study_id_1";
+    // Sample and Patient key are retrieved after response is given back
+    // TEST_UNIQUE_SAMPLE_KEY_1 decoded: test_sample_id_1:test_study_id_1
+    private static final String TEST_UNIQUE_SAMPLE_KEY_1 = "dGVzdF9zYW1wbGVfaWRfMTp0ZXN0X3N0dWR5X2lkXzE";
+    // TEST_UNIQUE_PATIENT_KEY_1 decoded: test_patient_id_1:test_study_id_1
+    private static final String TEST_UNIQUE_PATIENT_KEY_1 = "dGVzdF9wYXRpZW50X2lkXzE6dGVzdF9zdHVkeV9pZF8x";
     private static final long TEST_SITE1_ENTREZ_GENE_ID_1 = 1L;
     private static final String TEST_SITE1_HUGO_SYMBOL_1 = "test_site1_hugo_symbol_1";
     private static final String TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1 = "test_site1_ensembl_transcript_id_1";
@@ -122,6 +127,10 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].structuralVariantId").value((int) TEST_STRUCTURAL_VARIANT_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleIdInternal").value(TEST_SAMPLE_ID_INTERNAL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleId").value(TEST_SAMPLE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].patientId").value(TEST_PATIENT_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].studyId").value(TEST_STUDY_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].uniqueSampleKey").value(TEST_UNIQUE_SAMPLE_KEY_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].uniquePatientKey").value(TEST_UNIQUE_PATIENT_KEY_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EntrezGeneId").value((int) TEST_SITE1_ENTREZ_GENE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1HugoSymbol").value(TEST_SITE1_HUGO_SYMBOL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EnsemblTranscriptId").value(TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1))
@@ -184,6 +193,10 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].structuralVariantId").value((int) TEST_STRUCTURAL_VARIANT_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleIdInternal").value(TEST_SAMPLE_ID_INTERNAL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleId").value(TEST_SAMPLE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].patientId").value(TEST_PATIENT_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].studyId").value(TEST_STUDY_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].uniqueSampleKey").value(TEST_UNIQUE_SAMPLE_KEY_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].uniquePatientKey").value(TEST_UNIQUE_PATIENT_KEY_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EntrezGeneId").value((int) TEST_SITE1_ENTREZ_GENE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1HugoSymbol").value(TEST_SITE1_HUGO_SYMBOL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].site1EnsemblTranscriptId").value(TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1))
@@ -252,6 +265,10 @@ public class StructuralVariantControllerTest {
         structuralVariant1.setStructuralVariantId(TEST_STRUCTURAL_VARIANT_ID_1);
         structuralVariant1.setSampleIdInternal(TEST_SAMPLE_ID_INTERNAL_1);
         structuralVariant1.setSampleId(TEST_SAMPLE_ID_1);
+        structuralVariant1.setPatientId(TEST_PATIENT_ID_1);
+        structuralVariant1.setStudyId(TEST_STUDY_ID_1);
+        structuralVariant1.setUniqueSampleKey(TEST_UNIQUE_SAMPLE_KEY_1);
+        structuralVariant1.setUniquePatientKey(TEST_UNIQUE_PATIENT_KEY_1);
         structuralVariant1.setSite1EntrezGeneId(TEST_SITE1_ENTREZ_GENE_ID_1);
         structuralVariant1.setSite1HugoSymbol(TEST_SITE1_HUGO_SYMBOL_1);
         structuralVariant1.setSite1EnsemblTranscriptId(TEST_SITE1_ENSEMBL_TRANSCRIPT_ID_1);

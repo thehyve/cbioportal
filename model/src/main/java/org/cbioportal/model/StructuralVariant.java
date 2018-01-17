@@ -29,6 +29,7 @@ import org.cbioportal.model.UniqueKeyBase;
 public class StructuralVariant extends UniqueKeyBase implements Serializable{
 
     private int geneticProfileId;
+    private String molecularProfileId;
     private long structuralVariantId;
     private int sampleIdInternal;
     private String sampleId;
@@ -79,6 +80,12 @@ public class StructuralVariant extends UniqueKeyBase implements Serializable{
     }
     public void setGeneticProfileId(int geneticProfileId) {
         this.geneticProfileId = geneticProfileId;
+    }
+    public String getMolecularProfileId() {
+        return molecularProfileId;
+    }
+    public void setMolecularProfileId(String molecularProfileId) {
+        this.molecularProfileId = molecularProfileId;
     }
     public long getStructuralVariantId() {
         return structuralVariantId;

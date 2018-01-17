@@ -124,6 +124,7 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].geneticProfileId").value(TEST_GENETIC_PROFILE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].molecularProfileId").value(TEST_GENETIC_PROFILE_STABLE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].structuralVariantId").value((int) TEST_STRUCTURAL_VARIANT_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleIdInternal").value(TEST_SAMPLE_ID_INTERNAL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleId").value(TEST_SAMPLE_ID_1))
@@ -190,6 +191,7 @@ public class StructuralVariantControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].geneticProfileId").value(TEST_GENETIC_PROFILE_ID_1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].molecularProfileId").value(TEST_GENETIC_PROFILE_STABLE_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].structuralVariantId").value((int) TEST_STRUCTURAL_VARIANT_ID_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleIdInternal").value(TEST_SAMPLE_ID_INTERNAL_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].sampleId").value(TEST_SAMPLE_ID_1))
@@ -262,6 +264,7 @@ public class StructuralVariantControllerTest {
         List<StructuralVariant> structuralVariantList = new ArrayList<>();
         StructuralVariant structuralVariant1 = new StructuralVariant();
         structuralVariant1.setGeneticProfileId(TEST_GENETIC_PROFILE_ID_1);
+        structuralVariant1.setMolecularProfileId(TEST_GENETIC_PROFILE_STABLE_ID_1);
         structuralVariant1.setStructuralVariantId(TEST_STRUCTURAL_VARIANT_ID_1);
         structuralVariant1.setSampleIdInternal(TEST_SAMPLE_ID_INTERNAL_1);
         structuralVariant1.setSampleId(TEST_SAMPLE_ID_1);

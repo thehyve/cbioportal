@@ -437,8 +437,7 @@ window.loadReactApp({ defaultRoute: 'results' });
         $("#fusion-data-result-tab").qtip(
             {
                 content: {text: 
-                    "Fusion genes, hybrid gene formed from two previously separate genes. It can occur as a result of: " +
-                    "translocation, interstitial deletion, or chromosomal inversion *CHANGE THIS PLEASE*"},
+                    "Fusion details, including the exact exons where the fusion between two genes has occured, frame effects and annotations"},
                 style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow result-tab-qtip-content' },
                 show: {event: "mouseover", delay: 0},
                 hide: {fixed:true, delay: 100, event: "mouseout"},

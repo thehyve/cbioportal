@@ -13,10 +13,4 @@ public interface ClinicalAttributeMapper {
     BaseMeta getMetaClinicalAttributes(List<String> studyIds);
 
     ClinicalAttribute getClinicalAttribute(String studyId, String clinicalAttributeId, String projection);
-
-    List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleIds(List<String> studyIds, List<String> sampleIds,
-                                                                         String projection, String sortBy, String direction);
-
-    List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleListId(String sampleListId, String projection,
-                                                                            String sortBy, String direction);
 }

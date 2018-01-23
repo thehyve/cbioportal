@@ -36,7 +36,6 @@ public class StructuralVariantMyBatisRepositoryTest {
 
         Assert.assertEquals(2,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);
-        Assert.assertEquals((int) 7, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals("study_tcga_pub_sv", structuralVariantFirstResult.getMolecularProfileId());
         Assert.assertEquals(1, structuralVariantFirstResult.getStructuralVariantId());
         Assert.assertEquals((int) 1, structuralVariantFirstResult.getSampleIdInternal());
@@ -83,7 +82,6 @@ public class StructuralVariantMyBatisRepositoryTest {
         Assert.assertEquals(null, structuralVariantFirstResult.getDriverTiersFilter());
         Assert.assertEquals(null, structuralVariantFirstResult.getDriverTiersFilterAnn());
         StructuralVariant structuralVariantSecondResult = result.get(1);
-        Assert.assertEquals((int) 7, structuralVariantSecondResult.getGeneticProfileId());
         Assert.assertEquals("study_tcga_pub_sv", structuralVariantSecondResult.getMolecularProfileId());
         Assert.assertEquals(5, structuralVariantSecondResult.getStructuralVariantId());
         Assert.assertEquals((int) 2, structuralVariantSecondResult.getSampleIdInternal());
@@ -149,7 +147,6 @@ public class StructuralVariantMyBatisRepositoryTest {
 
         Assert.assertEquals(1,  result.size());
         StructuralVariant structuralVariantResult = result.get(0);
-        Assert.assertEquals((int) 7, structuralVariantResult.getGeneticProfileId());
         Assert.assertEquals("study_tcga_pub_sv", structuralVariantResult.getMolecularProfileId());
         Assert.assertEquals(1, structuralVariantResult.getStructuralVariantId());
         Assert.assertEquals((int) 1, structuralVariantResult.getSampleIdInternal());
@@ -178,7 +175,6 @@ public class StructuralVariantMyBatisRepositoryTest {
 
         Assert.assertEquals(2,  result.size());
         StructuralVariant structuralVariantFirstResult = result.get(0);
-        Assert.assertEquals((int) 8, structuralVariantFirstResult.getGeneticProfileId());
         Assert.assertEquals("acc_tcga_mutations", structuralVariantFirstResult.getMolecularProfileId());
         Assert.assertEquals(6, structuralVariantFirstResult.getStructuralVariantId());
         Assert.assertEquals((int) 15, structuralVariantFirstResult.getSampleIdInternal());
@@ -186,7 +182,6 @@ public class StructuralVariantMyBatisRepositoryTest {
         Assert.assertEquals((String) "TCGA-A1-B0SO", structuralVariantFirstResult.getPatientId());
         Assert.assertEquals((String) "acc_tcga", structuralVariantFirstResult.getStudyId());
         StructuralVariant structuralVariantSecondResult = result.get(1);
-        Assert.assertEquals((int) 7, structuralVariantSecondResult.getGeneticProfileId());
         Assert.assertEquals("study_tcga_pub_sv", structuralVariantSecondResult.getMolecularProfileId());
         Assert.assertEquals(1, structuralVariantSecondResult.getStructuralVariantId());
         Assert.assertEquals((int) 1, structuralVariantSecondResult.getSampleIdInternal());

@@ -4,7 +4,6 @@
 <mapper namespace="org.cbioportal.persistence.mybatis.StructuralVariantMapper">
     
     <sql id="select">
-        structural_variant.GENETIC_PROFILE_ID AS "${prefix}geneticProfileId",
         genetic_profile.STABLE_ID AS "${prefix}molecularProfileId",
         structural_variant.INTERNAL_ID AS "${prefix}structuralVariantId",
         structural_variant.SAMPLE_ID AS "${prefix}sampleIdInternal",

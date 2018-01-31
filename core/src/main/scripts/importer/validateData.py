@@ -999,11 +999,19 @@ class MutationsExtendedValidator(Validator):
 
     """Sub-class mutations_extended validator."""
 
-    # TODO - maybe this should comply to https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification ?
+    # These are the required headers as discussed in the data-hub Slack channel.
+    # When information annotation information will be pulled from Genome Nexus, genomic information will be necessary.
     REQUIRED_HEADERS = [
+        'Hugo_Symbol',
+        'NCBI_Build',
+        'Chromosome',
+        'Start_Position',
+        'End_Position',
+        'Reference_Allele',
+        'Tumor_Seq_Allele1',
+        'Tumor_Seq_Allele2',
         'Tumor_Sample_Barcode',
-        'Hugo_Symbol', # Required to initialize the Mutation Mapper tabs
-        'Variant_Classification', # seems to be important during loading/filtering step.
+        'HGVSp_Short'
     ]
     REQUIRE_COLUMN_ORDER = False
     ALLOW_BLANKS = True
@@ -1088,19 +1096,6 @@ class MutationsExtendedValidator(Validator):
                                 'Using Hugo_Symbol for all gene parsing',
                                 extra={'line_number': self.line_number})
 
-        if not 'SWISSPROT' in self.cols:
-            self.logger.warning(
-                'Including the SWISSPROT column is recommended to make sure '
-                'that the UniProt canonical isoform is used when drawing Pfam '
-                'domains in the mutations view',
-                extra={'line_number': self.line_number})
-        elif not 'swissprot_identifier' in self.meta_dict:
-            self.logger.warning(
-                "A SWISSPROT column was found in datafile without specifying "
-                "associated 'swissprot_identifier' in metafile, assuming "
-                "'swissprot_identifier: name'.",
-                extra={'column_number': self.cols.index('SWISSPROT') + 1})
-
         # one of these columns should be present:
         if not ('HGVSp_Short' in self.cols or 'Amino_Acid_Change' in self.cols):
             self.logger.error('At least one of the columns HGVSp_Short or '
@@ -1143,8 +1138,11 @@ class MutationsExtendedValidator(Validator):
         """
 
         super(MutationsExtendedValidator, self).checkLine(data)
-        if self.skipValidation(data):
-            return
+
+        # Filter based on Variant_Classification if it's in the data
+        if 'Variant_Classification' in self.cols:
+            if self.skipValidation(data):
+                return
 
         for col_name in self.CHECK_FUNCTION_MAP:
             # if optional column was found, validate it:

@@ -553,6 +553,27 @@ The mutation data file extends the [Mutation Annotation Format](https://wiki.nci
 2. An extended MAF file created with [vcf2maf or maf2maf](https://github.com/mskcc/vcf2maf).
 
 #### Minimal MAF format
+1. **Hugo_Symbol**: A [HUGO](http://www.genenames.org/) gene symbol.
+2. **NCBI_Build**: Must be "GRCh37" for human, and "GRCm38" for mouse.
+3. **Chromosome (Optional)**: A chromosome number, e.g., "7".
+4. **Start_Position (Optional)**: Start position of event.
+5. **End_Position (Optional)**: End position of event.
+6. **HGVSp_Short (Required)**: (annotation column) Amino Acid Change, e.g. p.V600E.
+7. **Reference_Allele (Optional)**: The plus strand reference allele at this position.
+8. **Tumor_Seq_Allele1 (Optional)**: Primary data genotype.
+9. **Tumor_Seq_Allele2 (Optional)**: Primary data genotype.
+10. **Tumor_Sample_Barcode (Required)**: This is the sample ID. Either a TCGA barcode (patient identifier will be extracted), or for non-TCGA data, a SAMPLE_ID as listed in the clinical data file.
+
+
+2. **Entrez_Gene_Id (Optional, but recommended)**: A [Entrez Gene](http://www.ncbi.nlm.nih.gov/gene) identifier.
+3. **Center (Optional)**: The sequencing center.
+
+9. **Variant_Classification (Required)**: Translational effect of variant allele, e.g. Missense_Mutation, Silent, etc.
+10. **Variant_Type <sup>1</sup>(Optional)**: Variant Type, e.g. SNP, DNP, etc.
+
+14. **dbSNP_RS<sup>1</sup> (Optional)**: Latest dbSNP rs ID.
+15. **dbSNP_Val_Status<sup>1</sup> (Optional)**: dbSNP validation status.
+17. 
 A minimal mutation annotations file can contain just three of the MAF columns plus one annotation column. From this minimal MAF, it is possible to create an extended MAF by running maf2maf.
 1. **Hugo_Symbol (Required)**: (MAF column) A [HUGO](http://www.genenames.org/) gene symbol.
 2. **Tumor_Sample_Barcode (Required)**: (MAF column) This is the sample ID as listed in the clinical data file.
@@ -592,7 +613,7 @@ The extended MAF format recognized by the portal has:
 13. **Tumor_Seq_Allele2 (Optional)**: Primary data genotype.
 14. **dbSNP_RS<sup>1</sup> (Optional)**: Latest dbSNP rs ID.
 15. **dbSNP_Val_Status<sup>1</sup> (Optional)**: dbSNP validation status.
-16. **Tumor_Sample_Barcode (Required)**: This is the sample ID. Either a TCGA barcode (patient identifier will be extracted), or for non-TCGA data, a literal SAMPLE_ID as listed in the clinical data file.
+16. **Tumor_Sample_Barcode (Required)**: This is the sample ID. Either a TCGA barcode (patient identifier will be extracted), or for non-TCGA data, a  SAMPLE_ID as listed in the clinical data file.
 17. **Matched_Norm_Sample_Barcode<sup>1</sup> (Optional)**: The sample ID for the matched normal sample.
 18. **Match_Norm_Seq_Allele1 (Optional)**: Primary data.
 19. **Match_Norm_Seq_Allele2 (Optional)**: Primary data.

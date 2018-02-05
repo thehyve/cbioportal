@@ -53,8 +53,10 @@
         <script type="text/javascript" src="js/lib/showdown-github.min.js?${appVersion}"></script>
         <script type="text/javascript" src="js/src/url_based_content.js?${appVersion}"></script>
         <script>
-        window.loadReactApp({ defaultRoute: 'blank' });
+        //window.loadReactApp({ defaultRoute: 'blank' });
         </script>
+        <link rel="import" href="http://localhost:3838/sample-apps/hello2/">
+        
     </jsp:attribute>
 
     <jsp:attribute name="body_area">
@@ -70,10 +72,10 @@
 <script>
 $(document).ready( function() {
 // retrieve link for About Us and generate the page
-var aboutLink = '<%= GlobalProperties.getAboutHtml()%>';
-var baseUrl = '<%= GlobalProperties.getBaseUrl()%>';
-var markdownDocumentation = '<%= GlobalProperties.isMarkdownDocumentation()%>';
-var generatePage = new GeneratePage(baseUrl, aboutLink, markdownDocumentation, "#aboutPage");
-generatePage.init();
+// var aboutLink = '<%= GlobalProperties.getAboutHtml()%>';
+// var baseUrl = '<%= GlobalProperties.getBaseUrl()%>';
+// var markdownDocumentation = '<%= GlobalProperties.isMarkdownDocumentation()%>';
+//var generatePage = new GeneratePage(baseUrl, aboutLink, markdownDocumentation, "#aboutPage");
+//generatePage.init();
 });
 </script>

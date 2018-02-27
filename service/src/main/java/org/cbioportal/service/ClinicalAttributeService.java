@@ -22,7 +22,7 @@ public interface ClinicalAttributeService {
 
     BaseMeta getMetaClinicalAttributesInStudy(String studyId) throws StudyNotFoundException;
 
-    List<ClinicalAttribute> fetchClinicalAttributes(List<String> studyIds, String projection);
+	List<ClinicalAttribute> fetchClinicalAttributes(List<String> studyIds, String projection);
 
 	BaseMeta fetchMetaClinicalAttributes(List<String> studyIds);
 

@@ -83,17 +83,17 @@ public class ClinicalAttributeServiceImpl implements ClinicalAttributeService {
 
     @Override
     @PreAuthorize("hasPermission(#studyIds, 'List<CancerStudyId>', 'read')")
-    public List<ClinicalAttribute> fetchClinicalAttributes(List<String> studyIds, String projection) {
+	public List<ClinicalAttribute> fetchClinicalAttributes(List<String> studyIds, String projection) {
         
         return clinicalAttributeRepository.fetchClinicalAttributes(studyIds, projection);
-        }
+	}
 
     @Override
     @PreAuthorize("hasPermission(#studyIds, 'List<CancerStudyId>', 'read')")
-    public BaseMeta fetchMetaClinicalAttributes(List<String> studyIds) {
+	public BaseMeta fetchMetaClinicalAttributes(List<String> studyIds) {
         
         return clinicalAttributeRepository.fetchMetaClinicalAttributes(studyIds);
-        }
+	}
 
     @Override
     @PreAuthorize("hasPermission(#studyId, 'CancerStudy', 'read')")

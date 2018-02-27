@@ -19,6 +19,7 @@ public class ClinicalAttributeMyBatisRepository implements ClinicalAttributeRepo
     @Autowired
     private OffsetCalculator offsetCalculator;
 
+
     @Override
     public List<ClinicalAttribute> getAllClinicalAttributes(String projection, Integer pageSize, Integer pageNumber,
                                                             String sortBy, String direction) {

@@ -67,4 +67,22 @@ public class ClinicalAttributeMyBatisRepository implements ClinicalAttributeRepo
         
         return clinicalAttributeMapper.getMetaClinicalAttributes(studyIds);
 	}
+
+    @Override
+    public List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleIds(List<String> studyIds,
+            List<String> sampleIds, String projection, String sortBy, String direction) {
+
+        return clinicalAttributeMapper.getAllClinicalAttributesInStudiesBySampleIds(studyIds, sampleIds, projection,
+                sortBy, direction);
+
+    }
+
+    @Override
+    public List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleListId(String sampleListId,
+            String projection, String sortBy, String direction) {
+
+        return clinicalAttributeMapper.getAllClinicalAttributesInStudiesBySampleListId(sampleListId, projection, sortBy,
+                direction);
+
+    }
 }

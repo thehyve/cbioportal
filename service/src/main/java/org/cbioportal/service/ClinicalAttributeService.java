@@ -25,4 +25,10 @@ public interface ClinicalAttributeService {
 	List<ClinicalAttribute> fetchClinicalAttributes(List<String> studyIds, String projection);
 
 	BaseMeta fetchMetaClinicalAttributes(List<String> studyIds);
+
+    List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleIds(List<String> studyIds, List<String> sampleIds, String projection,
+            String sortBy, String direction);
+
+    List<ClinicalAttribute> getAllClinicalAttributesInStudiesBySampleListId(String sampleListId, String projection,
+            String sortBy, String direction);
 }

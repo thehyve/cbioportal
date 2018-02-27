@@ -17,6 +17,7 @@ public class ClinicalAttribute implements Serializable {
     private Integer cancerStudyId;
     @NotNull
     private String cancerStudyIdentifier;
+    private Integer count;
 
     public String getAttrId() {
         return attrId;
@@ -80,5 +81,13 @@ public class ClinicalAttribute implements Serializable {
 
     public void setCancerStudyIdentifier(String cancerStudyIdentifier) {
         this.cancerStudyIdentifier = cancerStudyIdentifier;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }

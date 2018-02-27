@@ -32,7 +32,7 @@ public class StructuralVariantServiceImplTest extends BaseServiceImplTest {
         List<String> molecularProfileIds = new ArrayList<>();
         List<Integer> entrezGeneIds = new ArrayList<>();
         molecularProfileIds.add("genetic_profile_id");
-        entrezGeneIds.add(ENTREZ_GENE_ID);
+        entrezGeneIds.add(ENTREZ_GENE_ID_1);
 
         Mockito.when(structuralVariantRepository.fetchStructuralVariants(molecularProfileIds, 
                 entrezGeneIds, null))

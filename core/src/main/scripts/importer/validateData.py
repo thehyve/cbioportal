@@ -3103,6 +3103,9 @@ def processCaseListDirectory(caseListDir, cancerStudyId, logger,
                      fn in os.listdir(caseListDir) if
                      not (fn.startswith('.') or fn.endswith('~'))]
 
+    # Save case list categories
+    previous_case_list_categories = []
+
     for case in case_list_fns:
 
         meta_dictionary = cbioportal_common.parse_metadata_file(
@@ -3111,7 +3114,7 @@ def processCaseListDirectory(caseListDir, cancerStudyId, logger,
         if meta_dictionary['meta_file_type'] is None:
             continue
 
-        # check for duplicated stable ids
+        # check for correct naming of case list stable ids
         stable_id = meta_dictionary['stable_id']
         if not stable_id.startswith(cancerStudyId + '_'):
             logger.error('Stable_id of case list does not start with the '
@@ -3119,6 +3122,8 @@ def processCaseListDirectory(caseListDir, cancerStudyId, logger,
                          cancerStudyId,
                          extra={'filename_': case,
                                 'cause': stable_id})
+
+        # check for duplicated stable ids
         elif stable_id in stableid_files:
             logger.error('Multiple case lists with this stable_id defined '
                          'in the study',
@@ -3151,6 +3156,15 @@ def processCaseListDirectory(caseListDir, cancerStudyId, logger,
                 logger.error('Invalid case list category',
                                extra={'filename_': case,
                                'cause': meta_dictionary['case_list_category']})
+
+            # Check for duplicate case list categories
+            if meta_dictionary['case_list_category'] in previous_case_list_categories and \
+                    not meta_dictionary['case_list_category'] is 'other':
+                logger.warning('Case list category already used in other case list. Both will be loaded',
+                               extra={'filename_': case,
+                                      'cause': meta_dictionary['case_list_category']})
+            else:
+                previous_case_list_categories.append(meta_dictionary['case_list_category'])
 
         # Check for any duplicate sample IDs
         sample_ids = [x.strip() for x in meta_dictionary['case_list_ids'].split('\t')]

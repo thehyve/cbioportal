@@ -1728,6 +1728,19 @@ class CaseListDirTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertIn('invalid', record.getMessage().lower())
 
+    def test_duplicate_category(self):
+        """Test if an error is issued for an duplicate case list category"""
+        self.logger.setLevel(logging.WARNING)
+        validateData.processCaseListDirectory(
+            'test_data/case_lists_duplicate_category',
+            'brca_tcga_pub',
+            self.logger)
+        record_list = self.get_log_records()
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.WARNING)
+        self.assertIn('used in other case list', record.getMessage().lower())
+
     def test_missing_caselists(self):
         """Test if errors are issued if certain case lists are not defined."""
         self.logger.setLevel(logging.ERROR)

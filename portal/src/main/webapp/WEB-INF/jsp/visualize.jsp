@@ -72,6 +72,7 @@ window.loadReactApp({ defaultRoute: 'results' });
         Boolean showPlotsTab = true;
         Boolean showDownloadTab = true;
         Boolean showBookmarkTab = true;
+        Boolean showExternalTab = GlobalProperties.showExternalTab();
         List<String> disabledTabs = GlobalProperties.getDisabledTabs();
 
             Enumeration paramEnum = request.getParameterNames();
@@ -219,7 +220,10 @@ window.loadReactApp({ defaultRoute: 'results' });
             }
             if (showDownloadTab) {
                 out.println ("<li><a href='#data_download' class='result-tab' id='data-download-result-tab'>Download</a></li>");
-            }       
+            }     
+            if (showExternalTab) {
+                out.println ("<li><a href='#data_external_tab' class='result-tab' id='data-external-result-tab'>"+GlobalProperties.getExternalTabName()+"</a></li>");
+            }
             if (showBookmarkTab) {
                 out.print ("<li><a href='#bookmark_email' class='result-tab' id='bookmark-result-tab'");
                 if (useSessionServiceBookmark) {
@@ -303,6 +307,9 @@ window.loadReactApp({ defaultRoute: 'results' });
             <% } %>
             <% if(showDownloadTab) { %>
         <%@ include file="data_download.jsp" %>
+            <% } %>
+            <% if(showExternalTab) { %>
+        <%@ include file="external_tab.jsp" %>
             <% } %>
 
 </div> <!-- end tabs div -->
@@ -493,6 +500,15 @@ window.loadReactApp({ defaultRoute: 'results' });
                 position: {my:'left top',at:'right bottom', viewport: $(window)}
             }
         );
+        $("#data-external-result-tab").qtip(
+                {
+                    content: {text: "Customized external HTML data"},
+                    style: { classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightyellow result-tab-qtip-content' },
+                    show: {event: "mouseover", delay: 0},
+                    hide: {fixed:true, delay: 100, event: "mouseout"},
+                    position: {my:'left top',at:'right bottom', viewport: $(window)}
+                }
+            );
 
         //Move code related to expression tab from cross_cancer_results.jsp to here
         window.ccQueriedGenes = window.frontendVars.oqlGenes(window.serverVars.theQuery);

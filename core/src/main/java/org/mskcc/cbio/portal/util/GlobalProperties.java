@@ -246,6 +246,9 @@ public class GlobalProperties {
     public static final String ONCOPRINT_DEFAULTVIEW = "oncoprint.defaultview";
     
     public static final String SETSOFGENES_LOCATION = "querypage.setsofgenes.location";
+    
+    public static final String EXTERNAL_TAB_NAME = "external.tab.name";
+    public static final String EXTERNAL_TAB_URL = "external.tab.url";
 
     private static boolean showCivic;
     @Value("${show.civic:false}") // default is false
@@ -1102,5 +1105,23 @@ public class GlobalProperties {
     public static String getQuerySetsOfGenes() {
         String fileName = portalProperties.getProperty(SETSOFGENES_LOCATION, null);
         return readFile(fileName);
+    }
+    
+    public static boolean showExternalTab()
+    {
+        if (portalProperties.getProperty(EXTERNAL_TAB_NAME) != null) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static String getExternalTabName()
+    {
+        return portalProperties.getProperty(EXTERNAL_TAB_NAME);
+    }
+    
+    public static String getExternalTabURL()
+    {
+        return portalProperties.getProperty(EXTERNAL_TAB_URL);
     }
 }

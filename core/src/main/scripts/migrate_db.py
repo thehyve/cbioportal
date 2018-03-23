@@ -138,6 +138,119 @@ def is_version_larger(version1, version2):
         return True
     return False
 
+def check_database_empty(cursor):
+    sql_statement = 'SELECT count(*) FROM cancer_study;'
+    try:
+        cursor.execute(sql_statement)
+    except MySQLdb.Error, msg:
+        print >> ERROR_FILE, msg
+        sys.exit(1)
+    number_of_studies = int(cursor.fetchall()[0][0])
+    if number_of_studies == 0:
+        return True
+    else:
+        return False
+
+
+def ask_reference_genome():
+    selection_message = ("\nPlease enter a reference genome or enter 'n' to abort:\n"
+                         'hg19 (default)\n'
+                         'hg38 (only use this when using a database with hg38 gene lengths and cytobands)\n'
+                         'mm10 (only use this when using a database with mm10 gene lengths and cytobands)\n')
+    response = raw_input('This migration includes a step that links all current genes in the database to 1 reference '
+                         'genome. This can not be undone!\n' +
+                         selection_message).strip()
+    while response.lower() not in ['', 'n', 'hg19', 'hg38', 'mm10']:
+        response = raw_input(selection_message).strip()
+    if response.lower() == 'n':
+        print "Aborted migration."
+        sys.exit()
+    elif response.lower() == 'hg38':
+        return 'GRCh38'
+    elif response.lower() == 'mm10':
+        return 'GRCm38'
+    else:
+        return 'GRCh37'
+
+
+def verify_reference_genome(reference_genomes, proposed_reference_genome):
+    response = raw_input('\nFound the following reference genomes in NCBI column of mutation_event:\n'
+                         '%s\n'
+                         'Is linking all genes to %s correct? (y/n)\n' % (", ".join(reference_genomes),
+                                                                          proposed_reference_genome))
+    while response.lower() not in ['y', 'n']:
+        response = raw_input('Found the following reference genomes in NCBI column of mutation_event:\n'
+                             '%s\n'
+                             'Is linking all genes to %s correct? (y/n)\n').strip()
+    if response.lower() == 'n':
+        print("DB migration aborted")
+        sys.exit()
+    else:
+        return True
+
+
+def find_reference_genome(cursor):
+    """
+    In the migration to 2.7.0, the genes in the database are linked to a specific reference genome. This functions finds
+    the reference genome of the used database in the mutation table.
+    """
+
+    # First check if the database is empty. This will result in GRCh37
+    if check_database_empty(cursor):
+        print 'This database contains no studies.'
+        reference_genome = ask_reference_genome()
+        return reference_genome
+
+    # If the database is not empty, check the mutation_event table for NCBI Build
+    sql_statement = 'SELECT distinct(NCBI_BUILD) FROM mutation_event;'
+    try:
+        cursor.execute(sql_statement)
+    except MySQLdb.Error, msg:
+        print >> ERROR_FILE, msg
+        sys.exit(1)
+    query_result = cursor.fetchall()
+    reference_genomes_original = set(['na' if x[0] is None else x[0] for x in query_result])
+    reference_genomes = set(['na' if x[0] is None else x[0].lower() for x in query_result])
+
+    # When a database contains data but no reference genomes, ask the user for reference genome.
+    if len(reference_genomes) == 0:
+        print 'Cannot infer reference genome from mutation_event table.'
+        reference_genome = ask_reference_genome()
+        return reference_genome
+
+    # When a database contains only NA values, ask the user for reference genome.
+    elif len(reference_genomes) == 1 and list(reference_genomes)[0] == 'na':
+        print 'Cannot infer reference genome from mutation_event table.'
+        reference_genome = ask_reference_genome()
+        return reference_genome
+
+    # Check if reference genome can be inferred
+    elif reference_genomes.issubset({'37', 'grch37', 'hg19'}):
+        return 'GRCh37'
+    elif reference_genomes.issubset({'grch38', 'hg38'}):
+        return 'GRCh38'
+    elif reference_genomes.issubset({'grcm38', 'mm10'}):
+        return 'GRCm38'
+
+    # Check if reference genome can be inferred but database also contains NA values. Verify with the user
+    elif reference_genomes.issubset({'37', 'grch37', 'hg19', 'na'}):
+        if verify_reference_genome(reference_genomes_original, 'hg19'):
+            return 'GRCh37'
+    elif reference_genomes.issubset({'grch38', 'hg38', 'na'}):
+        verify_reference_genome(reference_genomes_original, 'hg38')
+        return 'GRCh38'
+    elif reference_genomes.issubset({'grcm38', 'mm10', 'na'}):
+        verify_reference_genome(reference_genomes_original, 'mm10')
+        return 'GRCm38'
+
+    # Return an error in case of unknown or multiple reference genomes.
+    else:
+        print '\bFound unknown or multiple reference genomes in mutation_event table in database:\n%s\n\n' \
+              'Please start from new seed database, migrate database and reload studies.'\
+              % ", ".join(reference_genomes_original)
+        sys.exit(1)
+
+
 def run_migration(db_version, sql_filename, connection, cursor):
     """
 
@@ -156,10 +269,19 @@ def run_migration(db_version, sql_filename, connection, cursor):
     run_line = False
     statements = OrderedDict()
     statement = ''
+    reference_genome = ''
     for line in sql_file:
         if line.startswith('##'):
             sql_version = tuple(map(int, line.split(':')[1].strip().split('.')))
             run_line = is_version_larger(sql_version, db_version)
+
+            # In case of upgrade to 2.7.0, check if the database is hg19 by looking in the database, or verify with the user.
+            if run_line and line.split(':')[1].strip() == '2.7.0':
+                reference_genome = find_reference_genome(cursor)
+                reference_genome_dict = {'GRCh37': 'hg19',
+                                         'GRCh38': 'hg38',
+                                         'GRCm38': 'mm10'}
+                print "Selected reference genome: %s" % reference_genome_dict[reference_genome]
             continue
 
         # skip blank lines
@@ -171,6 +293,9 @@ def run_migration(db_version, sql_filename, connection, cursor):
         # skip sql comments
         if line.startswith('--') and len(line) > 2 and line[2].isspace():
             continue
+        # Add reference genome variable
+        if line.strip() == "(SELECT REFERENCE_GENOME_ID FROM reference_genome WHERE BUILD_NAME='?')":
+            line = line.replace('?', reference_genome)
         # only execute sql line if the last version seen in the file is greater than the db_version
         if run_line:
             line = line.strip()

@@ -57,6 +57,11 @@ DEFINED_CANCER_TYPES = None
 GSVA_SAMPLE_IDS = None
 GSVA_GENESET_IDS = None
 
+# Reference genome names. '37' is allowed to be compatible with old data and will refer to hg19, but this is not
+#  documented as allowed value.
+REFERENCE_GENOME_DICT = {'human': ['hg19', 'GRCh37', '37', 'GRCh38', 'hg38'],
+                         'mouse': ['GRCm38', 'mm10']}
+
 # ----------------------------------------------------------------------------
 
 VALIDATOR_IDS = {
@@ -253,10 +258,9 @@ class PortalInstance(object):
                 for entrez_list in entrez_map.values():
                     for entrez_id in entrez_list:
                         self.entrez_set.add(entrez_id)
-        #Set defaults for genome version and species
+        # Set default species
         self.species = 'human'
-        self.genome_build = {'human': {'hg19':['37','GRCh37'], 'hg38':['GRCh38']}}
-        self.genome_name = ['hg19','hg38']
+
 
     def load_genome_info(self, properties_filename):
         """Retrieves the species and genome information from portal.properties."""
@@ -268,9 +272,12 @@ class PortalInstance(object):
                 sp_line = line.split('=', 1)
                 if sp_line[0] == 'species':
                     self.species = sp_line[1]
-                    if self.species == 'mouse':
-                        self.genome_build = {'mouse': {'mm10':['GRCm38']}}
-                        self.genome_name = ['mm10']
+                    if self.species not in REFERENCE_GENOME_DICT:
+                        raise ValueError(
+                            'Species found in portal.properties is not supported. Only human or mouse is supported.\n'
+                            'Found: %s' % self.species)
+
+
 class Validator(object):
 
     """Abstract validator class for tab-delimited data files.
@@ -1002,6 +1009,7 @@ class MutationsExtendedValidator(Validator):
         'Tumor_Sample_Barcode',
         'Hugo_Symbol', # Required to initialize the Mutation Mapper tabs
         'Variant_Classification', # seems to be important during loading/filtering step.
+        'NCBI_Build' # Required for referring the mutation to the correct reference genome in the database.
     ]
     REQUIRE_COLUMN_ORDER = False
     ALLOW_BLANKS = True
@@ -1248,7 +1256,14 @@ class MutationsExtendedValidator(Validator):
 
 
     def checkNCBIbuild(self, value):
-        return value in (self.portal.genome_build[self.portal.species].values()[0])
+        if value not in REFERENCE_GENOME_DICT[self.portal.species]:
+            self.logger.error('Value in NCBI_Build is not supported. '
+                              'Expected hg19, hg38, mm10, GRCh37, GRCh38 or GRCm38.',
+                              extra={'line_number': self.line_number,
+                                     'column_number': self.cols.index('NCBI_Build'),
+                                     'cause': value})
+        return True
+
 
     def checkMatchedNormSampleBarcode(self, value):
         if value != '':
@@ -2218,8 +2233,7 @@ class SegValidator(Validator):
         # that chromosome in that patient.
 
     @staticmethod
-    def load_chromosome_lengths(genome_build, logger):
-
+    def load_chromosome_lengths(reference_genome, logger):
         """Get the length of each chromosome from USCS and return a dict.
 
         The dict will not include unplaced contigs, alternative haplotypes or
@@ -2230,7 +2244,7 @@ class SegValidator(Validator):
         chrom_size_url = (
             'http://hgdownload.cse.ucsc.edu'
             '/goldenPath/{build}/bigZips/{build}.chrom.sizes').format(
-                build=genome_build)
+                build=reference_genome)
         logger.debug("Retrieving chromosome lengths from '%s'",
                      chrom_size_url)
         r = requests.get(chrom_size_url)
@@ -3005,7 +3019,7 @@ def process_metadata_files(directory, portal_instance, logger, relaxed_mode):
     for filename in filenames:
 
         meta_dictionary = cbioportal_common.parse_metadata_file(
-            filename, logger, study_id, portal_instance.genome_build[portal_instance.species].keys()[0])
+            filename, logger, study_id, REFERENCE_GENOME_DICT[portal_instance.species])
         meta_file_type = meta_dictionary['meta_file_type']
         if meta_file_type is None:
             continue

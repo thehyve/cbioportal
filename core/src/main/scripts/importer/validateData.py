@@ -57,6 +57,11 @@ DEFINED_CANCER_TYPES = None
 GSVA_SAMPLE_IDS = None
 GSVA_GENESET_IDS = None
 
+# Reference genome names. '37' is allowed to be compatible with old data and will refer to hg19, but this is not
+#  documented as allowed value.
+REFERENCE_GENOME_DICT = {'human': ['hg19', 'GRCh37', '37', 'GRCh38', 'hg38'],
+                         'mouse': ['GRCm38', 'mm10']}
+
 # ----------------------------------------------------------------------------
 
 VALIDATOR_IDS = {
@@ -253,12 +258,12 @@ class PortalInstance(object):
                 for entrez_list in entrez_map.values():
                     for entrez_id in entrez_list:
                         self.entrez_set.add(entrez_id)
-        #Set defaults for genome version and species
+        # Set default species
         self.species = 'human'
-        self.genome_build = {'human': {'hg19':['37','GRCh37'], 'hg38':['GRCh38']}}
 
     def load_genome_info(self, properties_filename):
-        """Retrieves the species and genome information from portal.properties."""
+        """Retrieves the species and genome information from portal.properties.
+        """
         with open(properties_filename, 'r') as properties_file:
             for line in properties_file:
                 line = line.strip()
@@ -267,8 +272,12 @@ class PortalInstance(object):
                 sp_line = line.split('=', 1)
                 if sp_line[0] == 'species':
                     self.species = sp_line[1]
-                    if self.species == 'mouse':
-                        self.genome_build = {'mouse': {'mm10':['GRCm38']}}
+                    if self.species not in REFERENCE_GENOME_DICT:
+                        raise ValueError(
+                            'Species found in portal.properties is not'
+                            'supported. Only human or mouse is supported.'
+                            'Found: %s' % self.species)
+
 
 class Validator(object):
 
@@ -779,9 +788,9 @@ class Validator(object):
                 extra={'line_number': self.line_number,
                        'cause': driver_annotation})
         return None
-    
+
     def checkDriverTiersColumnsValues(self, driver_tiers_value=None, driver_tiers_annotation=None):
-        """Ensures that there are no mutations with one multiclass column filled and 
+        """Ensures that there are no mutations with one multiclass column filled and
         the other empty.
         """
         if driver_tiers_value is None and driver_tiers_annotation is not None:
@@ -1001,6 +1010,7 @@ class MutationsExtendedValidator(Validator):
         'Tumor_Sample_Barcode',
         'Hugo_Symbol', # Required to initialize the Mutation Mapper tabs
         'Variant_Classification', # seems to be important during loading/filtering step.
+        'NCBI_Build' # Required for referring the mutation to the correct reference genome in the database.
     ]
     REQUIRE_COLUMN_ORDER = False
     ALLOW_BLANKS = True
@@ -1105,7 +1115,7 @@ class MutationsExtendedValidator(Validator):
                               'Amino_Acid_Change needs to be present.',
                               extra={'line_number': self.line_number})
             num_errors += 1
-        
+
         # raise errors if the filter_annotations are found without the "filter" columns
         if 'cbp_driver_annotation' in self.cols and 'cbp_driver' not in self.cols:
             self.logger.error('Column cbp_driver_annotation '
@@ -1115,7 +1125,7 @@ class MutationsExtendedValidator(Validator):
             self.logger.error('Column cbp_driver_tiers_annotation '
                               'found without any cbp_driver_tiers '
                               'column.', extra={'column_number': self.cols.index('cbp_driver_tiers_annotation')})
-            
+
         # raise errors if the "filter" columns are found without the filter_annotations
         if 'cbp_driver' in self.cols and 'cbp_driver_annotation' not in self.cols:
             self.logger.error('Column cbp_driver '
@@ -1125,7 +1135,7 @@ class MutationsExtendedValidator(Validator):
             self.logger.error('Column cbp_driver_tiers '
                               'found without any cbp_driver_tiers_annotation '
                               'column.', extra={'column_number': self.cols.index('cbp_driver_tiers')})
-            
+
         return num_errors
 
     def checkLine(self, data):
@@ -1180,7 +1190,7 @@ class MutationsExtendedValidator(Validator):
                 entrez_id = None
         # validate hugo and entrez together:
         self.checkGeneIdentification(hugo_symbol, entrez_id)
-        
+
         # parse custom driver annotation values to validate them together
         driver_value = None
         driver_annotation = None
@@ -1245,9 +1255,15 @@ class MutationsExtendedValidator(Validator):
     # another field name, add the map in the global corresponding to
     # the function name that is created to check it.
 
-
     def checkNCBIbuild(self, value):
-        return value in list(itertools.chain(*self.portal.genome_build[self.portal.species].values()))
+        if value not in REFERENCE_GENOME_DICT[self.portal.species]:
+            self.logger.error('Value in NCBI_Build is not supported. '
+                              'Expected hg19, hg38, mm10, GRCh37, GRCh38 or GRCm38.',
+                              extra={'line_number': self.line_number,
+                                     'column_number': self.cols.index('NCBI_Build'),
+                                     'cause': value})
+        return True
+
 
     def checkMatchedNormSampleBarcode(self, value):
         if value != '':
@@ -1342,10 +1358,10 @@ class MutationsExtendedValidator(Validator):
         is_silent = False
         variant_classification = data[self.cols.index('Variant_Classification')]
         if 'variant_classification_filter' in self.meta_dict:
-            self.SKIP_VARIANT_TYPES = [x.strip() 
-                                       for x 
+            self.SKIP_VARIANT_TYPES = [x.strip()
+                                       for x
                                        in self.meta_dict['variant_classification_filter'].split(',')]
-        
+
         hugo_symbol = data[self.cols.index('Hugo_Symbol')]
         entrez_id = '0'
         if 'Entrez_Gene_Id' in self.cols:
@@ -1444,7 +1460,7 @@ class MutationsExtendedValidator(Validator):
                 return True
         # if no reasons to return with a message were found, return valid
         return True
-    
+
     def checkStartPosition(self, value):
         """Check that the Start_Position value is an integer."""
         if value.isdigit() == False or (value.isdigit() and '.' in value):
@@ -1456,7 +1472,7 @@ class MutationsExtendedValidator(Validator):
                        'cause': value})
         # if no reasons to return with a message were found, return valid
         return True
-    
+
     def checkEndPosition(self, value):
         """Check that the End_Position value is an integer."""
         if value.isdigit() == False or (value.isdigit() and '.' in value):
@@ -1476,7 +1492,7 @@ class MutationsExtendedValidator(Validator):
             self.extra_exists = True
             return False
         return True
-    
+
     def checkDriverTiers(self, value):
         """Report the tiers in the cbp_driver_tiers column (skipping the empty values)."""
         if value not in self.NULL_DRIVER_TIERS_VALUES:
@@ -1493,7 +1509,7 @@ class MutationsExtendedValidator(Validator):
             self.extra_exists = True
             return False
         return True
-    
+
     def checkFilterAnnotation(self, value):
         """Check if the annotation values are smaller than 80 characters."""
         if len(value) > 80:
@@ -2217,8 +2233,7 @@ class SegValidator(Validator):
         # that chromosome in that patient.
 
     @staticmethod
-    def load_chromosome_lengths(genome_build, logger):
-
+    def load_chromosome_lengths(reference_genome, logger):
         """Get the length of each chromosome from USCS and return a dict.
 
         The dict will not include unplaced contigs, alternative haplotypes or
@@ -2229,7 +2244,7 @@ class SegValidator(Validator):
         chrom_size_url = (
             'http://hgdownload.cse.ucsc.edu'
             '/goldenPath/{build}/bigZips/{build}.chrom.sizes').format(
-                build=genome_build)
+                build=reference_genome)
         logger.debug("Retrieving chromosome lengths from '%s'",
                      chrom_size_url)
         r = requests.get(chrom_size_url)
@@ -3004,7 +3019,7 @@ def process_metadata_files(directory, portal_instance, logger, relaxed_mode):
     for filename in filenames:
 
         meta_dictionary = cbioportal_common.parse_metadata_file(
-            filename, logger, study_id, portal_instance.genome_build[portal_instance.species].keys())
+            filename, logger, study_id, REFERENCE_GENOME_DICT[portal_instance.species])
         meta_file_type = meta_dictionary['meta_file_type']
         if meta_file_type is None:
             continue

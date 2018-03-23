@@ -1052,6 +1052,21 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertIn('HGVSp_Short', record.getMessage())
         self.assertEqual(record.line_number, 8)
 
+    def test_unsupported_reference_genome(self):
+        """Test if an error is given when loading mutation data with incorrect reference genome."""
+        self.logger.setLevel(logging.ERROR)
+        record_list = self.validate(
+                'mutations/data_mutations_unsupported_reference_genome.maf',
+                validateData.MutationsExtendedValidator)
+        self.assertEqual(len(record_list), 1)
+        record_iterator = iter(record_list)
+
+        # First line contains an unsupported reference genome in NCBI_Build: GRCh36
+        record = record_iterator.next()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual(record.line_number, 3)
+        self.assertIn('Value in NCBI_Build is not supported', record.getMessage())
+
     def test_isValidVariantClassification(self):
         """Test if proper warnings/errors are given for wrong/blank Variant_Classification change vals."""
         # set level according to this test case:

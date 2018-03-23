@@ -32,12 +32,9 @@
 
 package org.mskcc.cbio.portal.util;
 
-import org.mskcc.cbio.portal.servlet.QueryBuilder;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -310,6 +307,7 @@ public class GlobalProperties {
 
     private static Properties initializeProperties(String propertiesFileName)
     {
+        //displayAllPortalProperties();
         return loadProperties(getResourceStream(propertiesFileName));
     }
 
@@ -1114,6 +1112,17 @@ public class GlobalProperties {
         }
         return false;
     }
+    
+    //public static void displayAllPortalProperties() {
+    //    Properties properties = loadProperties(getResourceStream(PORTAL_PROPERTIES_FILE_NAME));
+    //    String[][] externalTabs = new String[][] {};
+    //    for (Object key : properties.keySet()) {
+    //        if (key.toString().contains("external.tab")) {
+    //            if (key[13] == 
+    //        }
+    //        System.out.println("Property: "+key.toString());
+    //    }
+    //}
     
     public static String getExternalTabName()
     {

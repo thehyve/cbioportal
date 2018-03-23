@@ -607,7 +607,7 @@ def validate_types_and_id(meta_dictionary, logger, filename):
 def parse_metadata_file(filename,
                         logger,
                         study_id=None,
-                        genome_name=None,
+                        reference_genome_list=None,
                         case_list=False):
 
     """Validate a metafile and return a dictionary of values read from it and
@@ -716,14 +716,14 @@ def parse_metadata_file(filename,
 
     # type-specific validations
     if meta_file_type in (MetaFileTypes.SEG, MetaFileTypes.GISTIC_GENES):
-        if genome_name and meta_dictionary['reference_genome_id'] not in genome_name:
-            logger.error(
-                'Reference_genome_id is not %s',
-                str(genome_name),
-                extra={'filename_': filename,
-                       'cause': meta_dictionary['reference_genome_id']})
-            #meta_file_type = None
-            meta_dictionary['meta_file_type'] = None
+        if reference_genome_list is not None:
+            if meta_dictionary['reference_genome_id'] not in reference_genome_list:
+                logger.error(
+                    'Reference_genome_id is not in %s' % ", ".join(reference_genome_list),
+                    extra={'filename_': filename,
+                           'cause': meta_dictionary['reference_genome_id']})
+                #meta_file_type = None
+                meta_dictionary['meta_file_type'] = None
     if meta_file_type == MetaFileTypes.MUTATION:
         if ('swissprot_identifier' in meta_dictionary and
                 meta_dictionary['swissprot_identifier'] not in ('name',

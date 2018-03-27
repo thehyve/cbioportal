@@ -1115,11 +1115,28 @@ public class GlobalProperties {
     
     //public static void displayAllPortalProperties() {
     //    Properties properties = loadProperties(getResourceStream(PORTAL_PROPERTIES_FILE_NAME));
-    //    String[][] externalTabs = new String[][] {};
+    //    Map<String, Map<String, String>[]> externalTabs = null;
     //    for (Object key : properties.keySet()) {
     //        if (key.toString().contains("external.tab")) {
-    //            if (key[13] == 
+    //            if (externalTabs.containsKey(key.toString().charAt(13))) {
+    //                if (key.toString().contains("name")) {
+    //                    
+    //                } else if (key.toString().contains("url")) {
+    //                    
+    //                }
+    //            } else {
+    //                if (key.toString().contains("name")) {
+    //                    Map<String, String> innerMap = null;
+    //                    Map<String, Map<String, String>> outerMap;
+    //                    innerMap.put("name", portalProperties.getProperty(key.toString()));
+    //                } else if (key.toString().contains("url")) {
+    //                    Map<String, String> innerMap = null;
+    //                    innerMap.put("url", portalProperties.getProperty(key.toString()));
+    //                }
+    //            }
     //        }
+    //        List<String> externalTabData = new ArrayList<String>();
+    //        externalTabData.add(properties.get(key).toString());
     //        System.out.println("Property: "+key.toString());
     //    }
     //}

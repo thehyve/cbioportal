@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 The Hyve B.V.
+ * Copyright (c) 2018 The Hyve B.V.
  * This code is licensed under the GNU Affero General Public License (AGPL),
  * version 3, or (at your option) any later version.
  */
@@ -99,7 +99,7 @@ public class ImportStructuralVariantData {
 
     public void importData() throws IOException, DaoException {
 
-        FileReader reader = new FileReader(this.structuralVariantFile);        
+        FileReader reader = new FileReader(this.structuralVariantFile);
         BufferedReader buf = new BufferedReader(reader);
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
 

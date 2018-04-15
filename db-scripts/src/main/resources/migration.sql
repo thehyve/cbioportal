@@ -397,11 +397,11 @@ CREATE TABLE `reference_genome` (
 );
 
 INSERT INTO `reference_genome` 
-VALUES (1, 'human', 'hg19', 'GRCh37', 2897310462, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips', '2009-02-01');
+VALUES (1, 'human', 'hg19', 'GRCh37', NULL, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips', '2009-02-01');
 INSERT INTO `reference_genome` 
-VALUES (2, 'human', 'hg38', 'GRCh38', 3049315783, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips', '2013-12-01');
+VALUES (2, 'human', 'hg38', 'GRCh38', NULL, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips', '2013-12-01');
 INSERT INTO `reference_genome` 
-VALUES (3, 'mouse', 'mm10', 'GRCm38', 2652783500, 'http://hgdownload.cse.ucsc.edu//goldenPath/mm10/bigZips', '2012-01-01');
+VALUES (3, 'mouse', 'mm10', 'GRCm38', NULL, 'http://hgdownload.cse.ucsc.edu//goldenPath/mm10/bigZips', '2012-01-01');
 
 CREATE TABLE `reference_genome_gene` (
     `ENTREZ_GENE_ID` int(11) NOT NULL,
@@ -411,6 +411,7 @@ CREATE TABLE `reference_genome_gene` (
     `EXONIC_LENGTH` int(11) DEFAULT NULL,
     `START` bigint(20) DEFAULT NULL,
     `END` bigint(20) DEFAULT NULL,
+    `ENSEMBL_GENE_ID` varchar(64) DEFAULT NULL,
     PRIMARY KEY (`ENTREZ_GENE_ID`,`REFERENCE_GENOME_ID`),
     FOREIGN KEY (`REFERENCE_GENOME_ID`) REFERENCES `reference_genome` (`REFERENCE_GENOME_ID`) ON DELETE CASCADE,
     FOREIGN KEY (`ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE
@@ -422,7 +423,7 @@ INSERT INTO reference_genome_gene (ENTREZ_GENE_ID, CYTOBAND, EXONIC_LENGTH, CHR,
 	CYTOBAND, 
 	LENGTH,
     SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(gene.CYTOBAND,IF(LOCATE('p', gene.CYTOBAND), 'p', 'q'), 1),'q',1),'cen',1),
-     (SELECT REFERENCE_GENOME_ID FROM reference_genome WHERE BUILD_NAME='GRCh37')
+	1 
 FROM `gene`);
 
 UPDATE info SET DB_SCHEMA_VERSION="2.4.1";
@@ -455,14 +456,58 @@ ALTER TABLE gistic_to_gene ADD CONSTRAINT `gistic_to_gene_ibfk_2` FOREIGN KEY (`
 UPDATE info SET DB_SCHEMA_VERSION="2.6.0";
 
 ##version: 2.7.0
+-- ========================== recreate reference genome genes related tables =============================================
+DROP TABLE IF EXISTS `reference_genome_gene`;
+DROP TABLE IF EXISTS `reference_genome`;
+CREATE TABLE `reference_genome` (
+    `REFERENCE_GENOME_ID` int(4) NOT NULL AUTO_INCREMENT,
+    `SPECIES` varchar(64) NOT NULL,
+    `NAME` varchar(64) NOT NULL,
+    `BUILD_NAME` varchar(64) NOT NULL,
+    `GENOME_SIZE` bigint(20) NULL,
+    `URL` varchar(256) NOT NULL,
+    `RELEASE_DATE` datetime DEFAULT NULL,
+    PRIMARY KEY (`REFERENCE_GENOME_ID`),
+    UNIQUE INDEX `BUILD_NAME_UNIQUE` (`BUILD_NAME` ASC)
+);
+
+INSERT INTO `reference_genome`
+VALUES (1, 'human', 'hg19', 'GRCh37', 2897310462, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips', '2009-02-01');
+INSERT INTO `reference_genome`
+VALUES (2, 'human', 'hg38', 'GRCh38', 3049315783, 'http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips', '2013-12-01');
+INSERT INTO `reference_genome`
+VALUES (3, 'mouse', 'mm10', 'GRCm38', 2652783500, 'http://hgdownload.cse.ucsc.edu//goldenPath/mm10/bigZips', '2012-01-01');
+
+CREATE TABLE `reference_genome_gene` (
+    `ENTREZ_GENE_ID` int(11) NOT NULL,
+    `REFERENCE_GENOME_ID` int(4) NOT NULL,
+    `CHR` varchar(4) DEFAULT NULL,
+    `CYTOBAND` varchar(64) DEFAULT NULL,
+    `EXONIC_LENGTH` int(11) DEFAULT NULL,
+    `START` bigint(20) DEFAULT NULL,
+    `END` bigint(20) DEFAULT NULL,
+    PRIMARY KEY (`ENTREZ_GENE_ID`,`REFERENCE_GENOME_ID`),
+    FOREIGN KEY (`REFERENCE_GENOME_ID`) REFERENCES `reference_genome` (`REFERENCE_GENOME_ID`) ON DELETE CASCADE,
+    FOREIGN KEY (`ENTREZ_GENE_ID`) REFERENCES `gene` (`ENTREZ_GENE_ID`) ON DELETE CASCADE
+);
+
+-- This step links all genes in database to a reference genome. ? will be replaced during migration by migrate_db.py with correct reference genome.
+INSERT INTO reference_genome_gene (ENTREZ_GENE_ID, CYTOBAND, EXONIC_LENGTH, CHR, REFERENCE_GENOME_ID)
+(SELECT
+	ENTREZ_GENE_ID,
+	CYTOBAND,
+	LENGTH,
+    SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(gene.CYTOBAND,IF(LOCATE('p', gene.CYTOBAND), 'p', 'q'), 1),'q',1),'cen',1),
+     (SELECT REFERENCE_GENOME_ID FROM reference_genome WHERE BUILD_NAME='?')
+FROM `gene`);
+-- ========================= end of reference genes related tables ========================================================================
+
 -- ================== new reference genome foreign key for mutation_event and genetic_profile tables   ==================
 ALTER TABLE `mutation_event` ADD COLUMN `REFERENCE_GENOME_ID` INT(4) NULL AFTER `ENTREZ_GENE_ID`;
-ALTER TABLE `mutation_event`
-    ADD FOREIGN KEY (`REFERENCE_GENOME_ID`) REFERENCES `reference_genome_gene` (`REFERENCE_GENOME_ID`) ON DELETE CASCADE;
-
-UPDATE `mutation_event` set REFERENCE_GENOME_ID = (SELECT `REFERENCE_GENOME_ID` FROM `reference_genome` WHERE BUILD_NAME = 'GRCh37') WHERE NCBI_BUILD in ('hg19', 'GRCh37','37');
--- UPDATE `mutation_event` set REFERENCE_GENOME_ID = (SELECT `REFERENCE_GENOME_ID` FROM `reference_genome` WHERE BUILD_NAME = 'GRCm38') WHERE NCBI_BUILD in ('mm10', 'GRCm38');
-
+ALTER TABLE `mutation_event` ADD FOREIGN KEY (`REFERENCE_GENOME_ID`, `ENTREZ_GENE_ID`) REFERENCES `reference_genome_gene` (`REFERENCE_GENOME_ID`, `ENTREZ_GENE_ID`) ON DELETE CASCADE;
+ALTER TABLE `mutation_event` DROP FOREIGN KEY `mutation_event_ibfk_1`;
+UPDATE `mutation_event` set REFERENCE_GENOME_ID = (SELECT REFERENCE_GENOME_ID FROM reference_genome_gene WHERE reference_genome_gene.ENTREZ_GENE_ID = mutation_event.ENTREZ_GENE_ID);
+ALTER TABLE `mutation_event` CHANGE COLUMN `REFERENCE_GENOME_ID` `REFERENCE_GENOME_ID` INT(4) NOT NULL;
 ALTER TABLE `mutation_event` DROP COLUMN `NCBI_BUILD`;
 
 ALTER TABLE `genetic_profile` ADD COLUMN `REFERENCE_GENOME_ID` INT(4) NULL AFTER `CANCER_STUDY_ID`;

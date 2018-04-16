@@ -495,7 +495,7 @@ CREATE TABLE `structural_variant` (
   `LENGTH` int(11),
   `COMMENTS` varchar(255),
   `EXTERNAL_ANNOTATION` varchar(80),
-  `DRIVER_FILTER` VARCHAR(20), -- These fields are the same as in `mutation` table and will be useful in a future PR to include custom driver annotation support for fusions. 
+  `DRIVER_FILTER` VARCHAR(20),
   `DRIVER_FILTER_ANNOTATION` VARCHAR(80),
   `DRIVER_TIERS_FILTER` VARCHAR(50),
   `DRIVER_TIERS_FILTER_ANNOTATION` VARCHAR(80),

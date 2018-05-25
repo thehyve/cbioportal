@@ -820,7 +820,7 @@ class Validator(object):
                     extra={'line_number': self.line_number,
                            'cause': gene_symbol})
 
-        return gene_symbol, identified_entrez_id
+        return identified_entrez_id
 
     def checkDriverAnnotationColumn(self, driver_value=None, driver_annotation=None):
         """Ensures that cbp_driver_annotation is filled when the cbp_driver column
@@ -957,7 +957,7 @@ class FeaturewiseFileValidator(Validator):
         # parse and check the feature identifiers (implemented by subclasses)
         feature_id = self.parseFeatureColumns(data[:self.num_nonsample_cols])
         # skip line if no feature was identified
-        if feature_id == (None, None):
+        if feature_id is None:
             return
         # skip line with an error if the feature was encountered before
         if feature_id in self._feature_id_lines:
@@ -2762,28 +2762,34 @@ class StructuralVariantValidator(Validator):
         self.transcript_exons_dict = {}
 
     def checkHeader(self, data):
-        super(StructuralVariantValidator, self).checkHeader(data)
+        num_errors = super(StructuralVariantValidator, self).checkHeader(data)
 
         # Check presence of gene
         if not ('Site1_Hugo_Symbol' in self.cols or 'Site1_Entrez_Gene_Id' in self.cols):
             self.logger.error('Structural variant requires Site1_Entrez_Gene_Id and/or Site1_Hugo_Symbol column',
                               extra={'line_number': self.line_number})
+            num_errors += 1
 
         # Check second gene column
         if not ('Site2_Hugo_Symbol' in self.cols or 'Site2_Entrez_Gene_Id' in self.cols):
             self.logger.error('Fusion event requires Site2_Entrez_Gene_Id and/or Site2_Hugo_Symbol column',
                               extra={'line_number': self.line_number})
+            num_errors += 1
 
         # Fusion events should be described by exons.
         # Using chromosomal locations to describe fusion events is not supported.
         if not {'Site1_Exon', 'Site2_Exon'}.issubset(set(self.cols)):
             self.logger.error('Fusion event requires "Site1_Exon" and "Site2_Exon" columns',
                               extra={'line_number': self.line_number})
+            num_errors += 1
 
         if not {'Site1_Ensembl_Transcript_Id', 'Site2_Ensembl_Transcript_Id'}.issubset(set(self.cols)):
             self.logger.error('Fusion event requires "Site1_Ensembl_Transcript_Id" and "Site2_Ensembl_Transcript_Id" '
                               'columns',
                               extra={'line_number': self.line_number})
+            num_errors += 1
+
+        return num_errors
 
     def checkLine(self, data):
         super(StructuralVariantValidator, self).checkLine(data)
@@ -2886,8 +2892,9 @@ class StructuralVariantValidator(Validator):
         if data[self.cols.index('Event_Info')] == 'Fusion':
             checkFusionValues(self, data)
         else:
-            self.logger.warning('Validation for other structural variant events is not implemented yet',
-                                extra={'cause': self.cols.index('Event_Info')})
+            self.logger.error('Validation and functionality for other structural variant events are not implemented '
+                              'yet. Event_Info must be "Fusion"',
+                              extra={'cause': self.cols.index('Event_Info')})
 
     def onComplete(self):
         """Perform final validations based on the data parsed."""

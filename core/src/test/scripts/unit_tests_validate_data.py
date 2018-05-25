@@ -745,7 +745,13 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
             self.assertLessEqual(record.levelno, logging.INFO)
 
     def test_repeated_gene(self):
-        """Test if a warning is issued and the line is skipped if duplicate."""
+        """Test if a warning is issued and the line is skipped if duplicate.
+
+        In the test data, the Entrez ID in line 6 is removed. Therefore the gene symbol and gene alias table will be
+        used to look up this gene in the database. ENTB5 is an alias for Entrez 116983 (ACAP3). This gene was defined
+        earlier in the file, so the CENTB5 entry will be skipped. There are invalid values in this row, but because the
+        entry is skipped, the values should not be validated."""
+
         self.logger.setLevel(logging.WARNING)
         record_list = self.validate('data_cna_duplicate_gene.txt',
                                     validateData.CNADiscreteValidator)
@@ -754,8 +760,8 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(len(record_list), 1)
         record = record_list.pop()
         self.assertEqual(record.levelno, logging.WARNING)
-        self.assertEqual(record.line_number, 9)
-        self.assertIn('Duplicate', record.getMessage())
+        self.assertEqual(record.line_number, 6)
+        self.assertTrue(record.cause.startswith('116983'))
 
     def test_invalid_discrete_cna(self):
         """Check a discrete CNA file with values that should yield errors."""

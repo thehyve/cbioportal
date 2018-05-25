@@ -67,7 +67,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.cbioportal.model.GenesetMolecularData;
+import org.cbioportal.model.StructuralVariant;
 import org.cbioportal.service.GenesetDataService;
+import org.cbioportal.service.StructuralVariantService;
 import org.mskcc.cbio.portal.dao.DaoGeneset;
 
 
@@ -130,7 +132,7 @@ public class TestIntegrationTest {
                 }
             }
             //check that there are only warnings for empty positions in fake data:
-            assertEquals(1, countWarnings);
+            assertEquals(0, countWarnings);
             
             //check that ALL data really got into DB correctly. In the spirit of integration tests,
             //we want to query via the same service layer as the one used by the web API here.
@@ -163,10 +165,22 @@ public class TestIntegrationTest {
             List<DBGeneticProfile> geneticProfiles = geneticProfileMapperLegacy.getGeneticProfiles(geneticProfileStableIds);
             assertEquals(geneticProfiles.size(), 0);
 
+            //===== Check STRUCTURAL VARIANT data ========
+            // 7 structural variant events are importerted, using 11 unique genes, over 2 samples
+            geneticProfileStableIds = new ArrayList<String>(Arrays.asList("study_es_0_structural_variants", "study_es_0_structural_variants"));
+            List<Integer> entrezGeneIds = new ArrayList<Integer>(Arrays.asList(57670, 673, 8031, 5979, 27436, 238, 7113, 2078, 1956, 238, 5774));
+            List<String> sampleIds = new ArrayList<String>(Arrays.asList("TCGA-A2-A04P-01", "TCGA-A1-A0SB-01"));
+
+            StructuralVariantService structuralVariantService = applicationContext.getBean(StructuralVariantService.class);
+            List<StructuralVariant> structuralVariants = structuralVariantService.fetchStructuralVariants(geneticProfileStableIds, entrezGeneIds, sampleIds);
+
+            // Check if all 7 structural variants are imported
+            assertEquals(7, structuralVariants.size());
+
             //===== Check CNA data ========
             geneticProfileStableIds = new ArrayList<String>();
             geneticProfileStableIds.add("study_es_0_gistic");
-            List<String> hugoGeneSymbols = new ArrayList<String>(Arrays.asList("ACAP3","AGRN","ATAD3A","ATAD3B","ATAD3C","AURKAIP1","ERCC5"));
+            ArrayList<String> hugoGeneSymbols = new ArrayList<String>(Arrays.asList("ACAP3","AGRN","ATAD3A","ATAD3B","ATAD3C","AURKAIP1","ERCC5"));
             List<DBProfileData> cnaProfileData = apiService.getGeneticProfileData(geneticProfileStableIds, hugoGeneSymbols, null, null);
             //there is data for 7 genes x 778 samples:
             assertEquals(7*778, cnaProfileData.size());

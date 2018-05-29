@@ -1112,35 +1112,7 @@ public class GlobalProperties {
         }
         return false;
     }
-    
-    //public static void displayAllPortalProperties() {
-    //    Properties properties = loadProperties(getResourceStream(PORTAL_PROPERTIES_FILE_NAME));
-    //    Map<String, Map<String, String>[]> externalTabs = null;
-    //    for (Object key : properties.keySet()) {
-    //        if (key.toString().contains("external.tab")) {
-    //            if (externalTabs.containsKey(key.toString().charAt(13))) {
-    //                if (key.toString().contains("name")) {
-    //                    
-    //                } else if (key.toString().contains("url")) {
-    //                    
-    //                }
-    //            } else {
-    //                if (key.toString().contains("name")) {
-    //                    Map<String, String> innerMap = null;
-    //                    Map<String, Map<String, String>> outerMap;
-    //                    innerMap.put("name", portalProperties.getProperty(key.toString()));
-    //                } else if (key.toString().contains("url")) {
-    //                    Map<String, String> innerMap = null;
-    //                    innerMap.put("url", portalProperties.getProperty(key.toString()));
-    //                }
-    //            }
-    //        }
-    //        List<String> externalTabData = new ArrayList<String>();
-    //        externalTabData.add(properties.get(key).toString());
-    //        System.out.println("Property: "+key.toString());
-    //    }
-    //}
-    
+
     public static String getExternalTabName()
     {
         return portalProperties.getProperty(EXTERNAL_TAB_NAME);

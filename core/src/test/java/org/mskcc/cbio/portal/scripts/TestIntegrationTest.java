@@ -166,16 +166,16 @@ public class TestIntegrationTest {
             assertEquals(geneticProfiles.size(), 0);
 
             //===== Check STRUCTURAL VARIANT data ========
-            // 7 structural variant events are importerted, using 11 unique genes, over 2 samples
+            // 9 structural variant events are imported, using 13 unique genes, over 2 samples
             geneticProfileStableIds = new ArrayList<String>(Arrays.asList("study_es_0_structural_variants", "study_es_0_structural_variants"));
-            List<Integer> entrezGeneIds = new ArrayList<Integer>(Arrays.asList(57670, 673, 8031, 5979, 27436, 238, 7113, 2078, 1956, 238, 5774));
+            List<Integer> entrezGeneIds = new ArrayList<Integer>(Arrays.asList(57670, 673, 8031, 5979, 27436, 238, 7113, 2078, 1956, 238, 5774, 2115, 7273));
             List<String> sampleIds = new ArrayList<String>(Arrays.asList("TCGA-A2-A04P-01", "TCGA-A1-A0SB-01"));
 
             StructuralVariantService structuralVariantService = applicationContext.getBean(StructuralVariantService.class);
             List<StructuralVariant> structuralVariants = structuralVariantService.fetchStructuralVariants(geneticProfileStableIds, entrezGeneIds, sampleIds);
 
-            // Check if all 7 structural variants are imported
-            assertEquals(7, structuralVariants.size());
+            // Check if all 9 structural variants are imported
+            assertEquals(9, structuralVariants.size());
 
             //===== Check CNA data ========
             geneticProfileStableIds = new ArrayList<String>();

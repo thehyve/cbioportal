@@ -423,7 +423,8 @@ public final class DaoCancerStudy {
      *
      * @param cancerStudyStableId
      * @throws DaoException
-     * @deprecated
+     * @deprecated  prefer {@link #deleteCancerStudyByCascade(String)} if not
+     *              specifically supporting databases without foreign keys
      */
     public static void deleteCancerStudy(String cancerStudyStableId) throws DaoException {
         CancerStudy study = getCancerStudyByStableId(cancerStudyStableId);
@@ -509,7 +510,8 @@ public final class DaoCancerStudy {
      *
      * @param internalCancerStudyId Internal Cancer Study ID.
      * @throws DaoException Database Error.
-     * @deprecated
+     * @deprecated  prefer {@link #deleteCancerStudyByCascade(int)} if not
+     *              specifically supporting databases without foreign keys
      */
     public static void deleteCancerStudy(int internalCancerStudyId) throws DaoException {
         String[] deleteStudyStatements = {

@@ -65,3 +65,10 @@ We also maintain an active [list of RFCs (Requests for Comments)](RFC-List.md) w
 ### 5.2 Datasets
 * [Downloads](Downloads.md)
 
+
+
+## 6. Integrating external apps with Custom Tabs feature
+
+* [Custom Tabs Feature](Custom-Tabs-Feature.md)
+   * [Integrating R-Shiny apps as custom tabs](Custom-Tabs-Using-R-Shiny.md)
+

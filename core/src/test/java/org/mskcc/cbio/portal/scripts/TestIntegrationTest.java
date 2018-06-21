@@ -166,16 +166,17 @@ public class TestIntegrationTest {
             assertEquals(geneticProfiles.size(), 0);
 
             //===== Check STRUCTURAL VARIANT data ========
-            // 10 structural variant events are imported, using 13 unique genes, over 2 samples
+            // 44 structural variant events are imported, using 31 unique genes, over 2 samples
             geneticProfileStableIds = new ArrayList<String>(Arrays.asList("study_es_0_structural_variants", "study_es_0_structural_variants"));
+            // Not all 31 genes have to be queried. BRAF is fused to many of the test genes.
             List<Integer> entrezGeneIds = new ArrayList<Integer>(Arrays.asList(57670, 673, 8031, 5979, 27436, 238, 7113, 2078, 1956, 238, 5774, 2115, 7273));
-            List<String> sampleIds = new ArrayList<String>(Arrays.asList("TCGA-A2-A04P-01", "TCGA-A1-A0SB-01"));
+            List<String> sampleIds = new ArrayList<String>(Arrays.asList("TCGA-A2-A04P-01", "TCGA-A1-A0SB-01", "TCGA-A1-A0SB-01", "TCGA-A2-A04P-01", "TCGA-A2-A04P-01", "TCGA-A1-A0SK-01", "TCGA-A2-A0CM-01", "TCGA-AR-A1AR-01", "TCGA-B6-A0WX-01", "TCGA-BH-A1F0-01", "TCGA-B6-A0I6-01", "TCGA-BH-A18V-01", "TCGA-BH-A18Q-01", "TCGA-BH-A18K-01", "TCGA-BH-A0HL-01", "TCGA-BH-A0E0-01", "TCGA-BH-A0RX-01", "TCGA-A7-A13D-01", "TCGA-BH-A0E6-01", "TCGA-AO-A0J4-01", "TCGA-A7-A0CE-01", "TCGA-A7-A13E-01", "TCGA-A7-A0DA-01", "TCGA-D8-A142-01", "TCGA-D8-A143-01", "TCGA-AQ-A04J-01", "TCGA-BH-A0HN-01", "TCGA-A2-A0T0-01", "TCGA-A2-A0YE-01", "TCGA-A2-A0YJ-01", "TCGA-A2-A0D0-01", "TCGA-A2-A04U-01", "TCGA-AO-A0J6-01", "TCGA-A2-A0YM-01", "TCGA-A2-A0D2-01", "TCGA-BH-A0B3-01", "TCGA-A2-A04Q-01", "TCGA-A2-A0SX-01", "TCGA-AO-A0JL-01"));
 
             StructuralVariantService structuralVariantService = applicationContext.getBean(StructuralVariantService.class);
             List<StructuralVariant> structuralVariants = structuralVariantService.fetchStructuralVariants(geneticProfileStableIds, entrezGeneIds, sampleIds);
 
-            // Check if all 10 structural variants are imported
-            assertEquals(10, structuralVariants.size());
+            // Check if all 44 structural variants are imported
+            assertEquals(44, structuralVariants.size());
 
             //===== Check CNA data ========
             geneticProfileStableIds = new ArrayList<String>();

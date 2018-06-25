@@ -48,3 +48,31 @@
         }
     });
 </script>
+<style type="text/css">
+    /* HACK: Use specific id for cbioportal-frontend overrides */
+    #fusion_data {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px
+    }
+    #fusion_data .table {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px
+    }
+    #fusion_data th,
+    #fusion_data td {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px
+    }
+    #fusion_data .btn-default {
+        background-image: linear-gradient(to bottom, #fff 0, #eee 100%);
+    }
+    #fusion_data .fa-cloud-download,
+    #fusion_data .fa-clipboard {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    .rc-tooltip {
+        opacity:1 !important;
+    }
+    /* END HACK */
+</style>

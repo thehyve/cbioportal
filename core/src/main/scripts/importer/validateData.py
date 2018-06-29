@@ -1019,7 +1019,11 @@ class MutationsExtendedValidator(Validator):
 
     """Sub-class mutations_extended validator."""
 
-    # TODO - maybe this should comply to https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification ?
+    # Many checks have been added to comply with the MAF format from NCI Genomic Data Commons:
+    # The NIH NCI wiki that was used to create this checks has been retired.
+    # The new resource for MAF format can be found at:
+    # https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/
+
     REQUIRED_HEADERS = [
         'Tumor_Sample_Barcode',
         'Hugo_Symbol', # Required to initialize the Mutation Mapper tabs
@@ -1028,8 +1032,9 @@ class MutationsExtendedValidator(Validator):
     REQUIRE_COLUMN_ORDER = False
     ALLOW_BLANKS = True
 
-    # MutationFilter.java filters these types. Therefore, there is no reason to add warnings and errors for them
-    SKIP_VARIANT_TYPES = [
+    # MutationFilter.java filters these types by default, unless `variant_classification_filter` in the meta file is
+    # set. If `variant_classification_filter` is set and no values are added, all variant classifications will be loaded
+    SKIP_VARIANT_CLASSIFICATIONS = [
         'Silent',
         'Intron',
         '3\'UTR',
@@ -1045,9 +1050,9 @@ class MutationsExtendedValidator(Validator):
     NULL_DRIVER_TIERS_VALUES = ('', 'NA')
 
     # extra unofficial Variant classification values from https://github.com/mskcc/vcf2maf/issues/88:
-    EXTRA_VARIANT_CLASSIFICATION_VALUES = ['Splice_Region', 'Fusion']
+    EXTRA_VARIANT_CLASSIFICATION_VALUES = ['Splice_Region', 'Fusion', 'Unknown']
+
     # MAF values for Variant_Classification column
-    # from https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification + EXTRA values + Unknown:
     VARIANT_CLASSIFICATION_VALUES = [
        'Frame_Shift_Del',
        'Frame_Shift_Ins',
@@ -1060,7 +1065,7 @@ class MutationsExtendedValidator(Validator):
        'Nonstop_Mutation',
        'Targeted_Region',
        'De_novo_Start_InFrame',
-       'De_novo_Start_OutOfFrame'] + SKIP_VARIANT_TYPES + EXTRA_VARIANT_CLASSIFICATION_VALUES + ['Unknown']
+       'De_novo_Start_OutOfFrame'] + SKIP_VARIANT_CLASSIFICATIONS + EXTRA_VARIANT_CLASSIFICATION_VALUES
 
     # Used for mapping column names to the corresponding function that does a check on the value.
     CHECK_FUNCTION_MAP = {
@@ -1259,11 +1264,9 @@ class MutationsExtendedValidator(Validator):
         else:
             self.logger.error(log_message, extra=extra_dict)
 
-
     def checkAlleleMAFFormat(self, data):
         """
         Check Start_Position and End_Position against Variant_Type (according to MAF file checks #6, #10 and #11:
-        https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+(MAF)+Specification)
         """
 
         necessary_columns_check6 = ['Reference_Allele', 'Tumor_Seq_Allele1', 'Tumor_Seq_Allele2']
@@ -1445,7 +1448,6 @@ class MutationsExtendedValidator(Validator):
     def checkValidationColumns(self, data):
         """
         Perform MAF file check #7,#8, #9 and #13 for the Validation columns:
-        https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+(MAF)+Specification)
         """
 
         # Set variables for the different checks
@@ -1672,9 +1674,9 @@ class MutationsExtendedValidator(Validator):
         is_silent = False
         variant_classification = data[self.cols.index('Variant_Classification')]
         if 'variant_classification_filter' in self.meta_dict:
-            self.SKIP_VARIANT_TYPES = [x.strip() 
-                                       for x 
-                                       in self.meta_dict['variant_classification_filter'].split(',')]
+            self.SKIP_VARIANT_CLASSIFICATIONS = [x.strip()
+                                                 for x
+                                                 in self.meta_dict['variant_classification_filter'].split(',')]
         
         hugo_symbol = data[self.cols.index('Hugo_Symbol')]
         entrez_id = '0'
@@ -1698,10 +1700,10 @@ class MutationsExtendedValidator(Validator):
                                     "not 'IGR' or 'Targeted_Region'; this variant will be filtered out",
                                     extra={'line_number': self.line_number,
                                            'cause': variant_classification})
-        elif variant_classification in self.SKIP_VARIANT_TYPES:
+        elif variant_classification in self.SKIP_VARIANT_CLASSIFICATIONS:
             self.logger.info("Line will not be loaded due to the variant "
                              "classification filter. Filtered types: [%s]",
-                             ', '.join(self.SKIP_VARIANT_TYPES),
+                             ', '.join(self.SKIP_VARIANT_CLASSIFICATIONS),
                              extra={'line_number': self.line_number,
                                     'cause': variant_classification})
             is_silent = True

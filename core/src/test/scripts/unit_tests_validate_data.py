@@ -1325,8 +1325,8 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         """Test if customized mutations are skipped with a message."""
         # set level according to this test case:
         self.logger.setLevel(logging.INFO)
-        old_variant_types = validateData.MutationsExtendedValidator.SKIP_VARIANT_TYPES
-        validateData.MutationsExtendedValidator.SKIP_VARIANT_TYPES = ["5'Flank", "Frame_Shift_Del", "Frame_Shift_Ins"]
+        old_variant_types = validateData.MutationsExtendedValidator.SKIP_VARIANT_CLASSIFICATIONS
+        validateData.MutationsExtendedValidator.SKIP_VARIANT_CLASSIFICATIONS = ["5'Flank", "Frame_Shift_Del", "Frame_Shift_Ins"]
         record_list = self.validate('mutations/data_mutations_some_silent.maf',
                                     validateData.MutationsExtendedValidator,
                                     extra_meta_fields={
@@ -1338,7 +1338,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
             self.assertIn("filtered types", record.getMessage().lower())
         
         # restore the default skipped variant types
-        validateData.MutationsExtendedValidator.SKIP_VARIANT_TYPES = old_variant_types
+        validateData.MutationsExtendedValidator.SKIP_VARIANT_CLASSIFICATIONS = old_variant_types
                
     def test_isValidGenePosition(self):
         """Test if proper warnings/errors are given for wrong/blank gene positions 

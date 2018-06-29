@@ -413,8 +413,7 @@ The expression metadata file should contain the following fields:
 9. **gene_panel (Optional)**:  gene panel stable id
 
 #### Supported stable_id values for MRNA_EXPRESSION
-For historical reasons, cBioPortal expects the `stable_id` to be one of those listed in the following static set.
-The stable_id for continuous RNA-seq data has two options: `rna_seq_mrna` or `rna_seq_v2_mrna`. These options were added to distinguish between two different TCGA pipelines, which perform different types of normalization (see [RNASeq](https://wiki.nci.nih.gov/display/TCGA/RNASeq) and [RNASeq version 2](https://wiki.nci.nih.gov/display/tcga/rnaseq+version+2)). However, for custom datasets either one of these `stable_id` can be chosen.
+For historical reasons, cBioPortal expects the `stable_id` to be one of those listed in the following static set. These options were added to distinguish between different TCGA pipelines, which perform different types of normalization. However, for custom datasets either one of these `stable_id` can be chosen.
 
 <table>
 <thead>
@@ -579,7 +578,7 @@ If your mutation data is already in [VCF](http://www.1000genomes.org/wiki/Analys
 
 #### Extended MAF format
 The extended MAF format recognized by the portal has:
-* 32 columns from the [TCGA MAF format](https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification).
+* 32 columns from the [TCGA MAF format](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/).
 * 1 column with the amino acid change.
 * 4 columns with information on reference and variant allele counts in tumor and normal samples. 
 

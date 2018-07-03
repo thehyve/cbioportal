@@ -98,7 +98,7 @@ public class ImportTimelineData extends ConsoleRunnable {
 					event.setStopDate(Long.valueOf(fields[2]));
 				}
 				event.setEventType(fields[indexCategorySpecificField - 1]);
-				Map<String, String> eventData = new HashMap<String, String>();
+				Map<String, String> eventData = new LinkedHashMap<String, String>();
 				for (int i = indexCategorySpecificField; i < fields.length; i++) {
 					if (!fields[i].isEmpty()) {
 						eventData.put(headers[i], fields[i]);

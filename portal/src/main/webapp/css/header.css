@@ -151,6 +151,10 @@ header {
     border-top:1px solid #ddd;
 }
 
+#footer #center .img {
+    padding:30px;
+}
+
 .legacy #page_wrapper {
     margin:0;
 }

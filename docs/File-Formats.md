@@ -728,9 +728,21 @@ profile_name: Protein expression Z-scores (RPPA)
 
 #### Data file
 
-A protein level data file is a two dimensional matrix with a RPPA antibody per row and a sample per column. For each antibody-sample pair, a real number represents the protein level for that sample.  The antibody information can contain one or more HUGO gene symbols and/or entrez gene identifiers, separated by a space, and an antibody ID pair separated by the "|" symbol.
+A protein level data file is a two dimensional matrix with a gene or RPPA antibody per row and a sample per column. 
+ Traditionally, this data file contained a column for RPPA antobody called Composite.Element.REF, containing an 
+ antibody-sample pair. It is also possible to load protein data based on Entrez Gene ID and/or Hugo Symbol.  
 
-#### Example 
+##### Composite.Element.REF
+For each 
+ antibody-sample pair, a real number represents the protein level for that sample. The antibody information can contain 
+ one or more HUGO gene symbols and/or entrez gene identifiers, separated by a space, and an antibody ID pair separated 
+ by the "|" symbol. 
+ 
+If the value after the '|' is 'symbol_symbol', this record is considered a phosphogene and added to the database. In the
+ database, this entry receives a unique, artificial, negative Entrez ID. The phosphoprotein part can queried on the 
+ Query page and visualized in both OncoPrint as Plots tab. If the part before '|' does not follow this patern, this 
+ entrys is considered a normal gene, and the symbol before '|' is used as gene symbol.
+ 
 
 An example data file which includes the required column header would look like:
 
@@ -741,6 +753,17 @@ MAPK1 MAPK3|MAPK_PT202_Y204<TAB>1.70444582025<TAB>1.0982864685...
 AKT1 AKT2 10000|AKT<TAB>0.17071492725<TAB>0.264067254391
 ...
 ```
+
+
+##### Entrez_Gene_Id and/or Hugo_Symbol
+##### Example
+```
+Entrez_Gene_Id<TAB>TCGA-C8-A12T-01<TAB>TCGA-A2-A0D2-01<TAB>...
+673<TAB>-0.29609<TAB>-0.35802TAB>...
+7157<TAB>0.19454<TAB>0.12368TAB>...
+...
+```
+
 
 
 ## Fusion Data  

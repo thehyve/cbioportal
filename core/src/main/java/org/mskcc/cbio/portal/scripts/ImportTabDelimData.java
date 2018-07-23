@@ -608,6 +608,9 @@ public class ImportTabDelimData {
         	ProgressMonitor.logWarning("Gene " + symbol + " not found in DB. Record will be skipped for this gene.");
         }
         
+        // If the symbol after the '|' is 'symbol_symbol', this record is considered a phosphogene and added to the
+        // database. If does not follow this patern, it is considered a normal gene, and the symbol before '|' is used 
+        // as gene symbol.
         Pattern p = Pattern.compile("(p[STY][0-9]+(?:_[STY][0-9]+)*)");
         Matcher m = p.matcher(arrayId);
         String residue;

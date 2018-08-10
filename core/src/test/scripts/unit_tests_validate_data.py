@@ -220,36 +220,28 @@ class ClinicalColumnDefsTestCase(PostClinicalDataFileTestCase):
         record_list = self.validate('data_clin_coldefs_hardcoded_attrs.txt',
                                     validateData.PatientClinicalValidator)
         self.assertEqual(len(record_list), 3)
-        osmonths_records = []
-        other_sid_records = []
-        other_warn_records = []
-        for record in record_list:
-            self.assertNotIn('portal', record.getMessage().lower())
-            if 'OS_MONTHS' in record.getMessage():
-                osmonths_records.append(record)
-            if hasattr(record, 'cause') and record.cause == 'OTHER_SAMPLE_ID':
-                other_sid_records.append(record)
-            if 'details will be missing' in record.getMessage():
-                other_warn_records.append(record)
+        record_iterator = iter(record_list)
 
-        self.assertEqual(len(osmonths_records), 1)
-        record = osmonths_records.pop()
+        # Expect error for OS_MONTHS being a STRING instead of NUMBER
+        record = record_iterator.next()
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(record.line_number, 3)
         self.assertEqual(record.column_number, 2)
+        self.assertIn(record.cause, 'STRING')
 
-        self.assertEqual(len(other_sid_records), 1)
-        record = other_sid_records.pop()
+        # Expect warning for sample attribute in patient clinical data
+        record = record_iterator.next()
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(record.line_number, 5)
         self.assertEqual(record.column_number, 6)
+        self.assertIn(record.cause, 'OTHER_SAMPLE_ID')
 
-        self.assertEqual(len(other_warn_records), 1)
-        record = other_warn_records.pop()
-        self.assertEqual(record.levelno, logging.WARNING)
+        # Expect warning for sample attribute in patient clinical data
+        record = record_iterator.next()
+        self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(record.line_number, 5)
         self.assertEqual(record.column_number, 7)
-
+        self.assertIn(record.cause, 'METASTATIC_SITE')
 
 
 class ClinicalValuesTestCase(DataFileTestCase):
@@ -679,6 +671,16 @@ class GeneIdColumnsTestCase(PostClinicalDataFileTestCase):
         record = record_iterator.next()
         self.assertIn('cannot be parsed', record.getMessage().lower())
 
+    def test_cytoband_column(self):
+        """Test that the validator will not fail for a column for Cytoband. This column is default outputted by GISTIC2
+         and ignored in the importer."""
+        self.logger.setLevel(logging.WARNING)
+        record_list = self.validate('data_cna_cytoband.txt',
+                                    validateData.CNAValidator)
+        # expecting zero warning messages:
+        self.assertEqual(len(record_list), 0)
+
+
     # TODO - add extra unit tests for the genesaliases scenarios (now only test_name_only_but_ambiguous tests part of this)
 
 
@@ -1054,18 +1056,13 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         record_list = self.validate('mutations/data_mutations_check_special_cases_allele.maf',
                                     validateData.MutationsExtendedValidator, None, True, True)
         
-        # We expect 4 errors
-        self.assertEqual(len(record_list), 4)
+        # We expect 3 errors
+        self.assertEqual(len(record_list), 3)
         record_iterator = iter(record_list)
         # expect error for the same values in Reference_Allele, Tumor_Seq_Allele1 and Tumor_Seq_Allele2 columns
         record = record_iterator.next()
         self.assertEqual(record.line_number, 2)
         self.assertIn('All Values in columns Reference_Allele, Tumor_Seq_Allele1 and Tumor_Seq_Allele2 are equal.',
-                      record.getMessage())
-        # expect error for Reference_Allele which is not - even though Variant_type equals INS
-        record = record_iterator.next()
-        self.assertEqual(record.line_number, 3)
-        self.assertIn('Variant_Type indicates an insertion, but Reference_Allele does not equal -.',
                       record.getMessage())
         # expect error for deletion, Tumor Seq allele columns do not contain -
         # even though the lengths of the sequences are equal
@@ -1969,9 +1966,9 @@ class CaseListDirTestCase(PostClinicalDataFileTestCase):
         self.assertIn('add_global_case_list', record.getMessage())
 
 
-class StableIdValidationTestCase(LogBufferTestCase):
+class MetaFilesTestCase(LogBufferTestCase):
 
-    """Tests to ensure stable_id validation works correctly."""
+    """Tests for the contents of the meta files."""
 
     def test_unnecessary_and_wrong_stable_id(self):
         """Tests to check behavior when stable_id is not needed (warning) or wrong(error)."""
@@ -2000,6 +1997,20 @@ class StableIdValidationTestCase(LogBufferTestCase):
         self.assertEqual(warning.levelno, logging.WARNING)
         self.assertEqual(warning.cause, 'stable_id')
 
+    def test_exceed_maximum_length_meta_attribute_value(self):
+        """Test to check the length the attribute in meta files."""
+        self.logger.setLevel(logging.WARNING)
+        validateData.process_metadata_files(
+            'test_data/meta_files',
+            PORTAL_INSTANCE,
+            self.logger, False, False)
+        record_list = self.get_log_records()
+        # expecting 1 error:
+        self.assertEqual(len(record_list), 1)
+
+        # expecting one error about the maximum length of 'short_name' meta_study
+        record = record_list.pop()
+        self.assertEqual("The maximum length of the 'short_name' value is 64", record.getMessage())
 
 class HeaderlessClinicalDataValidationTest(PostClinicalDataFileTestCase):
 

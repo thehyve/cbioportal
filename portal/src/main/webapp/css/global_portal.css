@@ -129,6 +129,7 @@ fieldset#patient-view-summary-fieldset > legend {
 
 img {
   border: 0px;
+  margin-right: 40px;
 }
 
 A:link {

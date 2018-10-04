@@ -161,6 +161,65 @@
     <!-- end googleplus beans -->
     </b:beans>
 
+    <!-- =============================================================================== -->
+    <!-- =============================================================================== -->
+    <!-- openid-keycloak beans -->
+    <b:beans profile="openid-kc">
+    <context:component-scan base-package="org.keycloak.adapters.springsecurity" />
+
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="keycloakAuthenticationProvider" />
+    </authentication-manager>
+
+    <bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean">
+        <!-- location of keycloak.json: see https://www.keycloak.org/docs/latest/securing_apps/index.html#_java_adapter_config for .json options --> 
+        <constructor-arg value="${keycloak.config.location}" />
+    </bean>
+
+    <bean id="keycloakAuthenticationEntryPoint" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationEntryPoint" />
+    <bean id="keycloakAuthenticationProvider" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider" />
+    <bean id="keycloakPreAuthActionsFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter" />
+    <bean id="keycloakAuthenticationProcessingFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter">
+        <constructor-arg name="authenticationManager" ref="authenticationManager" />
+    </bean>
+
+    <bean id="keycloakLogoutHandler" class="org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler">
+        <constructor-arg ref="adapterDeploymentContext" />
+    </bean>
+
+    <bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+        <constructor-arg name="logoutSuccessUrl" value="/" />
+        <constructor-arg name="handlers">
+            <list>
+                <ref bean="keycloakLogoutHandler" />
+                <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+            </list>
+        </constructor-arg>
+        <property name="logoutRequestMatcher">
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg name="pattern" value="/sso/logout**" />
+                <constructor-arg name="httpMethod" value="GET" />
+            </bean>
+        </property>
+    </bean>
+
+    <http auto-config="false" entry-point-ref="keycloakAuthenticationEntryPoint">
+        <intercept-url pattern="/auth/*" access="permitAll"/>
+        <intercept-url pattern="/favicon.ico" access="permitAll"/>
+        <intercept-url pattern="/login.jsp*" access="permitAll"/>
+        <intercept-url pattern="/case.do*" access="permitAll"/>
+        <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
+        <intercept-url pattern="/**" access="isAuthenticated()"/>
+        <custom-filter ref="keycloakPreAuthActionsFilter" before="LOGOUT_FILTER" />
+        <custom-filter ref="keycloakAuthenticationProcessingFilter" before="FORM_LOGIN_FILTER" />
+        <custom-filter ref="logoutFilter" position="LOGOUT_FILTER" />
+    </http>
+
+    <!-- end openid-keycloak beans -->
+    <!-- =============================================================================== -->
+    <!-- =============================================================================== -->
+    </b:beans>
+
     <!-- openid beans -->
     <b:beans profile="openid">
 
@@ -172,7 +231,7 @@
                 <openid-attribute name="firstname" type="http://axschema.org/namePerson/first" required="true"/>
                 <openid-attribute name="lastname" type="http://axschema.org/namePerson/last" required="true"/>
             </attribute-exchange>
-            <attribute-exchange identifier-match=".*yahoo.com.*">
+            <attribute-exchange identifier-match=".*yahoo.com.*"> 
                 <openid-attribute name="email" type="http://axschema.org/contact/email" required="true"/>
                 <openid-attribute name="fullname" type="http://axschema.org/namePerson" required="true"/>
             </attribute-exchange>

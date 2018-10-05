@@ -171,37 +171,37 @@
         <authentication-provider ref="keycloakAuthenticationProvider" />
     </authentication-manager>
 
-    <bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean">
+    <b:bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean">
         <!-- location of keycloak.json: see https://www.keycloak.org/docs/latest/securing_apps/index.html#_java_adapter_config for .json options --> 
         <constructor-arg value="${keycloak.config.location}" />
-    </bean>
+    </b:bean>
 
-    <bean id="keycloakAuthenticationEntryPoint" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationEntryPoint" />
-    <bean id="keycloakAuthenticationProvider" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider" />
-    <bean id="keycloakPreAuthActionsFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter" />
-    <bean id="keycloakAuthenticationProcessingFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter">
+    <b:bean id="keycloakAuthenticationEntryPoint" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationEntryPoint" />
+    <b:bean id="keycloakAuthenticationProvider" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider" />
+    <b:bean id="keycloakPreAuthActionsFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter" />
+    <b:bean id="keycloakAuthenticationProcessingFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter">
         <constructor-arg name="authenticationManager" ref="authenticationManager" />
-    </bean>
+    </b:bean>
 
-    <bean id="keycloakLogoutHandler" class="org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler">
+    <b:bean id="keycloakLogoutHandler" class="org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler">
         <constructor-arg ref="adapterDeploymentContext" />
-    </bean>
+    </b:bean>
 
-    <bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+    <b:bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
         <constructor-arg name="logoutSuccessUrl" value="/" />
         <constructor-arg name="handlers">
             <list>
                 <ref bean="keycloakLogoutHandler" />
-                <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+                <b:bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
             </list>
         </constructor-arg>
         <property name="logoutRequestMatcher">
-            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+            <b:bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
                 <constructor-arg name="pattern" value="/sso/logout**" />
                 <constructor-arg name="httpMethod" value="GET" />
-            </bean>
+            </b:bean>
         </property>
-    </bean>
+    </b:bean>
 
     <http auto-config="false" entry-point-ref="keycloakAuthenticationEntryPoint">
         <intercept-url pattern="/auth/*" access="permitAll"/>

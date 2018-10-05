@@ -264,6 +264,7 @@
         <intercept-url pattern="/favicon.ico" access="permitAll"/>
         <intercept-url pattern="/login.jsp*" access="permitAll"/>
         <intercept-url pattern="/case.do*" access="permitAll"/>
+        <intercept-url pattern="/api/**" access="permitAll"/>
         <intercept-url pattern="/webservice.do*" access="isAuthenticated() or hasIpAddress('127.0.0.1')"/>
         <intercept-url pattern="/**" access="isAuthenticated()"/>
         <!-- used for saml authentication -->

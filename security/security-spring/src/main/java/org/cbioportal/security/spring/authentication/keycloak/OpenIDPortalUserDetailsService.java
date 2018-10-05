@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
  * @author Pieter Lukasse
  */
 @Primary
+//TODO make sure this ^@Primary annotation does not interfere with other authentication settings (e.g. if SAML is chosen)
 @Service
 public class OpenIDPortalUserDetailsService
     implements UserDetailsService, AuthenticationUserDetailsService<OpenIDAuthenticationToken> {

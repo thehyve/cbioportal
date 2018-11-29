@@ -18,6 +18,7 @@
     * [Gene Panel Data](#gene-panel-data)
     * [Gene Set Data](#gene-set-data)
     * [Study Tags file](#study-tags-file)
+    * [Treatment Data](#treatment-data)
 
 # Introduction
 
@@ -1209,7 +1210,7 @@ The cells contain the GSVA(-like) score: which is real number, between -1.0 and 
 
 <table>
 <thead><tr><th>geneset_id</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>
-<tr><td>GO_POTASSIUM_ION_TRANSPOR</td><td>-0.987</td><td>0.423</td><td>-0.879</td></tr>
+<tr><td>GO_POTASSIUM_ION_TRANSPORT</td><td>-0.987</td><td>0.423</td><td>-0.879</td></tr>
 <tr><td>GO_GLUCURONATE_METABOLIC_PROCES</td><td>0.546</td><td>0.654</td><td>0.123</td></tr>
 <tr><td>..</td><td></td><td></td><td></td></tr>
 </table>
@@ -1253,10 +1254,193 @@ The cells contain the p-value for the GSVA score: A real number, between 0.0 and
 
 <table>
 <thead><tr><th>geneset_id</th><th>TCGA-AO-A0J</th><th>TCGA-A2-A0Y</th><th>TCGA-A2-A0S</th></tr></thead>
-<tr><td>GO_POTASSIUM_ION_TRANSPOR</td><td>0.0811</td><td>0.0431</td><td>0.0087</td></tr>
+<tr><td>GO_POTASSIUM_ION_TRANSPORT</td><td>0.0811</td><td>0.0431</td><td>0.0087</td></tr>
 <tr><td>GO_GLUCURONATE_METABOLIC_PROCES</td><td>0.6621</td><td>0.0031</td><td>1.52e-9</td></tr>
 <tr><td>..</td><td></td><td></td><td></td></tr>
 </table>
 
 ## Study Tags file
 YAML or JSON file which contains extra information about the cancer study. No compulsory fields are required for this file (free-form). To enable this feature, you need to add a line in the cancer study meta file with `tags_file:` followed the YAML/JSON file name. The information on the YAML or JSON file will be displayed in a table when mousing over a tag logo in the studies on the query page.
+
+## Treatment Data
+Treatment response data relate to outcome variables of treatments (compounds or combinations thereof) on samples (e.g., cell lines). cBioPortal supports IC50, EC50, GI50 and AUC (area under the curve) response data types imported from separate files. Information on treatments (`id`, `name`, `description` and `url`) are not part of the cBioPortal seed database, but are imported automatically from treatment response data files. For treatments already present in the database the `name`, `description` and `url` fields are overwitten by subsequent imports of treatment response data files. The `name`, `description` and `url` fields/columns are optional, but must be unique. When not defined the `name`, `description` and `url` fields will hold the same value as the `id` field.
+
+### Treatment response IC50 meta file
+The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For IC50 `IC50` is used as `datatype` and `treatment_ic50` is used as `stable_id`.
+
+Required fields: 
+```
+cancer_study_identifier: Same value as specified in study meta file
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: IC50
+stable_id: Any unique identifier within the study
+profile_name: A name describing the analysis.
+profile_description: A description of the data processing done.
+data_filename: <your treatment IC50 datafile>
+show_profile_in_analysis_tab: true
+pivot_threshold_value: A threshold value beyond which a treatment response is considered effective
+value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last.
+```
+
+Example:
+```
+cancer_study_identifier: study_es_0
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: IC50
+stable_id: treatment_ic50
+profile_name: IC50 values of compounds on cellular phenotype readout
+profile_description: IC50 (compound concentration resulting in half maximal inhibition) of compounds on cellular phenotype readout of cultured mutant cell lines.
+data_filename: data_treatment_ic50.txt
+show_profile_in_analysis_tab: true
+pivot_threshold_value: 0.1
+value_sort_order: ASC
+```
+
+### Treatment response IC50 data file
+The data file will be a simple tab separated format, similar to the expression data file: each sample is a column, each tested treatment (a compound or combination thereof) is a row, each cell contains treatment IC50 values for that sample x treatment combination.
+
+The first column must be named `treatment_id` and contains unique names for the treatments. The `treatment_id` column can be followed by optional unique `name`, `description` and `url` columns. The other columns are sample columns; an additional column for each sample in the dataset using the sample id as the column header.
+
+The cells contain the IC50 values. IC50 represents the concentration of an inhibitory compound that resuls in half-maximal inhibition of a cellular process or activity of a protein (complex). The IC50 is a postive real number (cannot be 0). When the IC50 is not measured for a sample/treatment-pair the value should be NA. When IC50 is not reached at the highest concentration tested the value should be the maximal concentration prefixed with ">" (e.g. ">10"). Example with 3 treatments and 3 samples:
+
+<table>
+<thead><tr><th>treatment_id</th><th>name</th><th>description</th><th>url</th><th>1321N1_CENTRAL_NERVOUS_SYSTEM</th><th>22RV1_PROSTATE</th><th>42MGBA_CENTRAL_NERVOUS_SYSTEM</th></tr></thead>
+<tr><td>17-AAG</td><td>Tanespimycin</td><td>Hsp90 inhibitor</td><td>https://en.wikipedia.org/wiki/Tanespimycin</td><td>0.228</td><td>0.330</td><td>0.0530</td></tr>
+<tr><td>AEW541</td><td>Larotrectinib</td><td>TrkA/B/C inhibitor</td><td>https://en.wikipedia.org/wiki/Larotrectinib</td><td>>8</td><td>2.33</td><td>2.68</td></tr>
+<tr><td>AZD0530</td><td>Saracatinib</td><td>Src/Bcr-Abl inhibitor</td><td>https://en.wikipedia.org/wiki/Saracatinib</td><td>NA</td><td>>8</td><td>4.60</td></tr>
+</table>
+
+### Treatment response EC50 meta file
+The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For EC50 `EC50` is used as `datatype` and `treatment_ec50` is used as `stable_id`. 
+
+Required fields: 
+```
+cancer_study_identifier: Same value as specified in study meta file
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: EC50
+stable_id: Any unique identifier within the study
+profile_name: A name describing the analysis.
+profile_description: A description of the data processing done.
+data_filename: <your treatment EC50 datafile>
+show_profile_in_analysis_tab: true
+pivot_threshold_value: A threshold value beyond which a treatment response is considered effective
+value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last.
+```
+
+Example:
+```
+cancer_study_identifier: study_es_0
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: EC50
+stable_id: treatment_ec50
+profile_name: EC50 values of compounds on cellular phenotype readout
+profile_description: EC50 (compound concentration resulting in half maximal activation) of compounds on cellular phenotype readout of cultured mutant cell lines.
+data_filename: data_treatment_ec50.txt
+show_profile_in_analysis_tab: true
+pivot_threshold_value: 0.1
+value_sort_order: ASC
+```
+
+### Treatment response EC50 data file
+The data file will be a simple tab separated format, similar to the expression data file: each sample is a column, each tested treatment (a compound or combination thereof) is a row, each cell contains treatment IC50 values for that sample x treatment combination.
+
+The first column must be named `treatment_id` and contains unique names for the treatments. The `treatment_id` column can be followed by optional unique `name`, `description` and `url` columns. The other columns are sample columns; an additional column for each sample in the dataset using the sample id as the column header.
+
+The cells contain the EC50 values. EC50 represents the concentration of an activator compound that resuls in half-maximal activation of a cellular process or activity of a protein (complex). The EC50 is a postive real number (cannot be 0). When the EC50 is not measured for a sample/treatment-pair the value should be NA. When EC50 is not reached at the highest concentration tested the value should be the maximal concentration prefixed with ">" (e.g. ">10"). Example with 3 treatments and 3 samples:
+
+<table>
+<thead><tr><th>treatment_id</th><th>name</th><th>description</th><th>url</th><th>1321N1_CENTRAL_NERVOUS_SYSTEM</th><th>22RV1_PROSTATE</th><th>42MGBA_CENTRAL_NERVOUS_SYSTEM</th></tr></thead>
+<tr><td>17-AAG</td><td>Tanespimycin</td><td>Hsp90 inhibitor</td><td>https://en.wikipedia.org/wiki/Tanespimycin</td><td>0.194</td><td>0.267</td><td>0.0521</td></tr>
+<tr><td>AEW541</td><td>Larotrectinib</td><td>TrkA/B/C inhibitor</td><td>https://en.wikipedia.org/wiki/Larotrectinib</td><td>8.72</td><td>8.17</td><td>1.51</td></tr>
+<tr><td>AZD0530</td><td>Saracatinib</td><td>Src/Bcr-Abl inhibitor</td><td>https://en.wikipedia.org/wiki/Saracatinib</td><td>0.599</td><td>NA</td><td>8.62</td></tr>
+</table>
+
+### Treatment response GI50 meta file
+The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For GI50 `GI50` is used as `datatype` and `treatment_gi50` is used as `stable_id`. 
+
+Required fields: 
+```
+cancer_study_identifier: Same value as specified in study meta file
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: GI50
+stable_id: Any unique identifier within the study
+profile_name: A name describing the analysis.
+profile_description: A description of the data processing done.
+data_filename: <your treatment GI50 datafile>
+show_profile_in_analysis_tab: true
+pivot_threshold_value: A threshold value beyond which a treatment response is considered effective
+value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last.
+```
+
+Example:
+```
+cancer_study_identifier: study_es_0
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: GI50
+stable_id: treatment_gi50
+profile_name: GI50 values of compounds on cellular phenotype readout
+profile_description: GI50 (compound concentration for 50% of maximal inhibition of cell proliferation) of compounds on cellular phenotype readout of cultured mutant cell lines.
+data_filename: data_treatment_gi50.txt
+show_profile_in_analysis_tab: true
+pivot_threshold_value: 0.1
+value_sort_order: ASC
+```
+
+### Treatment response GI50 data file
+The data file will be a simple tab separated format, similar to the expression data file: each sample is a column, each tested treatment (a compound or combination thereof) is a row, each cell contains treatment IC50 values for that sample x treatment combination.
+
+The first column must be named `treatment_id` and contains unique names for the treatments. The `treatment_id` column can be followed by optional unique `name`, `description` and `url` columns. The other columns are sample columns; an additional column for each sample in the dataset using the sample id as the column header.
+
+The cells contain the GI50 values. GI50 represents the concentration of an compound that results in 50% of the maximal inhibition of cell proliferation. The GI50 is a postive real number (cannot be 0). When the GI50 is not measured for a sample/treatment-pair the value should be NA. When GI50 is not reached at the highest concentration tested the value should be the maximal concentration prefixed with ">" (e.g. ">10"). Example with 3 treatments and 3 samples:
+
+<table>
+<thead><tr><th>treatment_id</th><th>name</th><th>description</th><th>url</th><th>1321N1_CENTRAL_NERVOUS_SYSTEM</th><th>22RV1_PROSTATE</th><th>42MGBA_CENTRAL_NERVOUS_SYSTEM</th></tr></thead>
+<tr><td>17-AAG</td><td>Tanespimycin</td><td>Hsp90 inhibitor</td><td>https://en.wikipedia.org/wiki/Tanespimycin</td><td>0.228</td><td>0.330</td><td>0.0530</td></tr>
+<tr><td>AEW541</td><td>Larotrectinib</td><td>TrkA/B/C inhibitor</td><td>https://en.wikipedia.org/wiki/Larotrectinib</td><td>>8</td><td>2.33</td><td>2.68</td></tr>
+<tr><td>AZD0530</td><td>Saracatinib</td><td>Src/Bcr-Abl inhibitor</td><td>https://en.wikipedia.org/wiki/Saracatinib</td><td>NA</td><td>>8</td><td>4.60</td></tr>
+</table>
+
+### Treatment response AUC meta file
+The meta file will be similar to meta files of other genetic profiles, such as mRNA expression. For GI50 `AUC` is used as `datatype` and `treatment_auc` is used as `stable_id`. 
+
+Required fields: 
+```
+cancer_study_identifier: Same value as specified in study meta file
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: AUC
+stable_id: Any unique identifier within the study
+profile_name: A name describing the analysis.
+profile_description: A description of the data processing done.
+data_filename: <your treatment AUC datafile>
+show_profile_in_analysis_tab: true
+pivot_threshold_value: A threshold value beyond which a treatment response is considered effective
+value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last.
+```
+
+Example:
+```
+cancer_study_identifier: study_es_0
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: AUC
+stable_id: treatment_auc
+profile_name: AUC values of compounds on cellular phenotype readout
+profile_description: AUC (area-under-the-curve) of compounds on cellular phenotype readout of cultured mutant cell lines.
+data_filename: data_treatment_auc.txt
+show_profile_in_analysis_tab: true
+pivot_threshold_value: 0.1
+value_sort_order: ASC
+```
+
+### Treatment response AUC data file
+The data file will be a simple tab separated format, similar to the expression data file: each sample is a column, each tested treatment (a compound or combination thereof) is a row, each cell contains treatment IC50 values for that sample x treatment combination.
+
+The first column must be named `treatment_id` and contains unique names for the treatments. The `treatment_id` column can be followed by optional unique `name`, `description` and `url` columns. The other columns are sample columns; an additional column for each sample in the dataset using the sample id as the column header.
+
+The cells contain the AUC values. AUC represents the area under the dose-response curve for a compound that stimulates or inhibits a cellular process or activity of a protein (complex). The AUC is zero or a postive real number. When the AUC is not measured for a sample/treatment-pair the value should be NA. Example with 3 treatments and 3 samples:
+
+<table>
+<thead><tr><th>treatment_id</th><th>name</th><th>description</th><th>url</th><th>1321N1_CENTRAL_NERVOUS_SYSTEM</th><th>22RV1_PROSTATE</th><th>42MGBA_CENTRAL_NERVOUS_SYSTEM</th></tr></thead>
+<tr><td>17-AAG</td><td>Tanespimycin</td><td>Hsp90 inhibitor</td><td>https://en.wikipedia.org/wiki/Tanespimycin</td><td>3.03</td><td>3.06</td><td>5.06</td></tr>
+<tr><td>AEW541</td><td>Larotrectinib</td><td>TrkA/B/C inhibitor</td><td>https://en.wikipedia.org/wiki/Larotrectinib</td><td>0.712</td><td>1.67</td><td>1.19</td></tr>
+<tr><td>AZD0530</td><td>Saracatinib</td><td>Src/Bcr-Abl inhibitor</td><td>https://en.wikipedia.org/wiki/Saracatinib</td><td>1.64</td><td>0.620</td><td>1.91</td></tr>
+</table>

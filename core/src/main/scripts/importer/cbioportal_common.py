@@ -59,6 +59,11 @@ class MetaFileTypes(object):
     GENE_PANEL_MATRIX = 'meta_gene_panel_matrix'
     GSVA_SCORES = 'meta_gsva_scores'
     GSVA_PVALUES = 'meta_gsva_pvalues'
+    TREATMENT_IC50 = 'meta_treatment_ic50'
+    TREATMENT_EC50 = 'meta_treatment_ec50'
+    TREATMENT_GI50 = 'meta_treatment_gi50'
+    TREATMENT_AUC = 'meta_treatment_auc'
+
 
 # fields allowed in each meta file type, maps to True if required
 META_FIELD_MAP = {
@@ -246,6 +251,54 @@ META_FIELD_MAP = {
         'data_filename': True,
         'show_profile_in_analysis_tab': True,
         'geneset_def_version': True
+    },
+    MetaFileTypes.TREATMENT_AUC: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True,
+        'show_profile_in_analysis_tab': True,
+        'pivot_threshold_value': True,
+        'value_sort_order': True
+    },
+    MetaFileTypes.TREATMENT_IC50: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True,
+        'show_profile_in_analysis_tab': True,
+        'pivot_threshold_value': True,
+        'value_sort_order': True
+    },
+    MetaFileTypes.TREATMENT_GI50: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True,
+        'show_profile_in_analysis_tab': True,
+        'pivot_threshold_value': True,
+        'value_sort_order': True
+    },
+    MetaFileTypes.TREATMENT_EC50: {
+        'cancer_study_identifier': True,
+        'genetic_alteration_type': True,
+        'datatype': True,
+        'stable_id': True,
+        'profile_name': True,
+        'profile_description': True,
+        'data_filename': True,
+        'show_profile_in_analysis_tab': True,
+        'pivot_threshold_value': True,
+        'value_sort_order': True
     }
 }
 
@@ -269,7 +322,11 @@ IMPORTER_CLASSNAME_BY_META_TYPE = {
     MetaFileTypes.MUTATION_SIGNIFICANCE: "org.mskcc.cbio.portal.scripts.ImportMutSigData",
     MetaFileTypes.GENE_PANEL_MATRIX: "org.mskcc.cbio.portal.scripts.ImportGenePanelProfileMap",
     MetaFileTypes.GSVA_SCORES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
-    MetaFileTypes.GSVA_PVALUES: "org.mskcc.cbio.portal.scripts.ImportProfileData"
+    MetaFileTypes.GSVA_PVALUES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+    MetaFileTypes.TREATMENT_AUC: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+    MetaFileTypes.TREATMENT_IC50: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+    MetaFileTypes.TREATMENT_EC50: "org.mskcc.cbio.portal.scripts.ImportProfileData",
+    MetaFileTypes.TREATMENT_GI50: "org.mskcc.cbio.portal.scripts.ImportProfileData"
 }
 
 IMPORTER_REQUIRES_METADATA = {
@@ -529,7 +586,11 @@ def get_meta_file_type(meta_dictionary, logger, filename):
         ("GISTIC_GENES_DEL", "Q-VALUE"): MetaFileTypes.GISTIC_GENES,
         ("MUTSIG", "Q-VALUE"): MetaFileTypes.MUTATION_SIGNIFICANCE,
         ("GENESET_SCORE", "GSVA-SCORE"): MetaFileTypes.GSVA_SCORES,
-        ("GENESET_SCORE", "P-VALUE"): MetaFileTypes.GSVA_PVALUES
+        ("GENESET_SCORE", "P-VALUE"): MetaFileTypes.GSVA_PVALUES,
+        ("TREATMENT_RESPONSE", "IC50"): MetaFileTypes.TREATMENT_IC50,
+        ("TREATMENT_RESPONSE", "EC50"): MetaFileTypes.TREATMENT_EC50,
+        ("TREATMENT_RESPONSE", "GI50"): MetaFileTypes.TREATMENT_GI50,
+        ("TREATMENT_RESPONSE", "AUC"): MetaFileTypes.TREATMENT_AUC
     }
     result = None
     if 'genetic_alteration_type' in meta_dictionary and 'datatype' in meta_dictionary:

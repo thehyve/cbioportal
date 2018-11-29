@@ -18,6 +18,7 @@ public class DaoGeneticEntity {
     {
         GENE,
         GENESET,
+        TREATMENT,
         PHOSPHOPROTEIN;
     }
     

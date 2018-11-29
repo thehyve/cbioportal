@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.cbioportal.persistence.mybatis.TreatmentMapper">
+    <cache readOnly="true"/>
+
+    <sql id="select">
+        treatment.ID AS "${prefix}id",
+        treatment.STABLE_ID AS "${prefix}stableId",
+        treatment.NAME as "${prefix}name",
+        treatment.DESCRIPTION as "${prefix}description",
+        treatment.LINKOUT_URL as "${prefix}refLink"
+    </sql>
+
+    <select id="getTreatments" resultType="org.cbioportal.model.Treatment">
+        SELECT
+        <include refid="select">
+            <property name="prefix" value=""/>
+        </include>
+        FROM treatment
+        <if test="sortBy != null and projection != 'ID'">
+            ORDER BY ${sortBy} ${direction}
+        </if>
+        <if test="projection == 'ID'">
+            ORDER BY treatment.STABLE_ID ASC
+        </if>
+        <if test="limit != null and limit != 0">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="getMetaTreatments" resultType="org.cbioportal.model.meta.BaseMeta">
+        SELECT
+        COUNT(*) AS totalCount
+        FROM treatment
+    </select>
+
+    <select id="getTreatmentByStableId" resultType="org.cbioportal.model.Treatment">
+        SELECT
+        <include refid="select">
+            <property name="prefix" value=""/>
+        </include>
+        FROM treatment
+        WHERE treatment.STABLE_ID = #{treatmentId}
+    </select>
+    
+    <select id="fetchTreatments" resultType="org.cbioportal.model.Treatment">
+        SELECT
+        <include refid="select">
+            <property name="prefix" value=""/>
+        </include>
+        FROM treatment
+        WHERE treatment.STABLE_ID IN
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY treatment.STABLE_ID ASC
+    </select>
+
+</mapper>

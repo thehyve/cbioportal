@@ -87,6 +87,13 @@ public class ImportProfileData extends ConsoleRunnable {
             } else if (geneticProfile.getGeneticAlterationType() == GeneticAlterationType.FUSION) {
                 ImportFusionData importer = new ImportFusionData(dataFile, geneticProfile.getGeneticProfileId(), genePanel);
                 importer.importData();
+            } else if (geneticProfile.getGeneticAlterationType() == GeneticAlterationType.TREATMENT_RESPONSE) {
+
+                // add all missing Treatments to the database
+                ImportTreatments.importData(dataFile, true);
+                
+                ImportTabDelimData treatmentProfileImporter = new ImportTabDelimData(dataFile, geneticProfile.getTargetLine(), geneticProfile.getGeneticProfileId(), genePanel);
+                treatmentProfileImporter.importData(numLines);
             } else {
                 ImportTabDelimData importer = new ImportTabDelimData(dataFile, geneticProfile.getTargetLine(), geneticProfile.getGeneticProfileId(), genePanel);
                 importer.importData(numLines);

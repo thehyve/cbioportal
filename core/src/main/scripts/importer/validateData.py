@@ -44,6 +44,8 @@ import yaml
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from base64 import urlsafe_b64encode
+import math
+from abc import ABCMeta, abstractmethod
 
 # configure relative imports if running as a script; see PEP 366
 if __name__ == "__main__" and __package__ is None:
@@ -92,7 +94,11 @@ VALIDATOR_IDS = {
     cbioportal_common.MetaFileTypes.MUTATION_SIGNIFICANCE:'MutationSignificanceValidator',
     cbioportal_common.MetaFileTypes.GENE_PANEL_MATRIX:'GenePanelMatrixValidator',
     cbioportal_common.MetaFileTypes.GSVA_SCORES:'GsvaScoreValidator',
-    cbioportal_common.MetaFileTypes.GSVA_PVALUES:'GsvaPvalueValidator'
+    cbioportal_common.MetaFileTypes.GSVA_PVALUES:'GsvaPvalueValidator',
+    cbioportal_common.MetaFileTypes.TREATMENT_IC50:'TreatmentEffectiveConcValidator',
+    cbioportal_common.MetaFileTypes.TREATMENT_EC50:'TreatmentEffectiveConcValidator',
+    cbioportal_common.MetaFileTypes.TREATMENT_GI50:'TreatmentEffectiveConcValidator',
+    cbioportal_common.MetaFileTypes.TREATMENT_AUC:'TreatmentAUCValidator'
 }
 
 
@@ -304,7 +310,10 @@ class Validator(object):
     column headers and a `REQUIRE_COLUMN_ORDER` boolean stating
     whether their position is significant. Unless ALLOW_BLANKS is
     set to True, empty cells in lines below the column header will
-    be reported as errors.
+    be reported as errors. An optional 'UNIQUE_COLUMNS' array can be
+    specified with names of columns that are checked for uniqueness
+    of cell contents.
+
 
     The methods `processTopLines`, `checkHeader`, `checkLine` and `onComplete`
     may be overridden (calling their superclass methods) to perform any
@@ -314,6 +323,7 @@ class Validator(object):
     """
 
     REQUIRED_HEADERS = []
+    UNIQUE_COLUMNS = []
     REQUIRE_COLUMN_ORDER = True
     ALLOW_BLANKS = False
 
@@ -347,6 +357,7 @@ class Validator(object):
         self.relaxed_mode = relaxed_mode
         self.strict_maf_checks = strict_maf_checks
         self.fill_in_attr_defs = False
+        self.unique_col_data = {}
 
     def validate(self):
         """Validate the data file."""
@@ -441,6 +452,15 @@ class Validator(object):
                                      delimiter='\t',
                                      quoting=csv.QUOTE_NONE,
                                      strict=True))
+
+            # init dictionary for detection of unique value columns
+            # - will use column indexes as key and a set of values as value
+            # - only columns that are presenet in the data are added
+            for unique_col_name in self.UNIQUE_COLUMNS:
+                col_index = _get_column_index(header_cols, unique_col_name)
+                if col_index > -1:
+                    self.unique_col_data[_get_column_index(header_cols, unique_col_name)] = []
+
             if self.checkHeader(header_cols) > 0:
                 if not self.relaxed_mode:
                     self.logger.error(
@@ -449,6 +469,9 @@ class Validator(object):
                 else:
                     self.logger.warning('Ignoring invalid column header. '
                         'Continuing with validation...')
+
+            # keep track of columns that should contain unique data
+            # init a dectionary for bookkeeping
 
             # read through the data lines of the file
             csvreader = csv.reader(itertools.chain(first_data_lines,
@@ -468,6 +491,18 @@ class Validator(object):
                         "Data line starting with '#' skipped",
                         extra={'line_number': self.line_number})
                 else:
+                    # check valid data lines for uniqueness of values in 
+                    # unique data columns (set with UNIQUE_COLUMNS option)
+                    for unique_col_index in self.unique_col_data.keys():
+                        cell_value = fields[unique_col_index]
+                        # if a value is already in the set of unique values, raise an error
+                        if (cell_value in self.unique_col_data[unique_col_index]):
+                            col_name = self.cols[unique_col_index]
+                            self.logger.error('Cell value `' + cell_value + '` in column `'
+                                                + col_name + '` is not unique.')
+                            continue
+                        # add the value to the set for comparison with other rows
+                        self.unique_col_data[unique_col_index].append(cell_value)
                     self.checkLine(fields)
 
             # (tuple of) string(s) of the newlines read (for 'rU' mode files)
@@ -922,6 +957,7 @@ class FeaturewiseFileValidator(Validator):
         # skip line if no feature was identified
         if feature_id is None:
             return
+
         # skip line with an error if the feature was encountered before
         if feature_id in self._feature_id_lines:
             self.logger.warning(
@@ -3229,87 +3265,187 @@ class GisticGenesValidator(Validator):
         else:
             return parsed_value
 
+class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
 
-class GsvaWiseFileValidator(FeaturewiseFileValidator):
+    """Ensures that multiple files that contain feature x sample data are consistent.
+    
+    MultipleDataFileValidator ensures that multiple files that contain feature x sample
+    data have consistent headers (containing sample id's) and feature columns (containing feature
+    id's). Errors messages are issued when samples or features are missing or when samples or features 
+    are present in one but not the other file.
+    ."""
 
-    """FeatureWiseValidator that has Gene set ID as feature column."""
-
-    REQUIRED_HEADERS = ['geneset_id']
     def __init__(self, *args, **kwargs):
-        super(GsvaWiseFileValidator, self).__init__(*args, **kwargs)
-        self.geneset_ids = []
+        super(MultipleDataFileValidator, self).__init__(*args, **kwargs)
+        self.feature_ids = []
+
+    @classmethod
+    @abstractmethod
+    def _get_prior_validated_header(cls):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _set_prior_validated_header(cls, header_names):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _get_prior_validated_feature_ids(cls):
+        pass
+        
+    @classmethod
+    @abstractmethod
+    def _set_prior_validated_feature_ids(cls, feature_ids):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _get_prior_validated_sample_ids(cls):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _set_prior_validated_sample_ids(cls, sample_ids):
+        pass
 
     def checkHeader(self, cols):
         """Validate the header and read sample IDs from it.
 
         Return the number of fatal errors.
         """
-        num_errors = super(GsvaWiseFileValidator, self).checkHeader(cols)
+        num_errors = super(MultipleDataFileValidator, self).checkHeader(cols)
 
-        global prior_validated_sample_ids
-
-        if prior_validated_sample_ids != None:
-            if self.cols != prior_validated_sample_ids:
-                self.logger.error('Headers from score and p-value files are different',
+        if self._get_prior_validated_header() != None:
+            if self.cols != self._get_prior_validated_header():
+                self.logger.error('Headers from data files are different',
                                   extra={'line_number': self.line_number})
                 num_errors += 1
         else:
-            prior_validated_sample_ids = self.cols
+            self._set_prior_validated_header(self.cols)
 
         return num_errors
 
     def parseFeatureColumns(self, nonsample_col_vals):
 
-        """Check the `geneset_id` column."""
+        """Check the feature id column."""
 
-        global prior_validated_geneset_ids
-        geneset_id = nonsample_col_vals[0].strip()
+        feature_id = nonsample_col_vals[0].strip()
 
-        # Check if gene set is present
-        if geneset_id == '':
+        # Check if treatment is present
+        if feature_id == '':
             # Validator already gives warning for this in checkLine method
             pass
-        # Check if gene set contains whitespace
-        elif ' ' in geneset_id:
-            self.logger.error("Whitespace found in `geneset_id`",
+        # Check if treatment contains whitespace
+        elif ' ' in feature_id:
+            self.logger.error("Whitespace found in feature identifier",
                               extra={'line_number': self.line_number,
-                                     'cause': geneset_id})
-        # Check if gene set is in database
-        elif self.portal.geneset_id_list is not None and geneset_id not in self.portal.geneset_id_list:
-            self.logger.error("Gene set not found in database, please make sure "
-                              "to import gene sets prior to study loading",
-                              extra={'line_number': self.line_number, 'cause': geneset_id})
+                                     'cause': feature_id})
         else:
-            # Check if this is the second gene set data file
-            if prior_validated_geneset_ids is not None:
-                # Check if gene set is in the first gene set data file
-                if geneset_id not in prior_validated_geneset_ids:
-                    self.logger.error('Gene sets in cannot be found in other gene set file',
+            # Check if this is the second treatment data file
+            if self._get_prior_validated_feature_ids() is not None:
+                # Check if treatment is in the first treatment data file
+                if feature_id not in self._get_prior_validated_feature_ids():
+                    self.logger.error('Feature id cannot be found in other data file',
                                       extra={'line_number': self.line_number,
-                                             'cause': geneset_id})
-            # Add gene set to list of gene sets of current gene set data file
-            self.geneset_ids.append(geneset_id)
-        return geneset_id
+                                             'cause': feature_id})
+            # Add treatment to list of treatments of current treatment data file
+            self.feature_ids.append(feature_id)
+        return feature_id
 
     def onComplete(self):
 
-        def checkConsistencyScoresPvalue(self):
-            """This function validates whether the gene sets in the scores and p-value file are the same"""
+        def checkConsistencyFeatures(self):
+            """This function validates whether the treatments in the treatment response files (IC50, EC50, 
+            GI50, AUC, ...) are the same"""
 
-            global prior_validated_geneset_ids
-
-            # If the prior_validated_geneset_ids is not filled yet, fill it with the first file.
-            if prior_validated_geneset_ids is None:
-                prior_validated_geneset_ids = self.geneset_ids
+            # If the prior_validated_features_ids is not filled yet, fill it with the first file.
+            if self._get_prior_validated_feature_ids() is None:
+                self._set_prior_validated_feature_ids(self.feature_ids)
             else:
                 # Check if gene set ids are the same
-                if not prior_validated_geneset_ids == self.geneset_ids:
+                if not self._get_prior_validated_feature_ids() == self.feature_ids:
                     self.logger.error(
-                        'Gene sets column in score and p-value file are not equal')
+                        'Feature columns in data files are not equal.')
 
-        checkConsistencyScoresPvalue(self)
+        checkConsistencyFeatures(self)
 
-        super(GsvaWiseFileValidator, self).onComplete()
+        super(MultipleDataFileValidator, self).onComplete()
+
+# TODO: move duplicate code in GsvaWiseFileValidator and TreatmentWiseFileValidator classes to meta class
+class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
+    """Groups multiple gene set data files from a study to ensure consistency.
+
+    All Validator classes that check validity of different gene set data
+    types in a study should inherit from this class.
+    """
+
+    prior_validated_sample_ids = None
+    prior_validated_feature_ids = None
+    prior_validated_header = None
+    REQUIRED_HEADERS = ['geneset_id']
+
+    @classmethod
+    def _get_prior_validated_header(cls):
+        return GsvaWiseFileValidator.prior_validated_header
+
+    @classmethod
+    def _set_prior_validated_header(cls, header_names):
+        GsvaWiseFileValidator.prior_validated_header = header_names
+    
+    @classmethod
+    def _get_prior_validated_feature_ids(cls):
+        return GsvaWiseFileValidator.prior_validated_feature_ids
+
+    @classmethod
+    def _set_prior_validated_feature_ids(cls, feature_ids):
+        GsvaWiseFileValidator.prior_validated_feature_ids = feature_ids
+
+    @classmethod
+    def _get_prior_validated_sample_ids(cls):
+        return GsvaWiseFileValidator.prior_validated_sample_ids
+
+    @classmethod
+    def _set_prior_validated_sample_ids(cls, sample_ids):
+        GsvaWiseFileValidator.prior_validated_sample_ids = sample_ids
+
+
+class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
+    """Groups multiple treatment response files from a study to ebsure consistency.
+
+    All Validator classes that check validity of different treatment response data
+    types in a study should inherit from this class.
+    """
+    prior_validated_sample_ids = None
+    prior_validated_feature_ids = None
+    prior_validated_header = None
+    REQUIRED_HEADERS = ['treatment_id']
+    OPTIONAL_HEADERS = ['name', 'description', 'url']
+    UNIQUE_COLUMNS = ['treatment_id', 'name', 'description', 'url']
+
+    @classmethod
+    def _get_prior_validated_header(cls):
+        return TreatmentWiseFileValidator.prior_validated_header
+
+    @classmethod
+    def _set_prior_validated_header(cls, header_names):
+        TreatmentWiseFileValidator.prior_validated_header = header_names
+    
+    @classmethod
+    def _get_prior_validated_feature_ids(cls):
+        return TreatmentWiseFileValidator.prior_validated_feature_ids
+
+    @classmethod
+    def _set_prior_validated_feature_ids(cls, feature_ids):
+        TreatmentWiseFileValidator.prior_validated_feature_ids = feature_ids
+
+    @classmethod
+    def _get_prior_validated_sample_ids(cls):
+        return TreatmentWiseFileValidator.prior_validated_sample_ids
+
+    @classmethod
+    def _set_prior_validated_sample_ids(cls, sample_ids):
+        TreatmentWiseFileValidator.prior_validated_sample_ids = sample_ids
 
 
 class GsvaScoreValidator(GsvaWiseFileValidator):
@@ -3323,7 +3459,7 @@ class GsvaScoreValidator(GsvaWiseFileValidator):
         """Check a value in a sample column."""
         stripped_value = float(value.strip())
         if stripped_value < -1 or stripped_value > 1:
-            self.logger.error("Value is not between -1 and 1, and therefor not "
+            self.logger.error("Value is not between -1 and 1, and therefore not "
                               "a valid GSVA score",
                               extra={'line_number': self.line_number,
                                      'column_number': col_index + 1,
@@ -3341,7 +3477,127 @@ class GsvaPvalueValidator(GsvaWiseFileValidator):
         """Check a value in a sample column."""
         stripped_value = float(value.strip())
         if stripped_value <= 0 or stripped_value > 1:
-            self.logger.error("Value is not between 0 and 1, and therefor not a valid p-value",
+            self.logger.error("Value is not between 0 and 1, and therefore not a valid p-value",
+                              extra={'line_number': self.line_number,
+                                     'column_number': col_index + 1,
+                                     'cause': value})
+
+
+
+class TreatmentEffectiveConcValidator(TreatmentWiseFileValidator):
+
+    """ Validator for files containing concentration values for treatment responses.
+    """
+
+    # (1) Natural positive number (not 0)
+    # (2) Number may be prefixed by ">"; ">n" means that the treatment was ineffective at the highest tested concentration of n.
+    # (3) NA cell value is allowed; means treatment was not tested on a sample
+    # (4) Is an empty cell value allowed? (meaning treatment was not tested on a sample)
+    #
+    # Warnings for concentrations:
+    # (1) Cell contains a value without decimals and is not prependend by ">"; value appears to be truncated but lacks ">" truncation indicator
+    def checkValue(self, value, col_index):
+        """Check a value in a sample column."""
+
+        # value is not defined
+        if value == "":
+            self.logger.error("Cell is empty. An effective concentration value is expected. Use 'NA' to indicate missing values.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+        
+        stripped_value = value.strip()
+
+        # 'NA' is an allowed value. No further validations apply.
+        if stripped_value == 'NA':
+            return
+
+        # if the value is prefixed with '>' remove this prefix
+        # prior to evaluation of the numeric value
+        hasTruncSymbol = re.match("^>", stripped_value)
+        stripped_value = re.sub("^>","", stripped_value)
+        
+        try:
+            numeric_value = float(stripped_value)
+        except ValueError:
+            self.logger.error("Value cannot be interpreted as a floating point number and is not valid effective concentration.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if math.isnan(numeric_value):
+            self.logger.error("Value is NaN, therefore, not a valid effective concentration.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if math.isinf(numeric_value):
+            self.logger.error("Value is infinite and, therefore, not a valid effective concentration.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        # raise error when number is not a natural positive number
+        if numeric_value <= 0:
+            self.logger.error("Value is not larger than 0 and, therefore, not a valid effective concentration.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if numeric_value % 1 == 0 and not hasTruncSymbol:
+            self.logger.warning("Value has no decimals and may represent an invalid effective concentration.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+
+class TreatmentAUCValidator(TreatmentWiseFileValidator):
+
+    """ Validator for files containing AUC values for treatment responses.
+    """
+
+    # Requirements for AUC (area under the curve): 
+    # (1) Natural positive number including 0.
+    # (2) NA is allowed;  means treatment was not tested on a sample.
+    # (3) Cell values cannot contain characters other than [0-9,.>]; scientific notation (e.g., 123.456e+5) is not supported at the moment.
+    def checkValue(self, value, col_index):
+        """Check a value in a sample column."""
+
+        stripped_value = value.strip()
+
+        # 'NA' is an allowed value. No further validations apply.
+        if stripped_value == 'NA':
+            return
+
+        try:
+            numeric_value = float(stripped_value)
+        except ValueError:
+            self.logger.error("Value cannot be interpreted as a floating point number and is not valid effective AUC.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if math.isnan(numeric_value):
+            self.logger.error("Value is NaN, therefore, not a valid AUC.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if math.isinf(numeric_value):
+            self.logger.error("Value is infinite and, therefore, not a valid AUC.",
+                extra={'line_number': self.line_number,
+                'column_number': col_index + 1,
+                'cause': value})
+            return
+
+        if numeric_value < 0:
+            self.logger.error("Value is smaller than 0 and, therefore, not a valid AUC.",
                               extra={'line_number': self.line_number,
                                      'column_number': col_index + 1,
                                      'cause': value})
@@ -4195,6 +4451,12 @@ def main_validate(args):
 
 # ------------------------------------------------------------------------------
 # vamanos
+
+def _get_column_index(parts, name):
+    for i in range(len(parts)):
+        if name == parts[i]:
+            return i
+    return -1
 
 if __name__ == '__main__':
     try:

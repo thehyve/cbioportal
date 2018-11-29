@@ -7,6 +7,7 @@ version 3, or (at your option) any later version.
 """
 
 import unittest
+from unittest.mock import Mock
 import sys
 import logging.handlers
 import textwrap
@@ -40,7 +41,7 @@ def setUpModule():
                                 num != 8)
     logger = logging.getLogger(__name__)
     # parse mock API results from a local directory
-    PORTAL_INSTANCE = validateData.load_portal_info('test_data/api_json_unit_tests/',
+    PORTAL_INSTANCE = validateData.load_portal_info('test_data/api_json_unit_tests',
                                                     logger,
                                                     offline=True)
 
@@ -199,6 +200,30 @@ class ColumnOrderTestCase(DataFileTestCase):
         # again, we expect no errors or warnings
         self.assertEqual(0, len(record_list))
 
+
+class UniqueColumnTestCase(PostClinicalDataFileTestCase):
+
+    # create dummy class from  FeaturewiseFileValidator
+    # set the `name` column to be validated for uniqueness
+    class DummyFeaturewiseFileValidator(validateData.FeaturewiseFileValidator):
+        REQUIRED_HEADERS = ['id']
+        OPTIONAL_HEADERS = ['name']
+        def parseFeatureColumns(self, nonsample_col_vals):
+            return
+        def checkValue(self, value, column_index):
+            return 
+
+    def test_uniquecolumns_are_accepted(self):
+        self.logger.setLevel(logging.ERROR)
+        UniqueColumnTestCase.DummyFeaturewiseFileValidator.UNIQUE_COLUMNS = ['id']
+        record_list = self.validate('data_unique_column_test.txt', UniqueColumnTestCase.DummyFeaturewiseFileValidator)
+        self.assertEqual(len(record_list), 0)
+
+    def test_uniquecolumns_(self):
+        self.logger.setLevel(logging.ERROR)
+        UniqueColumnTestCase.DummyFeaturewiseFileValidator.UNIQUE_COLUMNS = ['name']
+        record_list = self.validate('data_unique_column_test.txt', UniqueColumnTestCase.DummyFeaturewiseFileValidator)
+        self.assertEqual(len(record_list), 1)
 
 class ClinicalColumnDefsTestCase(PostClinicalDataFileTestCase):
 
@@ -926,7 +951,6 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertIn('column', record.getMessage().lower())
         return
 
-
     def test_missing_row_gsva(self):
         #Test if an error is issued if the score and pvalue table does not have same rownames
         self.logger.setLevel(logging.ERROR)
@@ -941,25 +965,184 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(len(record_list2), 1)
         for record in record_list2:
             self.assertEqual(record.levelno, logging.ERROR)
-        self.assertEqual('Gene sets column in score and p-value file are not equal', record.getMessage())
+        self.assertEqual('Feature columns in data files are not equal.', record.getMessage())
         return
+        
+#    TODO: test other subclasses of FeatureWiseValidator
 
-    def test_geneset_not_in_database(self):
-        """Test if an error is issued if the score and pvalue table does not have same rownames"""
+class MultipleDataFileValidatorTestCase(unittest.TestCase):
 
+    def feature_id_is_accepted(self):
+        mockval = Mock()
+        validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id_without_whitespace"])
+        mockval.logger.error.assert_not_called()
+        mockval.logger.warning.assert_not_called()
+
+    def test_whitespace_in_feature_id_issues_error(self):
+        mockval = Mock()
+        validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id with whitespace"])
+        mockval.logger.error.assert_called()
+
+# -------------------- treatment multifile consistency test --------------------
+
+class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
+
+    # create a dummy class of that has no value checking
+    class DummyTreatmentValidator(validateData.TreatmentWiseFileValidator):
+        def checkValue(self, value, col_index):
+            return
+            
+    def test_identical_columns_are_accepted(self):
+        # Test if no error is issued when an concentration tables have identicat headers
         self.logger.setLevel(logging.ERROR)
-        record_list = self.validate('data_gsva_scores_geneset_not_in_database.txt',
-                                    validateData.GsvaScoreValidator)
-        self.assertEqual(len(record_list), 1)
-        record_iterator = iter(record_list)
-        record = next(record_iterator)
-        self.assertEqual(record.line_number, 3)
-        self.assertIn(record.cause, 'HYVE_TEST_GENE_SET')
-        self.assertEqual('Gene set not found in database, please make sure to import gene sets prior to study loading',
-                         record.getMessage())
+
+        # reset state of the TreatmentWiseFileValidator class 
+        # to prevent carry-over from other tests
+        _resetMultipleFileHandlerClassVars()
+        record_list1 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        record_list2 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        self.assertEqual(len(record_list1), 0)
+        self.assertEqual(len(record_list2), 0)
+
         return
 
-    # TODO: test other subclasses of FeatureWiseValidator
+    def test_missing_column_effectiveconcentration(self):
+        # Test if an error is issued when an IC50 and GI50 concentration table do not have same header
+        self.logger.setLevel(logging.ERROR)
+
+        # reset state of the TreatmentWiseFileValidator class 
+        # to prevent carry-over from other tests
+        _resetMultipleFileHandlerClassVars()
+
+        ### Error should appear when the second file is validated
+        record_list1 = self.validate('study_es_0/data_treatment_ic50.txt',
+                                    TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        record_list2 = self.validate('data_treatment_ic50_missing_column.txt',
+                                    TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        
+        self.assertEqual(len(record_list1), 0)
+        self.assertEqual(len(record_list2), 2)
+        for record in record_list2:
+            self.assertEqual(record.levelno, logging.ERROR)
+        record_iterator = iter(record_list2)
+        record = next(record_iterator)
+        self.assertEqual(record.line_number, 1)
+        self.assertIn('headers', record.getMessage().lower())
+        self.assertIn('different', record.getMessage().lower())
+        record = next(record_iterator)
+        self.assertIn('invalid', record.getMessage().lower())
+        self.assertIn('column', record.getMessage().lower())
+        return
+                                    
+    def test_missing_row_effectiveconcentration(self):
+        self.logger.setLevel(logging.ERROR)
+
+        # reset state of the TreatmentWiseFileValidator 
+        # class to prevent carry-over from other tests
+        _resetMultipleFileHandlerClassVars()
+
+        ### Error should appear when the second file is validated
+        record_list1 = self.validate('study_es_0/data_treatment_ic50.txt',
+                                    TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        record_list2 = self.validate('data_treatment_ic50_missing_row.txt',
+                                    TreatmentMultiFileTestCase.DummyTreatmentValidator)
+
+        self.assertEqual(len(record_list1), 0)
+        self.assertEqual(len(record_list2), 1)
+        for record in record_list2:
+            self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Feature columns in data files are not equal.', record.getMessage())
+        return
+
+# ------------------ end treatment multifile consistency test ------------------
+
+# -------------- treatment effective concentration validator test --------------
+
+class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
+
+    def test_empty_cell_issues_error(self):
+        passConcValue("").error.assert_called()
+
+    def test_NA_value_is_allowed(self):
+        passConcValue("NA").error.assert_not_called()
+
+    def test_NAN_value_issues_error(self):
+        passConcValue("NAN").error.assert_called()
+        passConcValue("nan").error.assert_called()
+        passConcValue("NaN").error.assert_called()
+
+    def test_Inf_value_issues_error(self):
+        passConcValue("Inf").error.assert_called()
+        passConcValue("inf").error.assert_called()
+        passConcValue("Infinite").error.assert_called()
+        passConcValue("infinite").error.assert_called()
+
+    def test_no_decimals_issues_warning(self):
+        passConcValue("10").warning.assert_called()
+        passConcValue("00010").warning.assert_called()
+    
+    def test_zero_issues_error(self):
+        passConcValue("0").error.assert_called()
+        passConcValue("0.000").error.assert_called()
+        passConcValue("00000").error.assert_called()
+
+    def test_leadingzeros_are_allowed(self):
+        passConcValue("0000.123").error.assert_not_called()
+
+    def test_negativenumber_issues_error(self):
+        passConcValue("-234234.234").error.assert_called()
+    
+    def test_positivenumber_is_allowed(self):
+        passConcValue("234234.234").error.assert_not_called()
+        passConcValue("234234.234").warning.assert_not_called()
+
+    def test_largerthan_notation_is_allowed(self):
+        passConcValue(">10").warning.assert_not_called()
+        passConcValue(">10").error.assert_not_called()
+
+    def test_floatnumber_is_allowed(self):
+        passConcValue("10.23234").warning.assert_not_called()
+        passConcValue("10.23234").error.assert_not_called()
+
+# helper function for test 
+def passConcValue(value):
+    mockval = Mock()
+    validateData.TreatmentEffectiveConcValidator.checkValue(mockval, value, 1)
+    return mockval.logger
+
+# ------------ end treatment effective concentration validator test -------------
+
+# ---------------- treatment area-under-the-curve validator test ----------------
+
+class AreaUnderTheCurveValidatorTestCase(unittest.TestCase):
+
+    def test_empty_cell_issues_error(self):
+        passAUCValue("").error.assert_called()
+
+    def test_NA_value_is_allowed(self):
+        passAUCValue("NA").error.assert_not_called()
+
+    def test_NAN_value_issues_error(self):
+        passAUCValue("NAN").error.assert_called()
+        passAUCValue("nan").error.assert_called()
+        passAUCValue("NaN").error.assert_called()
+
+    def test_Inf_value_issues_error(self):
+        passAUCValue("Inf").error.assert_called()
+        passAUCValue("inf").error.assert_called()
+        passAUCValue("Infinite").error.assert_called()
+        passAUCValue("infinite").error.assert_called()
+
+    def test_negativenumber_issues_error(self):
+        passAUCValue("-234234.234").error.assert_called()
+
+# helper function for test 
+def passAUCValue(value):
+    mockval = Mock()
+    validateData.TreatmentAUCValidator.checkValue(mockval, value, 1)
+    return mockval.logger
+
+# -------------- end treatment area-under-the-curve validator test ---------------
 
 class ContinuousValuesTestCase(PostClinicalDataFileTestCase):
 
@@ -2336,7 +2519,6 @@ class HeaderlessClinicalDataValidationTest(PostClinicalDataFileTestCase):
         self.assertEqual(final_record.levelno, logging.ERROR)
         self.assertIn('cannot be parsed', final_record.getMessage().lower())
 
-
 class DataFileIOTestCase(PostClinicalDataFileTestCase):
     """Test if the right behavior occurs if study files cannot be read."""
 
@@ -2350,6 +2532,20 @@ class DataFileIOTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertIn('file', record.getMessage().lower())
 
+def _resetMultipleFileHandlerClassVars():
+    """Reset the state of classes that check mulitple files of the same type.
+    
+    GsvaWiseFileValidator and TreatmentWiseFileValidator classes check 
+    consistency between multiple data files by collecting information in class variables.
+    This implementation is not consistent with the unit test environment that simulates
+    different studies to be loaded. To ensure real-world fucntionality the class variables 
+    should be reset before each unit test that tests multi file consistency."""
+    validateData.TreatmentWiseFileValidator.prior_validated_sample_ids = None
+    validateData.TreatmentWiseFileValidator.prior_validated_feature_ids = None
+    validateData.TreatmentWiseFileValidator.prior_validated_header = None
+    validateData.GsvaWiseFileValidator.prior_validated_sample_ids = None
+    validateData.GsvaWiseFileValidator.prior_validated_feature_ids = None
+    validateData.GsvaWiseFileValidator.prior_validated_header = None
 
 if __name__ == '__main__':
     unittest.main(buffer=True)

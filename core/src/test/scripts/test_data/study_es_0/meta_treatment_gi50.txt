@@ -1,0 +1,10 @@
+cancer_study_identifier: study_es_0
+genetic_alteration_type: TREATMENT_RESPONSE
+datatype: GI50
+stable_id: treatment_gi50
+profile_name: GI50 values of compounds on cellular phenotype readout
+profile_description: GI50 (compound concentration for 50% of maximal inhibition of cell proliferation) of compounds on cellular phenotype readout of cultured mutant cell lines.
+data_filename: data_treatment_gi50.txt
+show_profile_in_analysis_tab: true
+pivot_threshold_value: 0.1
+value_sort_order: ASC

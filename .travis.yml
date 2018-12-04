@@ -73,8 +73,8 @@ script:
           -e \
           -Ppublic \
           -Dfinal.war.name=cbioportal \
-          -Ddb.user=cbio_user \
-          -Ddb.password=somepassword \
+          -Ddb.test.username=cbio_user \
+          -Ddb.test.password=somepassword \
           clean integration-test
   fi
 - |

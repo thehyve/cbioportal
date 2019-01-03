@@ -67,7 +67,6 @@ public class ImportExtendedMutationData{
     private int samplesSkipped = 0;
     private Set<String> sampleSet = new HashSet<String>();
     private Set<String> geneSet = new HashSet<String>();
-                     private String genePanel;
     private Set<String> filteredMutations = new HashSet<String>();
     private Pattern SEQUENCE_SAMPLES_REGEX = Pattern.compile("^.*sequenced_samples:(.*)$");
 
@@ -75,19 +74,18 @@ public class ImportExtendedMutationData{
      * construct an ImportExtendedMutationData.
      * Filter mutations according to the no argument MutationFilter().
      */
-    public ImportExtendedMutationData(File mutationFile, int geneticProfileId, String genePanel, Set<String> filteredMutations) {
+    public ImportExtendedMutationData(File mutationFile, int geneticProfileId, Set<String> filteredMutations) {
         this.mutationFile = mutationFile;
         this.geneticProfileId = geneticProfileId;
         this.swissprotIsAccession = false;
-        this.genePanel = genePanel;
         this.filteredMutations = filteredMutations;
 
         // create default MutationFilter
         myMutationFilter = new MutationFilter( );
     }
 
-    public ImportExtendedMutationData(File mutationFile, int geneticProfileId, String genePanel) {
-        this(mutationFile, geneticProfileId, genePanel, null);
+    public ImportExtendedMutationData(File mutationFile, int geneticProfileId) {
+        this(mutationFile, geneticProfileId, null);
     }
 
     /**
@@ -583,8 +581,9 @@ public class ImportExtendedMutationData{
 
     private void addSampleProfileRecord(Sample sample) throws DaoException {
         if (!DaoSampleProfile.sampleExistsInGeneticProfile(sample.getInternalId(), geneticProfileId)) {
-            Integer genePanelID = (genePanel == null) ? null : GeneticProfileUtil.getGenePanelId(genePanel);
-            DaoSampleProfile.addSampleProfile(sample.getInternalId(), geneticProfileId, genePanelID);
+            // If mutations are profiled on gene panel, use gene panel matrix file, not MAF file, since it cannot
+            // contain samples that are profiled but no mutations are found.
+            DaoSampleProfile.addSampleProfile(sample.getInternalId(), geneticProfileId, null);
         }
     }
 

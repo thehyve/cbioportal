@@ -135,7 +135,7 @@ public class ImportGenePanelProfileMap extends ConsoleRunnable {
                 String genePanelName = row_data.get(i);
                 GenePanel genePanel = DaoGenePanel.getGenePanelByStableId(genePanelName);
 
-                // Add gene pnel information to database
+                // Add gene panel information to database
                 if (genePanel != null) {
                     DaoSampleProfile.addGenePanel(sample.getInternalId(), profileIds.get(i), genePanel.getInternalId());
                 }

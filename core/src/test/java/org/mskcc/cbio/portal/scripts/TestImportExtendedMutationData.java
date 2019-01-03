@@ -217,7 +217,7 @@ public class TestImportExtendedMutationData {
 	           
 	           File file = new File("src/test/resources/data_mutations_extended.txt");
 	           Set<String> customFiltering = new HashSet<String>(Arrays.asList("Missense_Mutation", "Nonsense_Mutation"));
-	           ImportExtendedMutationData parser = new ImportExtendedMutationData(file, geneticProfileId, null, customFiltering);
+	           ImportExtendedMutationData parser = new ImportExtendedMutationData(file, geneticProfileId, customFiltering);
 	           parser.importData();
 	           MySQLbulkLoader.flushAll();
 	           ConsoleUtil.showMessages();
@@ -237,7 +237,7 @@ public class TestImportExtendedMutationData {
                    
                    File file = new File("src/test/resources/data_mutations_extended.txt");
                    Set<String> customFiltering = new HashSet<String>(Arrays.asList(""));
-                   ImportExtendedMutationData parser = new ImportExtendedMutationData(file, geneticProfileId, null, customFiltering);
+                   ImportExtendedMutationData parser = new ImportExtendedMutationData(file, geneticProfileId, customFiltering);
                    parser.importData();
                    MySQLbulkLoader.flushAll();
                    ConsoleUtil.showMessages();

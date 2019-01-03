@@ -442,13 +442,15 @@ class CancerTypeFileValidationTestCase(DataFileTestCase):
     def test_new_cancer_type(self):
         """Test when a study defines a new cancer type."""
         # {"id":"luad","name":"Lung Adenocarcinoma","color":"Gainsboro"}
-        self.logger.setLevel(logging.WARNING)
+        self.logger.setLevel(logging.INFO)
         record_list = self.validate('data_cancertype_lung.txt',
                                     validateData.CancerTypeValidator)
-        # expecting a warning about a new cancer type being added
-        self.assertEqual(len(record_list), 1)
+        # expecting an info message being about a new cancer type being added
+        self.assertEqual(len(record_list), 3)
         record = record_list.pop()
-        self.assertEqual(record.levelno, logging.WARNING)
+        record = record_list.pop()
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.INFO)
         self.assertEqual(record.cause, 'luad')
         self.assertIn('will be added', record.getMessage().lower())
 

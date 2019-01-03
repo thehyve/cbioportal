@@ -94,6 +94,37 @@ public final class DaoSampleProfile {
         }
     }
 
+    public static void addGenePanel(Integer sampleId, Integer geneticProfileId, Integer panelId) throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            if (!sampleExistsInGeneticProfile(sampleId, geneticProfileId)) {
+                con = JdbcUtil.getDbConnection(DaoSampleProfile.class);
+                pstmt = con.prepareStatement
+                    ("INSERT INTO sample_profile (`SAMPLE_ID`, `GENETIC_PROFILE_ID`, `PANEL_ID`) VALUES (?,?,?)");
+                pstmt.setInt(1, sampleId);
+                pstmt.setInt(2, geneticProfileId);
+                pstmt.setInt(3, panelId);
+            } else {
+                con = JdbcUtil.getDbConnection(DaoSampleProfile.class);
+                pstmt = con.prepareStatement
+                    ("UPDATE `sample_profile` SET `PANEL_ID` = ? WHERE (`SAMPLE_ID` = ? AND `GENETIC_PROFILE_ID` = ?)");
+                pstmt.setInt(1, panelId);
+                pstmt.setInt(2, sampleId);
+                pstmt.setInt(3, geneticProfileId);
+            }
+            pstmt.executeUpdate();
+        } catch (NullPointerException e) {
+            throw new DaoException(e);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoSampleProfile.class, con, pstmt, rs);
+        }
+    }
+    
     public static boolean sampleExistsInGeneticProfile(int sampleId, int geneticProfileId)
             throws DaoException {
         Connection con = null;

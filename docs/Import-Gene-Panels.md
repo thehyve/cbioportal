@@ -12,15 +12,15 @@ In this example, we are loading the example gene panel which resides in the samp
 
 ```
 cd <cbioportal_source_folder>/core/src/main/scripts
-./importGenePanel.pl --data ../../test/scripts/test_data/study_es_0/gene_panel_example.txt
+./importGenePanel.pl --data ../../test/scripts/test_data/study_es_0/data_gene_panel_testpanel1.txt
 ```
 
 #### Reimport existing gene panel
 
-If a gene panel exists in the database with the same name as the one being imported, and there exists cancer study data that refers to this gene panel, this command will abort.  In order to import the gene panel in this situation, either remove the cancer study from the database that refers to this gene panel or explicitly remove the gene panel from the data and then rerun the ImportGenePanel command.  To remove the gene panel from the database, run the following commands fromthe MySQL console:
+If a gene panel exists in the database with the same name as the one being imported, and there exists cancer study data that refers to this gene panel, this command will abort.  In order to import the gene panel in this situation, either remove the cancer study from the database that refers to this gene panel or explicitly remove the gene panel from the data and then rerun the ImportGenePanel command.  To remove the gene panel from the database, run the following commands from the MySQL console:
 
 ```
-delete from gene_panel_list where internal_id = (select internal_id from gene_panel where stable_id = "example_gene_panel_stable_id");
-delete from gene_panel where stable_id = "example_gene_panel_stable_id";
+delete from gene_panel_list where internal_id = (select internal_id from gene_panel where stable_id = "TESTPANEL1");
+delete from gene_panel where stable_id = "TESTPANEL1";
 ```
-In this example we are removing the gene panel with the stable_id `example_gene_panel_stable_id`, the example gene_panel from the study_es_0 sample dataset.
+In this example we are removing the gene panel with the stable_id `TESTPANEL1`, the example gene_panel from the study_es_0 sample dataset.

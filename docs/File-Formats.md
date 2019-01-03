@@ -1105,58 +1105,44 @@ rank<TAB>gene<TAB>N<TAB>n<TAB>p<TAB>q
 ```
 
 ## Gene Panel Data
-Gene panel information can assign a list of genes that a genetic profile should consist of for a specific sample.
+Gene panel functionality can specify which genes are assayed on a panel and assign samples and genetic profiles (such as mutation data) to a panel.
 
-#### Gene Panel File
-The gene panel file follows the format of a meta file with the following fields:
-1. **stable_id**: The name of the gene panel. This should be unique across all studies, as gene panels can be globally applied to any sample and any genetic profile.
-2. **description**: A description of the gene panel.
-3. **gene_list**: Tab separated genes, represented either by all gene symbols or all Entrez gene IDs.
+To include gene panel data in your instance, the following data and/or configurations can be used:
+1. **Gene panel file**: This file contains the genes on the gene panel. A panel can be used for multiple studies within the instance and should be loaded prior to loading a study with gene panel data. For information on the format and import process please visit: [Import-Gene-Panels](Import-Gene-Panels.md).
+2. **Gene panel matrix file**: This file is used to specify which samples are sequenced on which gene panel in which genetic profile. This required for mutation and fusion data, because the MAF and fusion formats are unable to include samples which are sequenced but no mutations are found. For other genetic data, columns can be added to specify their gene panel, but a property can also be added to their respective meta file, because these data files contain all profiled samples. Although the gene panel matrix functionality overlaps with the case list functionality, a case list for mutations (`_sequenced`) is also required.
+3. **Gene panel property in meta file**: Adding the `gene_panel:` property to the meta file of a non-mutation data file, will assign all samples from that data type to the gene panel. In this case it is not necessary to include a column for this profile in the gene panel matrix file.
 
-An example gene panel file would be:
-```
-stable_id: IMPACT410
-description: Targeted (410 cancer genes) sequencing of various tumor types via MSK-IMPACT on Illumina HiSeq sequencers.
-gene_list: ABL1    ACVR1   AKT1    AKT3 ...
-```
+#### Gene Panel Matrix file
+The gene panel matrix file contains a list of samples in the first column, and an additional column for each profile in the study using the stable_id as the column header. These stable_id's should match the ones in their respective meta files. Fusion events are saved in the mutation table in the cBioPortal database, so they should be included in the `mutations` column. Other than mutation and fusion data formats can use the `gene_panel:` meta property if all samples are profiled on the same gene panel.
 
-For information on importing gene panels please visit: [Import-Gene-Panels](Import-Gene-Panels.md).
+For each sample-profile combination, a gene panel should be specified by using the stable_id from the gene panel file, for example `mutations` for mutation data and `gistic` for discrete CNA data, or `NA` to reflect whole exome. Columns should be separated by tabs.
 
-#### Sample-Profile Matrix
+Example:
 
-The second component to gene panel data is associating samples and profile to the panel which applies. The following column is required :
-
-- ***SAMPLE_ID***: Sample Id from the study 
-
-And:
-- An additional column for each profile in the dataset using the stable_id as the column header.
-
-For each sample-profile combination, a gene panel should be specified by using the stable_id from the gene panel file, or NA to reflect whole exome.
-
-#### Example
-An example sample-profile matrix file would look like:
-
-```
-SAMPLE_ID<TAB>cna<TAB>mutations<TAB>...
-SAMPLE_ID_1<TAB>IMPACT410<TAB>IMPACT410<TAB> ...
-SAMPLE_ID_2<TAB>NA<TAB>NA<TAB> ...
-...
-```
+| SAMPLE_ID   | mutations | gistic    |
+| ----------- | --------- | --------- |
+| SAMPLE_ID_1 | IMPACT410 | IMPACT410 |
+| SAMPLE_ID_2 | IMPACT410 | IMPACT410 |
+| SAMPLE_ID_3 | NA        | NA        |
 
 #### Meta file
-The sample-profile matrix requires a meta file, which should contain the following fields:
+The gene panel matrix file requires a meta file, which should contain the following fields:
 
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
 2. **genetic_alteration_type**: GENE_PANEL_MATRIX
 3. **datatype**: GENE_PANEL_MATRIX
 4. **data_filename**: your datafile
 
->If all samples in a genetic profile will have the same gene panel associated with them, an optional field can be specified in the meta data file of that datatype called **gene_panel**. If this is present, the sample-profile matrix will automatically be generated and the gene panel applied if it exists in the database already
+Example:
+```
+cancer_study_identifier: msk_impact_2017
+genetic_alteration_type: GENE_PANEL_MATRIX
+datatype: GENE_PANEL_MATRIX
+data_filename: data_gene_matrix.txt
+```
 
->If all profiles for a sample will have the sample gene panel, in the clinical data a column can be added called **GENE_PANEL** which can specify the gene panel stable id.
-
->In both of these cases, the sample-profile matrix file does not need to be provided in order to associate gene panel information with a sample-profile.*
-
+#### Gene panel property in meta file
+If all samples in a non-mutation genetic profile will have the same gene panel associated with them, an optional field can be specified in the meta data file of that datatype called **gene_panel:**. If this is present, all samples in this data file will be assigned to this gene panel for this specific profile.
 
 ## Gene Set Data
 A description of importing gene sets (which are required before loading gene set study) can be found [here](Import-Gene-Sets.md). This page also contains a decription to import gene set hierarchy data, which is required to show a hierarchical tree on the query page to select gene sets.

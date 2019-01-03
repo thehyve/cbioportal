@@ -1110,8 +1110,8 @@ Gene panel information can assign a list of genes that a genetic profile should 
 #### Gene Panel File
 The gene panel file follows the format of a meta file with the following fields:
 1. **stable_id**: The name of the gene panel. This should be unique across all studies, as gene panels can be globally applied to any sample and any genetic profile.
-2. **description**: A descripion of the gene panel.
-3. **gene_list**: Tab separated genes, represented either by all hugo symbols or all entrez_gene_ids.
+2. **description**: A description of the gene panel.
+3. **gene_list**: Tab separated genes, represented either by all gene symbols or all Entrez gene IDs.
 
 An example gene panel file would be:
 ```
@@ -1144,18 +1144,18 @@ SAMPLE_ID_2<TAB>NA<TAB>NA<TAB> ...
 ```
 
 #### Meta file
-The sample-profile matrix requires a meta file should contain the following fields:
+The sample-profile matrix requires a meta file, which should contain the following fields:
 
 1. **cancer_study_identifier**: same value as specified in [study meta file](#cancer-study)
 2. **genetic_alteration_type**: GENE_PANEL_MATRIX
 3. **datatype**: GENE_PANEL_MATRIX
 4. **data_filename**: your datafile
 
-If all samples in a genetic profile will have the same gene panel associated with them, an optional field can be specified in the meta data file of that datatype called **gene_panel**. If this is present, the sample-profile matrix will automatically be generated and the gene panel applied if it exists in the database already.
+>If all samples in a genetic profile will have the same gene panel associated with them, an optional field can be specified in the meta data file of that datatype called **gene_panel**. If this is present, the sample-profile matrix will automatically be generated and the gene panel applied if it exists in the database already
 
-If all profiles for a sample will have the sample gene panel, in the clinical data a column can be added called **GENE_PANEL** which can specify the gene panel stable id.
+>If all profiles for a sample will have the sample gene panel, in the clinical data a column can be added called **GENE_PANEL** which can specify the gene panel stable id.
 
-In both of these cases, the sample-profile matrix file does not need to be provided in order to associate gene panel information with a sample-profile.
+>In both of these cases, the sample-profile matrix file does not need to be provided in order to associate gene panel information with a sample-profile.*
 
 
 ## Gene Set Data

@@ -2954,7 +2954,7 @@ class CancerTypeValidator(Validator):
                                    'column_number': col_index + 1,
                                    'cause': value})
             elif self.portal.cancer_type_dict is not None:
-                self.logger.warning(
+                self.logger.info(
                     'New disease type will be added to the portal',
                     extra={'line_number': self.line_number,
                            'cause': line_cancer_type})

@@ -27,7 +27,8 @@ The sample gene panel has to be imported before gene panel study data can be add
 
 ```
 cd <your_cbioportal_dir>/core/src/main/scripts
-./importGenePanel.pl --data ../../test/scripts/test_data/study_es_0/gene_panel_example.txt
+./importGenePanel.pl --data ../../test/scripts/test_data/study_es_0/data_gene_panel_testpanel1.txt
+./importGenePanel.pl --data ../../test/scripts/test_data/study_es_0/data_gene_panel_testpanel2.txt
 ```
 
 More details to load your own gene panel and gene set data can be found here: [Import Gene Panels](Import-Gene-Panels.md).

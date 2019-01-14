@@ -45,9 +45,9 @@
   <div class="container">
     <div class="header">
       <div class="jumbotron">
-        <h1>cBioPortal validation report</h1>
+        <h1>{{ report_name }}</h1>
         <p>Study directory:<br />{{ study_dir }}</p>
-        <p>For details, please see <a href='https://github.com/cbioportal/cbioportal/blob/master/docs/File-Formats.md'>the documentation on file formats supported by cBioPortal</a></p>
+        <p>For details, please see <a href='{{ doc_link }}'>the documentation on file formats supported by cBioPortal</a></p>
         <p>cBioPortal version {{ cbio_version }}</p>
       </div>
     </div>
@@ -65,37 +65,6 @@
         'info': 'Debug'}[level] -%}
       <span class="glyphicon {{ glyphicon_name }}" aria-hidden="true"></span><span class="sr-only">{{ glyphicon_alt }}</span>
     {%- endmacro %}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title">Legend</h4>
-      </div>
-      <div class="panel-body">
-        <p>
-	  Click on a filename below to see a table of messages about the data
-	  in the file. The colors in the tables have the following meanings:
-        </p>
-        <table class="table">
-          <tbody>
-            <tr class="danger">
-              <td>{{ level_icon('danger') }}</td>
-              <td><strong>Error:</strong> cBioPortal will not know how to load this, please revise or remove</td>
-            </tr>
-            <tr class="warning">
-              <td>{{ level_icon('warning') }}</td>
-              <td><strong>Warning:</strong> possible cause of confusion, please check whether this is intended</td>
-            </tr>
-            <tr class="success">
-              <td>{{ level_icon('success') }}</td>
-              <td><strong>Info:</strong> this looks good, no action required</td>
-            </tr>
-            <tr class="info">
-              <td>{{ level_icon('info') }}</td>
-              <td><strong>Verbose output:</strong> details on the progress of the validation script</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
     <div class="panel panel-default">
     <div class="panel-body">
@@ -124,7 +93,7 @@
     </div>
 
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-    {% macro generate_group_html(filename, file_record_list) %}
+    {% macro generate_group_html(filename, file_record_list, default_state='') %}
       {% set file_level_list = file_record_list|map(attribute='levelname')|list %}
       {% if 'ERROR' in file_level_list or 'CRITICAL' in file_level_list %}
         {% set file_level = 'danger' %}
@@ -147,7 +116,7 @@
             <h4 class="panel-title">{{ filename|e }}</h4>
           </a>
         </div>
-        <div class="panel-collapse collapse" role="tabpanel"
+        <div class="panel-collapse collapse {{default_state}}" role="tabpanel"
              id="{{ 'collapse_%s'|format(filename|url_b64) }}"
              aria-labelledby="{{ 'heading_%s'|format(filename|url_b64) }}">
           <div class="panel-body">
@@ -208,7 +177,7 @@
 
     {% endmacro %}
     {% set fileless_record_list = record_list|selectattr('filename_', 'undefined')|list -%}
-    {{ generate_group_html('General', fileless_record_list) }}
+    {{ generate_group_html('General', fileless_record_list, default_state='in') }}
     {% set filerelated_record_list = record_list|selectattr('filename_', 'defined') %}
     {% for file_record_group in filerelated_record_list|groupby('filename_') -%}
       {{ generate_group_html(
@@ -218,6 +187,37 @@
 
     </div>
     </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">Legend</h4>
+      </div>
+      <div class="panel-body">
+        <p>
+	  Click on a filename below to see a table of messages about the data
+	  in the file. The colors in the tables have the following meanings:
+        </p>
+        <table class="table">
+          <tbody>
+            <tr class="danger">
+              <td>{{ level_icon('danger') }}</td>
+              <td><strong>Error:</strong> cBioPortal will not know how to load this, please revise or remove</td>
+            </tr>
+            <tr class="warning">
+              <td>{{ level_icon('warning') }}</td>
+              <td><strong>Warning:</strong> possible cause of confusion, please check whether this is intended</td>
+            </tr>
+            <tr class="success">
+              <td>{{ level_icon('success') }}</td>
+              <td><strong>Info:</strong> this looks good, no action required</td>
+            </tr>
+            <tr class="info">
+              <td>{{ level_icon('info') }}</td>
+              <td><strong>Verbose output:</strong> details on the progress of the validation script</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </body>

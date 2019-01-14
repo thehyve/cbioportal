@@ -40,6 +40,7 @@ import csv
 import itertools
 import requests
 import json
+import yaml
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from base64 import urlsafe_b64encode
@@ -186,6 +187,14 @@ class Jinja2HtmlHandler(logging.handlers.BufferingHandler):
 
     def generateHtml(self):
         """Render the HTML page for the current content in self.buffer """
+        # """Parse config file with custom parameters for the HTML Report
+        with open('report_config_file.yml', 'r') as stream:
+            try:
+                parsedYaml = yaml.load(stream)
+                report_name = parsedYaml['Report Name']
+                doc_link = parsedYaml['Documentation Link']
+            except yaml.YAMLError:
+                raise TypeError('The config file provided is not in YAML or JSON format.')
         # require Jinja2 only if it is actually used
         import jinja2
         j_env = jinja2.Environment(
@@ -203,6 +212,8 @@ class Jinja2HtmlHandler(logging.handlers.BufferingHandler):
         j_env.filters['os.path.relpath'] = os.path.relpath
         template = j_env.get_template('validation_report_template.html.jinja')
         doc = template.render(
+            report_name=report_name,
+            doc_link=doc_link,
             study_dir=self.study_dir,
             cbio_version=self.cbio_version,
             max_reported_values=self.max_reported_values,

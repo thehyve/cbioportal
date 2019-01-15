@@ -2762,17 +2762,15 @@ class GenePanelMatrixValidator(Validator):
 
                 if stable_id != mutation_stable_id:
                     if stable_id in property_in_meta_file_list:
-                        self.logger.error("The meta file for this genetic profile contains a property for gene panel. "
+                        self.logger.error("The meta file for genetic profile '%s' contains a property for gene panel. "
                                           "This functionality is mutually exclusive with including a column for this "
                                           "genetic profile in the gene panel matrix. Please remove either the property "
-                                          "in the meta file or the column in gene the panel matrix file",
-                                          extra={'line_number': self.line_number,
-                                                 'cause': stable_id})
+                                          "in the meta file or the column in the gene panel matrix file" % stable_id)
                     else:
                         self.logger.info("This column can be replaced by a 'gene_panel' property in the respective "
-                                         "meta file",
-                                         extra={'line_number': self.line_number,
-                                                'cause': stable_id})
+                                          "meta file",
+                                          extra={'line_number': self.line_number,
+                                                 'cause': stable_id})
         return num_errors
 
     def checkLine(self, data):
@@ -2799,7 +2797,8 @@ class GenePanelMatrixValidator(Validator):
                 # Sample ID has been removed from list, so subtract 1 position.
                 if data[self.mutation_stable_id_index - 1] != 'NA':
                     if sample_id not in mutation_sample_ids:
-                        self.logger.error('Sample ID has mutation gene panel, but is not in the sequenced case list',
+                        self.logger.error('Sample ID has gene panel for mutation genetic profile, but is not in the '
+                                          'sequenced case list',
                                           extra={'line_number': self.line_number,
                                                  'cause': sample_id})
 
@@ -3679,8 +3678,11 @@ def processCaseListDirectory(caseListDir, cancerStudyId, logger,
                         extra={'filename_': case,
                                'cause': mutation_sample_ids_not_in_case_list})
 
+            # Check all samples in the fusion data are included in the `_sequenced` case list
             # When the fusion events are moved to the structural variant data model, this validation should check the
-            # samples in the fusion data with the samples in the '_structural_variant' case list.
+            # samples in the fusion data with the samples in the '_structural_variant' case list. This is a currently a
+            # warning and not an error because the current model does not support having different case lists for
+            # mutation and fusion profiles. This should be changed to an error when fusion events are in the SV model.
             if len(fusion_file_sample_ids) > 0:
                 if not fusion_file_sample_ids.issubset(mutation_sample_ids):
                     fusion_sample_ids_not_in_case_list = ", ".join(fusion_file_sample_ids - mutation_sample_ids)
@@ -4020,7 +4022,7 @@ def interface(args=None):
     return parser
 
 
-def validate_study(study_dir, portal_instance, logger, relaxed_mode, strict_maf_checks):
+def validate_study(study_dir, portal_instance, logger, relaxed_mode = False, strict_maf_checks = False):
 
     """Validate the study in `study_dir`, logging messages to `logger`, and relaxing
         clinical data validation if `relaxed_mode` is true.
@@ -4161,7 +4163,8 @@ def validate_study(study_dir, portal_instance, logger, relaxed_mode, strict_maf_
         file_types=list(validators_by_meta_type.keys()),
         logger=logger)
 
-    # Validate the gene panel matrix file. This file is depending on clinical and case list data.
+    # Validate the gene panel matrix file. This file is depending on clinical and case list data and is therefore
+    # validated last.
     if cbioportal_common.MetaFileTypes.GENE_PANEL_MATRIX in validators_by_meta_type:
         if len(validators_by_meta_type[cbioportal_common.MetaFileTypes.GENE_PANEL_MATRIX]) > 1:
             logger.error('Multiple gene panel matrix files detected')

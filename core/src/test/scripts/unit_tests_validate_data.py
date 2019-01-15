@@ -150,7 +150,7 @@ class PostClinicalDataFileTestCase(DataFileTestCase):
         validateData.prior_validated_geneset_ids = prior_validated_geneset_ids
 
         # Prepare global variables related to sample profiled for mutations and gene panels
-        self.mutation_sample_ids = validateData.mutation_sample_ids
+        self.orig_mutation_sample_ids = validateData.mutation_sample_ids
         validateData.mutation_sample_ids = mutation_sample_ids
 
 
@@ -161,7 +161,7 @@ class PostClinicalDataFileTestCase(DataFileTestCase):
         validateData.PATIENTS_WITH_SAMPLES = self.orig_patients_with_samples
         validateData.prior_validated_sample_ids = self.orig_prior_validated_sample_ids
         validateData.prior_validated_geneset_ids = self.orig_prior_validated_geneset_ids
-        validateData.mutation_sample_ids = self.mutation_sample_ids
+        validateData.mutation_sample_ids = self.orig_mutation_sample_ids
         super(PostClinicalDataFileTestCase, self).tearDown()
 
 
@@ -1939,11 +1939,137 @@ class GenePanelMatrixValidationTestCase(PostClinicalDataFileTestCase):
         """Test if duplicate samples are detected"""
         # set level according to this test case:
         self.logger.setLevel(logging.ERROR)
-        record_list = self.validate('data_gene_matrix_duplicate_sample.txt',
+        record_list = self.validate('gene_panels/data_gene_panel_duplicate_sample.txt',
                                     validateData.GenePanelMatrixValidator)
 
         self.assertEqual(len(record_list), 1)
         self.assertIn("duplicated sample id.", record_list[0].getMessage().lower())
+
+    def test_multiple_gene_panel_matrix_files(self):
+        """Test whether having multiple matrix files throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/multiple_gene_panel_matrix_files',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Multiple gene panel matrix files detected', record.message)
+
+    def test_gene_panel_property_in_mutation_meta_file(self):
+        """Test whether a gene panel property in the mutation file throws an error. Gene panel property in the mutation
+        meta file is not supported, because this cannot cover samples that are sequenced but no mutations are found."""
+        self.logger.setLevel(logging.ERROR)
+        validateData.validate_study(
+            'test_data/gene_panels/gene_panel_property_in_mutation_meta_file',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Including the stable ID for gene panels in meta file might lead to incorrect results and is '
+                         'therefore not supported. Please add column for mutation profile to gene panel sample profile '
+                         'matrix file', record.message)
+        self.assertEqual('gene_panel: TESTPANEL1', record.cause)
+
+    def test_meta_property_gene_panel_not_in_database(self):
+        """Test whether a gene panel in the meta file which is not in the database throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/meta_property_gene_panel_not_in_database',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Gene panel ID is not in database. Please import this gene panel before loading '
+                         'study data.', record.message)
+        self.assertEqual('TESTPANEL_NOT_IN_DB', record.cause)
+
+    def test_matrix_gene_panel_not_in_database(self):
+        """Test whether a gene panel in the matrix which is not in the database throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/matrix_gene_panel_not_in_database',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Gene panel ID is not in database. Please import this gene panel before loading '
+                         'study data.', record.message)
+        self.assertEqual('TESTPANEL_NOT_IN_DB', record.cause)
+
+    def test_gene_panel_property_and_column(self):
+        """Test whether having both a gene panel property in the meta file and column in the matrix throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/gene_panel_property_and_column',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual("The meta file for genetic profile 'gistic' contains a property for gene panel. "
+                         'This functionality is mutually exclusive with including a column for this '
+                         'genetic profile in the gene panel matrix. Please remove either the property '
+                         'in the meta file or the column in the gene panel matrix file', record.message)
+
+    def test_gene_panel_column_can_be_replaced(self):
+        """Test whether having a column in the gene panel matrix that can be replaced by a property in the meta file
+        throws an info message"""
+        self.logger.setLevel(logging.INFO)
+
+        validateData.validate_study(
+            'test_data/gene_panels/gene_panel_column_can_be_replaced',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Find if the the INFO message has been reported
+        specific_info_message = "This column can be replaced by a 'gene_panel' property in the respective meta file"
+        all_info_messages = [record.message for record in record_list]
+        self.assertIn(specific_info_message, all_info_messages)
+
+    def test_gene_panel_matrix_invalid_stable_id(self):
+        """Test whether having a stable id in the matrix that is not in any of the meta files throws an error"""
+        self.logger.setLevel(logging.ERROR)
+        validateData.validate_study(
+            'test_data/gene_panels/gene_panel_matrix_invalid_stable_id',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect two errors, one general for invalid column, and one specific
+        self.assertEqual(len(record_list), 2)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Invalid column header, file cannot be parsed', record.message)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Stable ID not found in study meta files', record.message)
+
+
 
 class StudyCompositionTestCase(LogBufferTestCase):
 
@@ -2117,6 +2243,59 @@ class CaseListDirTestCase(PostClinicalDataFileTestCase):
                 reported_sample_ids,
                 ['Patient0-Sample1', 'Patient2-Sample3', 'Patient1-Sample2'])
 
+    def test_mutation_file_sample_not_in_sequenced_case_list(self):
+        """Test whether having a sample id in the mutation file that is not in the sequenced case list throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/mutation_file_sample_not_in_sequenced_case_list',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual("Sample IDs from mutation data are missing from the '_sequenced' case list.", record.message)
+
+    def test_fusion_sample_not_in_sequenced_case_list(self):
+        """Test whether having a sample id in the fusion file that is not in the sequenced case list throws a warning"""
+        self.logger.setLevel(logging.WARNING)
+
+        validateData.validate_study(
+            'test_data/gene_panels/fusion_file_sample_not_in_sequenced_case_list',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single warning
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.WARNING)
+        self.assertEqual("Sample IDs from fusion data are missing from the '_sequenced' case list. This might lead to "
+                         "incorrect calculation of mutated samples. In the future fusion variants will be moved to the "
+                         "'structural variant' data model and its respective case list.", record.message)
+
+    def test_matrix_mutation_sample_not_in_sequenced_case_list(self):
+        """Test whether having a sample in the gene panel matrix file that has a gene panel for the mutation genetic
+        profile and not in the sequenced case list throws an error"""
+        self.logger.setLevel(logging.ERROR)
+
+        validateData.validate_study(
+            'test_data/gene_panels/matrix_mutation_sample_not_in_sequenced_case_list',
+            PORTAL_INSTANCE,
+            self.logger)
+        record_list = self.get_log_records()
+
+        # Expect single error
+        self.assertEqual(len(record_list), 1)
+        record = record_list.pop()
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual('Sample ID has gene panel for mutation genetic profile, but is not in the sequenced case list',
+                         record.message)
+
+
 class MetaFilesTestCase(LogBufferTestCase):
 
     """Tests for the contents of the meta files."""
@@ -2152,7 +2331,7 @@ class MetaFilesTestCase(LogBufferTestCase):
         """Test to check the length the attribute in meta files."""
         self.logger.setLevel(logging.WARNING)
         validateData.process_metadata_files(
-            'test_data/meta_files',
+            'test_data/meta_files_invalid_short_name',
             PORTAL_INSTANCE,
             self.logger, False, False)
         record_list = self.get_log_records()

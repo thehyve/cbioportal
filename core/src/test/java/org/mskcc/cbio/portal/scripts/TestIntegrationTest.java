@@ -80,7 +80,7 @@ import org.mskcc.cbio.portal.dao.DaoGeneset;
  *
  * @author Pieter Lukasse
  */
-
+loadGenePanel
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/integrationTestScript.xml", "classpath:/applicationContext-dao.xml" })
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
@@ -386,7 +386,9 @@ public class TestIntegrationTest {
      */
     private void loadGenePanel() throws Exception {
         ImportGenePanel gp = new ImportGenePanel(null);
-        gp.setFile(new File("src/test/scripts/test_data/study_es_0/gene_panel_example.txt"));
+        gp.setFile(new File("src/test/scripts/test_data/study_es_0/data_gene_panel_testpanel1.txt"));
+        gp.importData();
+        gp.setFile(new File("src/test/scripts/test_data/study_es_0/data_gene_panel_testpanel2.txt"));
         gp.importData();
     }
     

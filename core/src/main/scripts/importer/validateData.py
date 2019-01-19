@@ -3503,7 +3503,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     prior_validated_header = None
     REQUIRED_HEADERS = ['treatment_id']
     OPTIONAL_HEADERS = ['name', 'description', 'url']
-    UNIQUE_COLUMNS = ['treatment_id', 'name', 'description', 'url']
+    UNIQUE_COLUMNS = ['treatment_id']
 
     @classmethod
     def _get_prior_validated_header(cls):

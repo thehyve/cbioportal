@@ -1,3 +1,34 @@
+/*
+ * Copyright (c) 2019 The Hyve B.V.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
+ * FOR A PARTICULAR PURPOSE. The software and documentation provided hereunder
+ * is on an "as is" basis, and Memorial Sloan-Kettering Cancer Center has no
+ * obligations to provide maintenance, support, updates, enhancements or
+ * modifications. In no event shall Memorial Sloan-Kettering Cancer Center be
+ * liable to any party for direct, indirect, special, incidental or
+ * consequential damages, including lost profits, arising out of the use of this
+ * software and its documentation, even if Memorial Sloan-Kettering Cancer
+ * Center has been advised of the possibility of such damage.
+ */
+
+/*
+ * This file is part of cBioPortal.
+ *
+ * cBioPortal is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
@@ -70,14 +101,10 @@ public class TreatmentDataServiceImplTest extends BaseServiceImplTest {
         TreatmentMolecularAlteration treatmentGeneticAlteration1 = new TreatmentMolecularAlteration();
         treatmentGeneticAlteration1.setTreatmentId(GENESET_ID1);
         treatmentGeneticAlteration1.setValues("0.2,0.499");
-        treatmentGeneticAlteration1.setPivotThreshold(PIVOT_POINT1);
-        treatmentGeneticAlteration1.setSortOrder(SORT_ORDER1);
 
         TreatmentMolecularAlteration treatmentGeneticAlteration2 = new TreatmentMolecularAlteration();
         treatmentGeneticAlteration2.setTreatmentId(GENESET_ID2);
         treatmentGeneticAlteration2.setValues("0.89,-0.509");
-        treatmentGeneticAlteration2.setPivotThreshold(PIVOT_POINT2);
-        treatmentGeneticAlteration2.setSortOrder(SORT_ORDER2);
 
         treatmentGeneticAlterationList.add(treatmentGeneticAlteration1);
         treatmentGeneticAlterationList.add(treatmentGeneticAlteration2);
@@ -107,22 +134,16 @@ public class TreatmentDataServiceImplTest extends BaseServiceImplTest {
         Assert.assertEquals(item1.getSampleId(), SAMPLE_ID1);
         Assert.assertEquals(item1.getTreatmentId(), GENESET_ID1);
         Assert.assertEquals(item1.getValue(), "0.2");
-        Assert.assertEquals(item1.getPivotThreshold(), PIVOT_POINT1);
-        Assert.assertEquals(item1.getSortOrder(), SORT_ORDER1);
         Assert.assertEquals(item1.getMolecularProfileId(), MOLECULAR_PROFILE_ID);
         TreatmentMolecularData item2 = result.get(1);
         Assert.assertEquals(item2.getSampleId(), SAMPLE_ID1);
         Assert.assertEquals(item2.getTreatmentId(), GENESET_ID2);
         Assert.assertEquals(item2.getValue(), "0.89");
-        Assert.assertEquals(item2.getPivotThreshold(), PIVOT_POINT2);
-        Assert.assertEquals(item2.getSortOrder(), SORT_ORDER2);
         Assert.assertEquals(item2.getMolecularProfileId(), MOLECULAR_PROFILE_ID);
         TreatmentMolecularData item4 = result.get(3);
         Assert.assertEquals(item4.getSampleId(), SAMPLE_ID2);
         Assert.assertEquals(item4.getTreatmentId(), GENESET_ID2);
         Assert.assertEquals(item4.getValue(), "-0.509");
-        Assert.assertEquals(item4.getPivotThreshold(), PIVOT_POINT2);
-        Assert.assertEquals(item4.getSortOrder(), SORT_ORDER2);
         Assert.assertEquals(item4.getMolecularProfileId(), MOLECULAR_PROFILE_ID);
         
         //check when selecting only 1 sample:
@@ -133,8 +154,6 @@ public class TreatmentDataServiceImplTest extends BaseServiceImplTest {
         Assert.assertEquals(item1.getSampleId(), SAMPLE_ID1);
         Assert.assertEquals(item1.getTreatmentId(), GENESET_ID1);
         Assert.assertEquals(item1.getValue(), "0.2");
-        Assert.assertEquals(item1.getPivotThreshold(), PIVOT_POINT1);
-        Assert.assertEquals(item1.getSortOrder(), SORT_ORDER1);
         Assert.assertEquals(item1.getMolecularProfileId(), MOLECULAR_PROFILE_ID);
     }
 }

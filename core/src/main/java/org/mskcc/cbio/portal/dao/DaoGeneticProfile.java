@@ -230,7 +230,7 @@ public final class DaoGeneticProfile {
         profileType.setGeneticAlterationType(GeneticAlterationType.valueOf(rs.getString("GENETIC_ALTERATION_TYPE")));
         profileType.setDatatype(rs.getString("DATATYPE"));
         profileType.setGeneticProfileId(rs.getInt("GENETIC_PROFILE_ID"));
-        if ((Float) rs.getFloat("PIVOT_THRESHOLD") != null) {
+        if (rs.getFloat("PIVOT_THRESHOLD") != 0) {
             profileType.setPivotThreshold(rs.getFloat("PIVOT_THRESHOLD"));
             profileType.setSortOrder(rs.getString("SORT_ORDER"));
         }

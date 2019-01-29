@@ -41,6 +41,8 @@ public class MolecularProfile implements Serializable {
     private String description;
     private Boolean showProfileInAnalysisTab;
     private CancerStudy cancerStudy;
+    private Float pivotThreshold;
+    private String sortOrder;
 
     public Integer getMolecularProfileId() {
         return molecularProfileId;
@@ -121,4 +123,21 @@ public class MolecularProfile implements Serializable {
     public void setCancerStudy(CancerStudy cancerStudy) {
         this.cancerStudy = cancerStudy;
     }
+
+    public Float getPivotThreshold() {
+        return this.pivotThreshold;
+    }
+
+    public void setPivotThreshold(Float pivotThreshold) {
+        this.pivotThreshold = pivotThreshold;
+    }
+
+    public String getSortOrder() {
+        return this.sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+    
 }

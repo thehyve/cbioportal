@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2016 Memorial Sloan-Kettering Cancer Center.
+* Copyright (c) 2019 The Hyve B.Vs.
 *
 * This library is distributed in the hope that it will be useful, but WITHOUT
 * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
@@ -109,15 +109,10 @@ public class ImportTreatments extends ConsoleRunnable {
     *
     * @param updateInfo
     */
-    public static void startImport(OptionSet options, OptionSpec<String> data, boolean updateInfo){
-        try {
-            if (options.hasArgument(data)) {
-                File treatmentFile = new File(options.valueOf(data));
-                importData(treatmentFile, updateInfo);
-            }
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
+    public static void startImport(OptionSet options, OptionSpec<String> data, boolean updateInfo) throws Exception {
+        if (options.hasArgument(data)) {
+            File treatmentFile = new File(options.valueOf(data));
+            importData(treatmentFile, updateInfo);
         }
     }
     

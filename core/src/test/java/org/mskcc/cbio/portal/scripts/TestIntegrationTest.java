@@ -193,7 +193,7 @@ public class TestIntegrationTest {
             List<DBProfileData> cnaProfileData = apiService.getGeneticProfileData(geneticProfileStableIds,
                     hugoGeneSymbols, null, null);
             // there is data for 7 genes x 778 samples:
-            assertEquals(7 * 778, cnaProfileData.size());
+            assertEquals(7*778, cnaProfileData.size());
             // there are 63 CNA entries that have value == 2 or value == -2;
             int countAMP_DEL = 0;
             for (Serializable profileEntry : cnaProfileData) {

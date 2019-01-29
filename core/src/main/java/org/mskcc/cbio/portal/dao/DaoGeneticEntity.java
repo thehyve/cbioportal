@@ -14,6 +14,10 @@ public class DaoGeneticEntity {
     private DaoGeneticEntity() {
     }
     
+    // TODO consider renaming this class to something similar to
+    // DaoEntity because the name does not correctly capture the 
+    // new Treatment `genetic_entity` type.
+    // see: https://github.com/cBioPortal/cbioportal/pull/5460#discussion_r250148672
     public static enum EntityTypes
     {
         GENE,

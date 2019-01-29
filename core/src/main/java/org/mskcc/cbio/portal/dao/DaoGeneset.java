@@ -247,6 +247,58 @@ public class DaoGeneset {
         return geneset;
     }
     
+    public static Set<Long> getGenesetGeneticEntityIds() throws DaoException {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoGeneset.class);
+            pstmt = con.prepareStatement("SELECT ID FROM genetic_entity WHERE ENTITY_TYPE = 'GENESET'");
+            rs = pstmt.executeQuery();
+            
+            Set<Long> geneticEntities = new HashSet<Long>();
+            while (rs.next()) {
+            	geneticEntities.add(rs.getLong("ID"));
+            }
+            return geneticEntities;
+            
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        } finally {
+            JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
+        }
+    }  
+    
+    /**
+     * Checks the usage of a geneset by genetic entity id.
+     * @param geneticEntityId
+     * @return boolean indicating whether geneset is in use by other studies
+     * @throws DaoException 
+     */
+    public static boolean checkUsage(Integer geneticEntityId) throws DaoException {
+        String SQL = "SELECT COUNT(DISTINCT `CANCER_STUDY_ID`) FROM genetic_profile " +
+                "WHERE `GENETIC_PROFILE_ID` IN (SELECT `GENETIC_PROFILE_ID` FROM genetic_alteration WHERE `GENETIC_ENTITY_ID` = ?)";      
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = JdbcUtil.getDbConnection(DaoGeneset.class);
+            pstmt = con.prepareStatement(SQL);
+            pstmt.setInt(1, geneticEntityId);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1)>0;
+            }
+            return false;
+        } 
+        catch (SQLException e) {
+            throw new DaoException(e);
+        } 
+        finally {
+            JdbcUtil.closeAll(DaoGeneset.class, con, pstmt, rs);
+        }
+    }
+    
     public static void updateGeneset(Geneset geneset, boolean updateGenesetGenes) throws DaoException {
         String SQL = "UPDATE geneset SET " + 
                 "`NAME` = ?, `DESCRIPTION` = ?, `REF_LINK` = ?" +

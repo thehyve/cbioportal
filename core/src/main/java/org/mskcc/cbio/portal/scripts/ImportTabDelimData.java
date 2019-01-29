@@ -46,7 +46,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.mskcc.cbio.portal.dao.DaoCnaEvent;
@@ -584,6 +586,9 @@ public class ImportTabDelimData {
             }
             
             String values[] = (String[]) ArrayUtils.subarray(parts, sampleStartIndex, parts.length>nrColumns?nrColumns:parts.length);
+
+            // trim whitespace from values
+            values = Stream.of(values).map(String::trim).toArray(String[]::new);
             values = filterOutNormalValues(filteredSampleIndices, values);
             
             Treatment treatment = DaoTreatment.getTreatmentByStableId(parts[treatmentIdIndex]);

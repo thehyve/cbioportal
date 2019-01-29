@@ -109,9 +109,7 @@
         NULL AS "values"
         </if>
         <if test="projection != 'ID'">
-        genetic_alteration.VALUES AS "values",
-        genetic_profile.PIVOT_THRESHOLD AS pivotThreshold,
-        genetic_profile.SORT_ORDER AS sortOrder
+        genetic_alteration.VALUES AS "values"
         </if>
         FROM genetic_alteration
         INNER JOIN genetic_profile ON genetic_alteration.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID

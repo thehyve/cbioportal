@@ -156,7 +156,7 @@ public class GeneticProfileReader {
         // In the future with other types of genetic profile links, this should be configurable in the meta file. 
         String referenceType;
         if (Arrays.asList("P-VALUE", "Z-SCORE").contains(geneticProfile.getDatatype())) {
-            referenceType = "STATISTIC";
+        	referenceType = "STATISTIC";
         } else if (geneticProfile.getDatatype().equals("GSVA-SCORE")) {
             referenceType = "AGGREGATION";
         } else {
@@ -272,7 +272,6 @@ public class GeneticProfileReader {
         geneticProfile.setShowProfileInAnalysisTab(showProfileInAnalysisTab);
         geneticProfile.setTargetLine(properties.getProperty("target_line"));
         geneticProfile.setOtherMetadataFields(properties);
-
         return geneticProfile;
     }
 

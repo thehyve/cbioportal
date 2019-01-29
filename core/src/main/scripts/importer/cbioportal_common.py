@@ -37,6 +37,7 @@ IMPORT_CASE_LIST_CLASS = "org.mskcc.cbio.portal.scripts.ImportSampleList"
 ADD_CASE_LIST_CLASS = "org.mskcc.cbio.portal.scripts.AddCaseList"
 VERSION_UTIL_CLASS = "org.mskcc.cbio.portal.util.VersionUtil"
 
+# provides a key for data types to metafile specification dict.  
 class MetaFileTypes(object):
     """how we differentiate between data types."""
     STUDY = 'meta_study'
@@ -59,10 +60,7 @@ class MetaFileTypes(object):
     GENE_PANEL_MATRIX = 'meta_gene_panel_matrix'
     GSVA_SCORES = 'meta_gsva_scores'
     GSVA_PVALUES = 'meta_gsva_pvalues'
-    TREATMENT_IC50 = 'meta_treatment_ic50'
-    TREATMENT_EC50 = 'meta_treatment_ec50'
-    TREATMENT_GI50 = 'meta_treatment_gi50'
-    TREATMENT_AUC = 'meta_treatment_auc'
+    TREATMENT_RESPONSE = 'meta_treatment'
 
 
 # fields allowed in each meta file type, maps to True if required
@@ -252,43 +250,7 @@ META_FIELD_MAP = {
         'show_profile_in_analysis_tab': True,
         'geneset_def_version': True
     },
-    MetaFileTypes.TREATMENT_AUC: {
-        'cancer_study_identifier': True,
-        'genetic_alteration_type': True,
-        'datatype': True,
-        'stable_id': True,
-        'profile_name': True,
-        'profile_description': True,
-        'data_filename': True,
-        'show_profile_in_analysis_tab': True,
-        'pivot_threshold_value': True,
-        'value_sort_order': True
-    },
-    MetaFileTypes.TREATMENT_IC50: {
-        'cancer_study_identifier': True,
-        'genetic_alteration_type': True,
-        'datatype': True,
-        'stable_id': True,
-        'profile_name': True,
-        'profile_description': True,
-        'data_filename': True,
-        'show_profile_in_analysis_tab': True,
-        'pivot_threshold_value': True,
-        'value_sort_order': True
-    },
-    MetaFileTypes.TREATMENT_GI50: {
-        'cancer_study_identifier': True,
-        'genetic_alteration_type': True,
-        'datatype': True,
-        'stable_id': True,
-        'profile_name': True,
-        'profile_description': True,
-        'data_filename': True,
-        'show_profile_in_analysis_tab': True,
-        'pivot_threshold_value': True,
-        'value_sort_order': True
-    },
-    MetaFileTypes.TREATMENT_EC50: {
+    MetaFileTypes.TREATMENT_RESPONSE: {
         'cancer_study_identifier': True,
         'genetic_alteration_type': True,
         'datatype': True,
@@ -323,10 +285,7 @@ IMPORTER_CLASSNAME_BY_META_TYPE = {
     MetaFileTypes.GENE_PANEL_MATRIX: "org.mskcc.cbio.portal.scripts.ImportGenePanelProfileMap",
     MetaFileTypes.GSVA_SCORES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
     MetaFileTypes.GSVA_PVALUES: "org.mskcc.cbio.portal.scripts.ImportProfileData",
-    MetaFileTypes.TREATMENT_AUC: "org.mskcc.cbio.portal.scripts.ImportProfileData",
-    MetaFileTypes.TREATMENT_IC50: "org.mskcc.cbio.portal.scripts.ImportProfileData",
-    MetaFileTypes.TREATMENT_EC50: "org.mskcc.cbio.portal.scripts.ImportProfileData",
-    MetaFileTypes.TREATMENT_GI50: "org.mskcc.cbio.portal.scripts.ImportProfileData"
+    MetaFileTypes.TREATMENT_RESPONSE: "org.mskcc.cbio.portal.scripts.ImportProfileData"
 }
 
 IMPORTER_REQUIRES_METADATA = {
@@ -587,10 +546,7 @@ def get_meta_file_type(meta_dictionary, logger, filename):
         ("MUTSIG", "Q-VALUE"): MetaFileTypes.MUTATION_SIGNIFICANCE,
         ("GENESET_SCORE", "GSVA-SCORE"): MetaFileTypes.GSVA_SCORES,
         ("GENESET_SCORE", "P-VALUE"): MetaFileTypes.GSVA_PVALUES,
-        ("TREATMENT_RESPONSE", "IC50"): MetaFileTypes.TREATMENT_IC50,
-        ("TREATMENT_RESPONSE", "EC50"): MetaFileTypes.TREATMENT_EC50,
-        ("TREATMENT_RESPONSE", "GI50"): MetaFileTypes.TREATMENT_GI50,
-        ("TREATMENT_RESPONSE", "AUC"): MetaFileTypes.TREATMENT_AUC
+        ("TREATMENT_RESPONSE", "RESPONSE-VALUE"): MetaFileTypes.TREATMENT_RESPONSE
     }
     result = None
     if 'genetic_alteration_type' in meta_dictionary and 'datatype' in meta_dictionary:
@@ -651,6 +607,10 @@ def validate_types_and_id(meta_dictionary, logger, filename):
             # unexpected as this is already validated in get_meta_file_type
             raise RuntimeError('Unexpected error: genetic_alteration_type and data_type combination not found in allowed_data_types.txt.',
                                genetic_alteration_type, data_type)
+        # Check whether a wild card ('*') is set in allowed_data_types.txt for the alteration type-data type combination.
+        # For these entries the stable_id is not validated, but assumed to be checked for uniqueness by the user.
+        elif alt_type_datatype_and_stable_id[(genetic_alteration_type, data_type)][0] == "*":
+            pass
         # validate stable_id:
         elif stable_id not in alt_type_datatype_and_stable_id[(genetic_alteration_type, data_type)]:
             logger.error("Invalid stable id for genetic_alteration_type '%s', "

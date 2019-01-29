@@ -903,7 +903,6 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.line_number, 2)
         self.assertEqual(record.column_number, 5)
         self.assertEqual(record.cause, '1.5')
-        return
         record = next(record_iterator)
         self.assertEqual(record.line_number, 5)
         self.assertEqual(record.column_number, 2)
@@ -976,7 +975,7 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(len(record_list2), 1)
         for record in record_list2:
             self.assertEqual(record.levelno, logging.ERROR)
-        self.assertEqual('Feature columns in data files are not equal.', record.getMessage())
+        self.assertEqual('Gene sets column in score and p-value file are not equal.', record.getMessage())
         return
         
 #    TODO: test other subclasses of FeatureWiseValidator
@@ -1002,28 +1001,25 @@ class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
     class DummyTreatmentValidator(validateData.TreatmentWiseFileValidator):
         def checkValue(self, value, col_index):
             return
-            
+
+    def setUp(self):
+        super().setUp()
+        # reset state of the TreatmentWiseFileValidator class 
+        # to prevent carry-over from other tests
+        _resetMultipleFileHandlerClassVars()
+
     def test_identical_columns_are_accepted(self):
         # Test if no error is issued when an concentration tables have identicat headers
         self.logger.setLevel(logging.ERROR)
 
-        # reset state of the TreatmentWiseFileValidator class 
-        # to prevent carry-over from other tests
-        _resetMultipleFileHandlerClassVars()
         record_list1 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
         record_list2 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
         self.assertEqual(len(record_list1), 0)
         self.assertEqual(len(record_list2), 0)
 
-        return
-
     def test_missing_column_effectiveconcentration(self):
         # Test if an error is issued when an IC50 and GI50 concentration table do not have same header
         self.logger.setLevel(logging.ERROR)
-
-        # reset state of the TreatmentWiseFileValidator class 
-        # to prevent carry-over from other tests
-        _resetMultipleFileHandlerClassVars()
 
         ### Error should appear when the second file is validated
         record_list1 = self.validate('study_es_0/data_treatment_ic50.txt',
@@ -1048,10 +1044,6 @@ class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
     def test_missing_row_effectiveconcentration(self):
         self.logger.setLevel(logging.ERROR)
 
-        # reset state of the TreatmentWiseFileValidator 
-        # class to prevent carry-over from other tests
-        _resetMultipleFileHandlerClassVars()
-
         ### Error should appear when the second file is validated
         record_list1 = self.validate('study_es_0/data_treatment_ic50.txt',
                                     TreatmentMultiFileTestCase.DummyTreatmentValidator)
@@ -1062,12 +1054,45 @@ class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(len(record_list2), 1)
         for record in record_list2:
             self.assertEqual(record.levelno, logging.ERROR)
-        self.assertEqual('Feature columns in data files are not equal.', record.getMessage())
+        self.assertEqual('Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical.', record.getMessage())
         return
+
+    def test_different_name_for_treatment_in_db_method(self):
+
+        self.logger.setLevel(logging.WARNING)
+        self.portal = PORTAL_INSTANCE
+
+        record_list = self.validate('data_treatment_ic50_different_name.txt',
+                            TreatmentMultiFileTestCase.DummyTreatmentValidator)
+
+        self.assertEqual(len(record_list), 1)
 
 # ------------------ end treatment multifile consistency test ------------------
 
-# -------------- treatment effective concentration validator test --------------
+
+# --------------------------- treatment wise test ------------------------------
+
+class TreatmentWiseTestCase(PostClinicalDataFileTestCase):
+
+    def setUp(self):
+        super().setUp()
+        # reset state of the TreatmentWiseFileValidator class 
+        # to prevent carry-over from other tests
+        _resetMultipleFileHandlerClassVars()
+
+    def test_different_name_for_treatment_in_db_method(self):
+
+        self.logger.setLevel(logging.WARNING)
+        self.portal = PORTAL_INSTANCE
+
+        record_list = self.validate('data_treatment_ic50_different_name.txt',
+                            TreatmentMultiFileTestCase.DummyTreatmentValidator)
+
+        self.assertEqual(len(record_list), 1)
+
+# -------------------------- end treatment wise test ----------------------------
+
+# ------------------------- treatment validator test ----------------------------
 
 class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
 
@@ -1091,17 +1116,9 @@ class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
     def test_no_decimals_issues_warning(self):
         passConcValue("10").warning.assert_called()
         passConcValue("00010").warning.assert_called()
-    
-    def test_zero_issues_error(self):
-        passConcValue("0").error.assert_called()
-        passConcValue("0.000").error.assert_called()
-        passConcValue("00000").error.assert_called()
 
     def test_leadingzeros_are_allowed(self):
         passConcValue("0000.123").error.assert_not_called()
-
-    def test_negativenumber_issues_error(self):
-        passConcValue("-234234.234").error.assert_called()
     
     def test_positivenumber_is_allowed(self):
         passConcValue("234234.234").error.assert_not_called()
@@ -1111,6 +1128,10 @@ class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
         passConcValue(">10").warning.assert_not_called()
         passConcValue(">10").error.assert_not_called()
 
+    def test_smallerthan_notation_is_allowed(self):
+        passConcValue("<10").warning.assert_not_called()
+        passConcValue("<10").error.assert_not_called()
+
     def test_floatnumber_is_allowed(self):
         passConcValue("10.23234").warning.assert_not_called()
         passConcValue("10.23234").error.assert_not_called()
@@ -1118,42 +1139,10 @@ class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
 # helper function for test 
 def passConcValue(value):
     mockval = Mock()
-    validateData.TreatmentEffectiveConcValidator.checkValue(mockval, value, 1)
+    validateData.TreatmentValidator.checkValue(mockval, value, 1)
     return mockval.logger
 
-# ------------ end treatment effective concentration validator test -------------
-
-# ---------------- treatment area-under-the-curve validator test ----------------
-
-class AreaUnderTheCurveValidatorTestCase(unittest.TestCase):
-
-    def test_empty_cell_issues_error(self):
-        passAUCValue("").error.assert_called()
-
-    def test_NA_value_is_allowed(self):
-        passAUCValue("NA").error.assert_not_called()
-
-    def test_NAN_value_issues_error(self):
-        passAUCValue("NAN").error.assert_called()
-        passAUCValue("nan").error.assert_called()
-        passAUCValue("NaN").error.assert_called()
-
-    def test_Inf_value_issues_error(self):
-        passAUCValue("Inf").error.assert_called()
-        passAUCValue("inf").error.assert_called()
-        passAUCValue("Infinite").error.assert_called()
-        passAUCValue("infinite").error.assert_called()
-
-    def test_negativenumber_issues_error(self):
-        passAUCValue("-234234.234").error.assert_called()
-
-# helper function for test 
-def passAUCValue(value):
-    mockval = Mock()
-    validateData.TreatmentAUCValidator.checkValue(mockval, value, 1)
-    return mockval.logger
-
-# -------------- end treatment area-under-the-curve validator test ---------------
+# ------------------------ end treatment validator test -------------------------
 
 class ContinuousValuesTestCase(PostClinicalDataFileTestCase):
 

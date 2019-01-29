@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 The Hyve B.V.
+ * Copyright (c) 2019 The Hyve B.V.
  * This code is licensed under the GNU Affero General Public License (AGPL),
  * version 3, or (at your option) any later version.
  */
@@ -88,8 +88,6 @@ public class TreatmentDataServiceImpl implements TreatmentDataService {
             if (indexOfSampleId != -1) {
                 for (TreatmentMolecularAlteration treatmentAlteration : treatmentAlterations) {
 
-                    Float pivotThreshold = treatmentAlteration.getPivotThreshold();
-                    String sortOrder = treatmentAlteration.getSortOrder();
                     String treatmentId = treatmentAlteration.getTreatmentId();
                     TreatmentMolecularData treatmentData = new TreatmentMolecularData();
                     String value = treatmentAlteration.getSplitValues()[indexOfSampleId];
@@ -99,8 +97,6 @@ public class TreatmentDataServiceImpl implements TreatmentDataService {
                     treatmentData.setStudyId(sample.getCancerStudyIdentifier());
                     treatmentData.setTreatmentId(treatmentId);
                     treatmentData.setMolecularProfileId(geneticProfileId);
-                    treatmentData.setSortOrder(sortOrder);
-                    treatmentData.setPivotThreshold(pivotThreshold);
                     treatmentData.setValue(value);
                    
                     treatmentDataList.add(treatmentData);

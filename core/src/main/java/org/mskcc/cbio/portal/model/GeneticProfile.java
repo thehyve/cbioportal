@@ -95,12 +95,14 @@ public class GeneticProfile implements Serializable {
         this.setGeneticProfileId(template.geneticProfileId);
         this.setTargetLine(template.getTargetLine());
         this.setOtherMetadataFields(template.getAllOtherMetadataFields());
+        this.setPivotThreshold(template.getPivotThreshold());
+        this.setSortOrder(template.getSortOrder());
     }
     
     public int getGeneticProfileId() {
         return geneticProfileId;
     }
-    
+
     public void setGeneticProfileId(int geneticProfileId) {
         this.geneticProfileId = geneticProfileId;
     }

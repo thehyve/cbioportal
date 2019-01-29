@@ -48,7 +48,7 @@ import math
 from abc import ABCMeta, abstractmethod
 
 # configure relative imports if running as a script; see PEP 366
-if __name__ == "__main__" and __package__ is None:
+if __name__ == "__main__" and (__package__ is None or __package__ is '') :
     # replace the script's location in the Python search path by the main
     # scripts/ folder, above it, so that the importer package folder is in
     # scope and *not* directly in sys.path; see PEP 395
@@ -101,10 +101,7 @@ VALIDATOR_IDS = {
     cbioportal_common.MetaFileTypes.GENE_PANEL_MATRIX:'GenePanelMatrixValidator',
     cbioportal_common.MetaFileTypes.GSVA_SCORES:'GsvaScoreValidator',
     cbioportal_common.MetaFileTypes.GSVA_PVALUES:'GsvaPvalueValidator',
-    cbioportal_common.MetaFileTypes.TREATMENT_IC50:'TreatmentEffectiveConcValidator',
-    cbioportal_common.MetaFileTypes.TREATMENT_EC50:'TreatmentEffectiveConcValidator',
-    cbioportal_common.MetaFileTypes.TREATMENT_GI50:'TreatmentEffectiveConcValidator',
-    cbioportal_common.MetaFileTypes.TREATMENT_AUC:'TreatmentAUCValidator'
+    cbioportal_common.MetaFileTypes.TREATMENT_RESPONSE:'TreatmentValidator'
 }
 
 
@@ -275,13 +272,14 @@ class PortalInstance(object):
     if the checks are to be skipped.
     """
 
-    def __init__(self, cancer_type_dict, hugo_entrez_map, alias_entrez_map, gene_set_list, gene_panel_list):
+    def __init__(self, cancer_type_dict, hugo_entrez_map, alias_entrez_map, gene_set_list, gene_panel_list, treatment_map):
         """Represent a portal instance with the given dictionaries."""
         self.cancer_type_dict = cancer_type_dict
         self.hugo_entrez_map = hugo_entrez_map
         self.alias_entrez_map = alias_entrez_map
         self.gene_set_list = gene_set_list
         self.gene_panel_list = gene_panel_list
+        self.treatment_map = treatment_map
         self.entrez_set = set()
         for entrez_map in (hugo_entrez_map, alias_entrez_map):
             if entrez_map is not None:
@@ -3390,6 +3388,11 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
     @abstractmethod
     def _set_prior_validated_sample_ids(cls, sample_ids):
         pass
+    
+    @classmethod
+    @abstractmethod
+    def _get_message_features_do_not_match():
+        pass
 
     def checkHeader(self, cols):
         """Validate the header and read sample IDs from it.
@@ -3445,10 +3448,9 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
             if self._get_prior_validated_feature_ids() is None:
                 self._set_prior_validated_feature_ids(self.feature_ids)
             else:
-                # Check if gene set ids are the same
+                # Check if feature ids are the same
                 if not self._get_prior_validated_feature_ids() == self.feature_ids:
-                    self.logger.error(
-                        'Feature columns in data files are not equal.')
+                    self.logger.error( self._get_message_features_do_not_match() )
 
         checkConsistencyFeatures(self)
 
@@ -3466,6 +3468,9 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     prior_validated_feature_ids = None
     prior_validated_header = None
     REQUIRED_HEADERS = ['geneset_id']
+
+    def __init__(self, *args, **kwargs):
+        super(GsvaWiseFileValidator, self).__init__(*args, **kwargs)
 
     @classmethod
     def _get_prior_validated_header(cls):
@@ -3491,6 +3496,11 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     def _set_prior_validated_sample_ids(cls, sample_ids):
         GsvaWiseFileValidator.prior_validated_sample_ids = sample_ids
 
+    @classmethod
+    def _get_message_features_do_not_match(cls):
+        return "Gene sets column in score and p-value file are not equal."
+
+
 
 class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     """Groups multiple treatment response files from a study to ebsure consistency.
@@ -3503,7 +3513,32 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     prior_validated_header = None
     REQUIRED_HEADERS = ['treatment_id']
     OPTIONAL_HEADERS = ['name', 'description', 'url']
-    UNIQUE_COLUMNS = ['treatment_id']
+    UNIQUE_COLUMNS = ['treatment_id','name']
+
+    def __init__(self, *args, **kwargs):
+        super(TreatmentWiseFileValidator, self).__init__(*args, **kwargs)
+
+    def parseFeatureColumns(self, nonsample_col_vals):
+        self.checkDifferentNameInDb(nonsample_col_vals)
+        return MultipleDataFileValidator.parseFeatureColumns(self, nonsample_col_vals)
+    
+    def checkDifferentNameInDb(self, nonsample_col_vals):
+        # Check for different combinations of treatment_id and treatment_name
+        # in the database. If true, raise warnings for each discrepancy.
+        nonsample_cols =  self.nonsample_cols
+        if (nonsample_cols.index("name") != None):
+
+            treatmentId = nonsample_col_vals[ nonsample_cols.index("treatment_id") ]
+            fileTreatmentName = nonsample_col_vals[ nonsample_cols.index("name") ]
+            dbTreatmentName = self.portal.treatment_map[treatmentId]["name"]
+
+            if (dbTreatmentName != fileTreatmentName):
+                    self.logger.warning(
+                    "Name " + fileTreatmentName + " for treatment `" + treatmentId
+                    + "` is different from name `"+ dbTreatmentName + "` present in the cBioPortal database. "
+                    + "Treatment names in cBioPortal always reflect treatment names in the last imported study. ",
+                    extra={'line_number': self.line_number,
+                            'cause': fileTreatmentName})
 
     @classmethod
     def _get_prior_validated_header(cls):
@@ -3528,6 +3563,10 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     @classmethod
     def _set_prior_validated_sample_ids(cls, sample_ids):
         TreatmentWiseFileValidator.prior_validated_sample_ids = sample_ids
+    
+    @classmethod
+    def _get_message_features_do_not_match(cls):
+        return "Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical."
 
 
 class GsvaScoreValidator(GsvaWiseFileValidator):
@@ -3535,6 +3574,9 @@ class GsvaScoreValidator(GsvaWiseFileValidator):
     """ Validator for files containing scores per gene set from GSVA algorithm. The GSVA algorithm
     in R can calculate a GSVA score or GSVA-like score (such as ssGSEA) per sample per gene set.
     """
+
+    def __init__(self, *args, **kwargs):
+        super(GsvaScoreValidator, self).__init__(*args, **kwargs)
 
     # Score must be between -1 and 1
     def checkValue(self, value, col_index):
@@ -3554,6 +3596,9 @@ class GsvaPvalueValidator(GsvaWiseFileValidator):
     calculate a p-value for each GSVA score using a bootstrapping method.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(GsvaPvalueValidator, self).__init__(*args, **kwargs)
+
     # Score must be between -0 and 1
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
@@ -3566,13 +3611,16 @@ class GsvaPvalueValidator(GsvaWiseFileValidator):
 
 
 
-class TreatmentEffectiveConcValidator(TreatmentWiseFileValidator):
+class TreatmentValidator(TreatmentWiseFileValidator):
 
-    """ Validator for files containing concentration values for treatment responses.
+    """ Validator for files containing treatment response values.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(TreatmentValidator, self).__init__(*args, **kwargs)
+
     # (1) Natural positive number (not 0)
-    # (2) Number may be prefixed by ">"; ">n" means that the treatment was ineffective at the highest tested concentration of n.
+    # (2) Number may be prefixed by ">" or "<"; f.i. ">n" means that the treatment was ineffective at the highest tested concentration of n.
     # (3) NA cell value is allowed; means treatment was not tested on a sample
     # (4) Is an empty cell value allowed? (meaning treatment was not tested on a sample)
     #
@@ -3595,94 +3643,42 @@ class TreatmentEffectiveConcValidator(TreatmentWiseFileValidator):
         if stripped_value == 'NA':
             return
 
-        # if the value is prefixed with '>' remove this prefix
+        # if the value is prefixed with '>' or '<' remove this prefix
         # prior to evaluation of the numeric value
-        hasTruncSymbol = re.match("^>", stripped_value)
-        stripped_value = re.sub("^>","", stripped_value)
+        hasTruncSymbol = re.match("^[><]", stripped_value)
+        stripped_value = re.sub("^[><]","", stripped_value)
         
         try:
             numeric_value = float(stripped_value)
         except ValueError:
-            self.logger.error("Value cannot be interpreted as a floating point number and is not valid effective concentration.",
+            self.logger.error("Value cannot be interpreted as a floating point number and is not valid response value.",
                 extra={'line_number': self.line_number,
                 'column_number': col_index + 1,
                 'cause': value})
             return
 
         if math.isnan(numeric_value):
-            self.logger.error("Value is NaN, therefore, not a valid effective concentration.",
+            self.logger.error("Value is NaN, therefore, not a valid response value.",
                 extra={'line_number': self.line_number,
                 'column_number': col_index + 1,
                 'cause': value})
             return
 
         if math.isinf(numeric_value):
-            self.logger.error("Value is infinite and, therefore, not a valid effective concentration.",
-                extra={'line_number': self.line_number,
-                'column_number': col_index + 1,
-                'cause': value})
-            return
-
-        # raise error when number is not a natural positive number
-        if numeric_value <= 0:
-            self.logger.error("Value is not larger than 0 and, therefore, not a valid effective concentration.",
+            self.logger.error("Value is infinite and, therefore, not a valid response value.",
                 extra={'line_number': self.line_number,
                 'column_number': col_index + 1,
                 'cause': value})
             return
 
         if numeric_value % 1 == 0 and not hasTruncSymbol:
-            self.logger.warning("Value has no decimals and may represent an invalid effective concentration.",
+            self.logger.warning("Value has no decimals and may represent an invalid response value.",
                 extra={'line_number': self.line_number,
                 'column_number': col_index + 1,
                 'cause': value})
+                
+        return
 
-class TreatmentAUCValidator(TreatmentWiseFileValidator):
-
-    """ Validator for files containing AUC values for treatment responses.
-    """
-
-    # Requirements for AUC (area under the curve): 
-    # (1) Natural positive number including 0.
-    # (2) NA is allowed;  means treatment was not tested on a sample.
-    # (3) Cell values cannot contain characters other than [0-9,.>]; scientific notation (e.g., 123.456e+5) is not supported at the moment.
-    def checkValue(self, value, col_index):
-        """Check a value in a sample column."""
-
-        stripped_value = value.strip()
-
-        # 'NA' is an allowed value. No further validations apply.
-        if stripped_value == 'NA':
-            return
-
-        try:
-            numeric_value = float(stripped_value)
-        except ValueError:
-            self.logger.error("Value cannot be interpreted as a floating point number and is not valid effective AUC.",
-                extra={'line_number': self.line_number,
-                'column_number': col_index + 1,
-                'cause': value})
-            return
-
-        if math.isnan(numeric_value):
-            self.logger.error("Value is NaN, therefore, not a valid AUC.",
-                extra={'line_number': self.line_number,
-                'column_number': col_index + 1,
-                'cause': value})
-            return
-
-        if math.isinf(numeric_value):
-            self.logger.error("Value is infinite and, therefore, not a valid AUC.",
-                extra={'line_number': self.line_number,
-                'column_number': col_index + 1,
-                'cause': value})
-            return
-
-        if numeric_value < 0:
-            self.logger.error("Value is smaller than 0 and, therefore, not a valid AUC.",
-                              extra={'line_number': self.line_number,
-                                     'column_number': col_index + 1,
-                                     'cause': value})
 
 # ------------------------------------------------------------------------------
 # Functions
@@ -4116,7 +4112,7 @@ def validate_data_relations(validators_by_meta_type, logger):
 def request_from_portal_api(server_url, api_name, logger):
     """Send a request to the portal API and return the decoded JSON object."""
 
-    if api_name in ['genesets', 'gene-panels']:
+    if api_name in ['genesets', 'gene-panels', 'treatments']:
         service_url = server_url + '/api/' + api_name + "?pageSize=9999999"
 
     # TODO: change API for genes, gene aliases and cancer types to non-legacy
@@ -4222,6 +4218,14 @@ def extract_ids(json_data, id_key):
         result_set.add(data_item[id_key])
     return list(result_set)
 
+def index_treatment_data(json_data,
+                         id_field = "treatmentId"):
+    result_dict = {}
+    for data_item in json_data:
+        treatment_id = data_item[id_field]
+        result_dict[treatment_id] = data_item
+    return result_dict
+
 
 def load_portal_info(path, logger, offline=False):
     """Create a PortalInstance object based on a server API or offline dir.
@@ -4240,6 +4244,9 @@ def load_portal_info(path, logger, offline=False):
             ('genesaliases',
                 lambda json_data: transform_symbol_entrez_map(
                                         json_data, 'gene_alias')),
+            ('treatments',
+                lambda json_data: index_treatment_data(
+                                        json_data, 'treatmentId')),
             ('genesets',
                 lambda json_data: extract_ids(json_data, 'genesetId')),
             ('gene-panels',
@@ -4257,7 +4264,8 @@ def load_portal_info(path, logger, offline=False):
                           hugo_entrez_map=portal_dict['genes'],
                           alias_entrez_map=portal_dict['genesaliases'],
                           gene_set_list=portal_dict['genesets'],
-                          gene_panel_list=portal_dict['gene-panels'])
+                          gene_panel_list=portal_dict['gene-panels'],
+                          treatment_map = portal_dict['treatments'])
 
 
 # ------------------------------------------------------------------------------
@@ -4338,6 +4346,8 @@ def validate_study(study_dir, portal_instance, logger, relaxed_mode, strict_maf_
         logger.warning('Skipping validations relating to gene set identifiers')
     if portal_instance.gene_panel_list is None:
         logger.warning('Skipping validations relating to gene panel identifiers')
+    if portal_instance.treatment_map is None:
+        logger.warning('Skipping validations relating to treatment identifiers')
 
     # walk over the meta files in the dir and get properties of the study
     (validators_by_meta_type,
@@ -4578,7 +4588,8 @@ def main_validate(args):
                                          hugo_entrez_map=None,
                                          alias_entrez_map=None,
                                          gene_set_list=None,
-                                         gene_panel_list=None)
+                                         gene_panel_list=None,
+                                         treatment_map=None)
     elif args.portal_info_dir:
         portal_instance = load_portal_info(args.portal_info_dir, logger,
                                            offline=True)

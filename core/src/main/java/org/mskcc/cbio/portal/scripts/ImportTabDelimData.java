@@ -541,6 +541,9 @@ public class ImportTabDelimData {
             }
             
             String values[] = (String[]) ArrayUtils.subarray(parts, sampleStartIndex, parts.length>nrColumns?nrColumns:parts.length);
+
+            // trim whitespace from values
+            values = Stream.of(values).map(String::trim).toArray(String[]::new);
             values = filterOutNormalValues(filteredSampleIndices, values);
             
             Geneset geneset = DaoGeneset.getGenesetByExternalId(parts[genesetIdIndex]);

@@ -112,7 +112,7 @@ public class ImportTreatments extends ConsoleRunnable {
     public static void startImport(OptionSet options, OptionSpec<String> data, boolean updateInfo) throws Exception {
         if (options.hasArgument(data)) {
             File treatmentFile = new File(options.valueOf(data));
-            importData(treatmentFile, updateInfo);
+            importData(treatmentFile);
         }
     }
     
@@ -124,7 +124,7 @@ public class ImportTreatments extends ConsoleRunnable {
     * ("Description, Name, URL") of existing records should be overwritten
     * @throws Exception
     */
-    public static void importData(File treatmentDataFile, boolean updateInfo) throws Exception {
+    public static void importData(File treatmentDataFile) throws Exception {
         
         ProgressMonitor.setCurrentMessage("Reading data from: " + treatmentDataFile.getCanonicalPath());
         
@@ -149,37 +149,34 @@ public class ImportTreatments extends ConsoleRunnable {
             String treatmentStableId = parts[indexStableIdField];
             Treatment treatment = DaoTreatment.getTreatmentByStableId(treatmentStableId);
             
-            // if treatment does not already exist in the database
-            // when fields need to be updated...
-            if (treatment == null || updateInfo) {
+            // treatments are always updated to based on the current import;
+            // also when present in db a new record is created.
                 
-                // extract fields; replace optional fields with the Stable ID when not set
-                String stableId = parts[indexStableIdField];
-                String name = indexNameField == -1?stableId:parts[indexNameField];
-                String desc = indexNameField == -1?stableId:parts[indexDescField];
-                String url = indexNameField == -1?stableId:parts[indexUrlField];
+            // extract fields; replace optional fields with the Stable ID when not set
+            String stableId = parts[indexStableIdField];
+            String name = indexNameField == -1?stableId:parts[indexNameField];
+            String desc = indexNameField == -1?stableId:parts[indexDescField];
+            String url = indexNameField == -1?stableId:parts[indexUrlField];
 
-                if (treatment == null) {
-                
-                    // create a new treatment and add to the database
-                    Treatment newTreatment = new Treatment(stableId, name, desc, url);
-                    ProgressMonitor.setCurrentMessage("Adding treatment: " + newTreatment.getStableId());
-                    DaoTreatment.addTreatment(newTreatment);
-
-                }
-                // updateInfo is true, update the meta-information fields of the treatment
-                else {
-
-                    ProgressMonitor.setCurrentMessage("Updating treatment: " + treatment.getStableId());
-                    treatment.setName(name);
-                    treatment.setDescription(desc);
-                    treatment.setRefLink(url);
-                    DaoTreatment.updateTreatment(treatment);
-
-                }
+            if (treatment == null) {
+            
+                // create a new treatment and add to the database
+                Treatment newTreatment = new Treatment(stableId, name, desc, url);
+                ProgressMonitor.setCurrentMessage("Adding treatment: " + newTreatment.getStableId());
+                DaoTreatment.addTreatment(newTreatment);
 
             }
-            
+            // update the meta-information fields of the treatment
+            else {
+
+                ProgressMonitor.setCurrentMessage("Updating treatment: " + treatment.getStableId());
+                treatment.setName(name);
+                treatment.setDescription(desc);
+                treatment.setRefLink(url);
+                DaoTreatment.updateTreatment(treatment);
+
+            }
+
             currentLine = buf.readLine();
         }
         

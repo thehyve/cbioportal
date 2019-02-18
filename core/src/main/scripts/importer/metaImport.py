@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 # configure relative imports if running as a script; see PEP 366
-if __name__ == "__main__" and (__package__ is None or __package__ is ''):
+if __name__ == "__main__" and __package__ is None:
     # replace the script's location in the Python search path by the main
     # scripts/ folder, above it, so that the importer package folder is in
     # scope and *not* directly in sys.path; see PEP 395

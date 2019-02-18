@@ -48,7 +48,7 @@ import math
 from abc import ABCMeta, abstractmethod
 
 # configure relative imports if running as a script; see PEP 366
-if __name__ == "__main__" and (__package__ is None or __package__ is '') :
+if __name__ == "__main__" and (__package__ is None or __package__ is ''):
     # replace the script's location in the Python search path by the main
     # scripts/ folder, above it, so that the importer package folder is in
     # scope and *not* directly in sys.path; see PEP 395
@@ -3361,37 +3361,37 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def _get_prior_validated_header(cls):
+    def get_prior_validated_header(cls):
         pass
 
     @classmethod
     @abstractmethod
-    def _set_prior_validated_header(cls, header_names):
+    def set_prior_validated_header(cls, header_names):
         pass
 
     @classmethod
     @abstractmethod
-    def _get_prior_validated_feature_ids(cls):
+    def get_prior_validated_feature_ids(cls):
         pass
         
     @classmethod
     @abstractmethod
-    def _set_prior_validated_feature_ids(cls, feature_ids):
+    def set_prior_validated_feature_ids(cls, feature_ids):
         pass
 
     @classmethod
     @abstractmethod
-    def _get_prior_validated_sample_ids(cls):
+    def get_prior_validated_sample_ids(cls):
         pass
 
     @classmethod
     @abstractmethod
-    def _set_prior_validated_sample_ids(cls, sample_ids):
+    def set_prior_validated_sample_ids(cls, sample_ids):
         pass
     
     @classmethod
     @abstractmethod
-    def _get_message_features_do_not_match():
+    def get_message_features_do_not_match(cls):
         pass
 
     def checkHeader(self, cols):
@@ -3401,13 +3401,13 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
         """
         num_errors = super(MultipleDataFileValidator, self).checkHeader(cols)
 
-        if self._get_prior_validated_header() != None:
-            if self.cols != self._get_prior_validated_header():
+        if self.get_prior_validated_header() != None:
+            if self.cols != self.get_prior_validated_header():
                 self.logger.error('Headers from data files are different',
                                   extra={'line_number': self.line_number})
                 num_errors += 1
         else:
-            self._set_prior_validated_header(self.cols)
+            self.set_prior_validated_header(self.cols)
 
         return num_errors
 
@@ -3428,9 +3428,9 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
                                      'cause': feature_id})
         else:
             # Check if this is the second treatment data file
-            if self._get_prior_validated_feature_ids() is not None:
+            if self.get_prior_validated_feature_ids() is not None:
                 # Check if treatment is in the first treatment data file
-                if feature_id not in self._get_prior_validated_feature_ids():
+                if feature_id not in self.get_prior_validated_feature_ids():
                     self.logger.error('Feature id cannot be found in other data file',
                                       extra={'line_number': self.line_number,
                                              'cause': feature_id})
@@ -3445,18 +3445,19 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
             GI50, AUC, ...) are the same"""
 
             # If the prior_validated_features_ids is not filled yet, fill it with the first file.
-            if self._get_prior_validated_feature_ids() is None:
-                self._set_prior_validated_feature_ids(self.feature_ids)
+            if self.get_prior_validated_feature_ids() is None:
+                ids = self.feature_ids
+                self.set_prior_validated_feature_ids(ids)
             else:
                 # Check if feature ids are the same
-                if not self._get_prior_validated_feature_ids() == self.feature_ids:
-                    self.logger.error( self._get_message_features_do_not_match() )
+                if not self.get_prior_validated_feature_ids() == self.feature_ids:
+                    log_info = self.get_message_features_do_not_match()
+                    self.logger.error( log_info.get('message'), extra={'cause': log_info.get('cause')} )
 
         checkConsistencyFeatures(self)
 
         super(MultipleDataFileValidator, self).onComplete()
 
-# TODO: move duplicate code in GsvaWiseFileValidator and TreatmentWiseFileValidator classes to meta class
 class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     """Groups multiple gene set data files from a study to ensure consistency.
 
@@ -3473,37 +3474,37 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
         super(GsvaWiseFileValidator, self).__init__(*args, **kwargs)
 
     @classmethod
-    def _get_prior_validated_header(cls):
-        return GsvaWiseFileValidator.prior_validated_header
+    def get_prior_validated_header(cls):
+        return cls.prior_validated_header
 
     @classmethod
-    def _set_prior_validated_header(cls, header_names):
+    def set_prior_validated_header(cls, header_names):
         GsvaWiseFileValidator.prior_validated_header = header_names
     
     @classmethod
-    def _get_prior_validated_feature_ids(cls):
-        return GsvaWiseFileValidator.prior_validated_feature_ids
+    def get_prior_validated_feature_ids(cls):
+        return cls.prior_validated_feature_ids
 
     @classmethod
-    def _set_prior_validated_feature_ids(cls, feature_ids):
+    def set_prior_validated_feature_ids(cls, feature_ids):
         GsvaWiseFileValidator.prior_validated_feature_ids = feature_ids
 
     @classmethod
-    def _get_prior_validated_sample_ids(cls):
-        return GsvaWiseFileValidator.prior_validated_sample_ids
+    def get_prior_validated_sample_ids(cls):
+        return cls.prior_validated_sample_ids
 
     @classmethod
-    def _set_prior_validated_sample_ids(cls, sample_ids):
+    def set_prior_validated_sample_ids(cls, sample_ids):
         GsvaWiseFileValidator.prior_validated_sample_ids = sample_ids
 
     @classmethod
-    def _get_message_features_do_not_match(cls):
-        return "Gene sets column in score and p-value file are not equal."
-
+    def get_message_features_do_not_match(cls):
+        return {"message": "Gene sets column in score and p-value file are not equal.",
+                "cause": "The same set of gene sets should be used in the score and p-value files for this study. Please ensure that all gene set id's of one file are present in the other gene set data file."}
 
 
 class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
-    """Groups multiple treatment response files from a study to ebsure consistency.
+    """Groups multiple treatment response files from a study to ensure consistency.
 
     All Validator classes that check validity of different treatment response data
     types in a study should inherit from this class.
@@ -3520,7 +3521,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
     def parseFeatureColumns(self, nonsample_col_vals):
         self.checkDifferentNameInDb(nonsample_col_vals)
-        return MultipleDataFileValidator.parseFeatureColumns(self, nonsample_col_vals)
+        return super(TreatmentWiseFileValidator, self).parseFeatureColumns(nonsample_col_vals)
     
     def checkDifferentNameInDb(self, nonsample_col_vals):
         # Check for different combinations of treatment_id and treatment_name
@@ -3530,43 +3531,51 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
             treatmentId = nonsample_col_vals[ nonsample_cols.index("treatment_id") ]
             fileTreatmentName = nonsample_col_vals[ nonsample_cols.index("name") ]
-            dbTreatmentName = self.portal.treatment_map[treatmentId]["name"]
 
-            if (dbTreatmentName != fileTreatmentName):
+            # check whether a name for the treatment has been
+            # registered in the database
+            dbTreatmentName = None
+            if treatmentId in self.portal.treatment_map.keys():
+                dbTreatmentName = self.portal.treatment_map[treatmentId]["name"]
+
+            # when a name has been registered for this treatment and 
+            # is different from the new name, issue a warning.
+            if dbTreatmentName != None and dbTreatmentName != fileTreatmentName:
                     self.logger.warning(
-                    "Name " + fileTreatmentName + " for treatment `" + treatmentId
+                    "Name `" + fileTreatmentName + "` for treatment `" + treatmentId
                     + "` is different from name `"+ dbTreatmentName + "` present in the cBioPortal database. "
                     + "Treatment names in cBioPortal always reflect treatment names in the last imported study. ",
                     extra={'line_number': self.line_number,
                             'cause': fileTreatmentName})
 
     @classmethod
-    def _get_prior_validated_header(cls):
-        return TreatmentWiseFileValidator.prior_validated_header
+    def get_prior_validated_header(cls):
+        return cls.prior_validated_header
 
     @classmethod
-    def _set_prior_validated_header(cls, header_names):
+    def set_prior_validated_header(cls, header_names):
         TreatmentWiseFileValidator.prior_validated_header = header_names
     
     @classmethod
-    def _get_prior_validated_feature_ids(cls):
-        return TreatmentWiseFileValidator.prior_validated_feature_ids
+    def get_prior_validated_feature_ids(cls):
+        return cls.prior_validated_feature_ids
 
     @classmethod
-    def _set_prior_validated_feature_ids(cls, feature_ids):
+    def set_prior_validated_feature_ids(cls, feature_ids):
         TreatmentWiseFileValidator.prior_validated_feature_ids = feature_ids
 
     @classmethod
-    def _get_prior_validated_sample_ids(cls):
-        return TreatmentWiseFileValidator.prior_validated_sample_ids
+    def get_prior_validated_sample_ids(cls):
+        return cls.prior_validated_sample_ids
 
     @classmethod
-    def _set_prior_validated_sample_ids(cls, sample_ids):
+    def set_prior_validated_sample_ids(cls, sample_ids):
         TreatmentWiseFileValidator.prior_validated_sample_ids = sample_ids
     
     @classmethod
-    def _get_message_features_do_not_match(cls):
-        return "Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical."
+    def get_message_features_do_not_match(cls):
+        return {"message": "Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical.",
+                "cause": "The same set of treatments should be used across the different treatment data files for this study. Please ensure that all treatment id's of one file are present in all other treatment files."}
 
 
 class GsvaScoreValidator(GsvaWiseFileValidator):
@@ -3629,15 +3638,14 @@ class TreatmentValidator(TreatmentWiseFileValidator):
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
 
-        # value is not defined
-        if value == "":
+        # value is not defined (empty cell)
+        stripped_value = value.strip()
+        if stripped_value == "":
             self.logger.error("Cell is empty. An effective concentration value is expected. Use 'NA' to indicate missing values.",
                 extra={'line_number': self.line_number,
                 'column_number': col_index + 1,
                 'cause': value})
             return
-        
-        stripped_value = value.strip()
 
         # 'NA' is an allowed value. No further validations apply.
         if stripped_value == 'NA':
@@ -3646,7 +3654,7 @@ class TreatmentValidator(TreatmentWiseFileValidator):
         # if the value is prefixed with '>' or '<' remove this prefix
         # prior to evaluation of the numeric value
         hasTruncSymbol = re.match("^[><]", stripped_value)
-        stripped_value = re.sub("^[><]","", stripped_value)
+        stripped_value = re.sub(r"^[><]\s*","", stripped_value)
         
         try:
             numeric_value = float(stripped_value)
@@ -4219,7 +4227,7 @@ def extract_ids(json_data, id_key):
     return list(result_set)
 
 def index_treatment_data(json_data,
-                         id_field = "treatmentId"):
+                         id_field='treatmentId'):
     result_dict = {}
     for data_item in json_data:
         treatment_id = data_item[id_field]
@@ -4609,7 +4617,6 @@ def main_validate(args):
 
 
 # ------------------------------------------------------------------------------
-# vamanos
 
 def _get_column_index(parts, name):
     for i in range(len(parts)):

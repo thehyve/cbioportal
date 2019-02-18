@@ -65,10 +65,8 @@ public class TestImportTreatmentData {
         // Open genesets test data file
         File file = new File("src/test/resources/treatments/data_treatment_ic50.txt");
         
-        boolean updateInfo = false;
-
         // import data and test all treatments were added
-        ImportTreatments.importData(file, updateInfo);
+        ImportTreatments.importData(file);
         assertEquals(10, getNumRecords());
  
         // test wether a record can be retrieved via stable id 
@@ -80,16 +78,9 @@ public class TestImportTreatmentData {
         assertEquals("Desc of Irinotecan", treatment1.getDescription());
         assertEquals("Url of Irinotecan", treatment1.getRefLink());
 
-        // test fields are left unchanged when updateInfo flag is not setcd 
-        // and the next data file contains different feature meta data
+        // test fields are updated after loading new treatment file
         File fileNewDesc = new File("src/test/resources/treatments/data_treatment_ic50_newdesc.txt");
-        ImportTreatments.importData(fileNewDesc, updateInfo);
-        Treatment treatment2 = DaoTreatment.getTreatmentByStableId("Irinotecan");
-        assertEquals("Desc of Irinotecan", treatment2.getDescription());
-
-        // test fields are updated when updateInfo flag is set
-        updateInfo = true;
-        ImportTreatments.importData(fileNewDesc, updateInfo);
+        ImportTreatments.importData(fileNewDesc);
         Treatment treatment3 = DaoTreatment.getTreatmentByStableId("Irinotecan");
         assertEquals("New desc of Irinotecan", treatment3.getDescription());
         

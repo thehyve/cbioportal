@@ -36,6 +36,7 @@ class ValidateDataSystemTester(unittest.TestCase):
             return "test_data/test.xml"
         self.orig_get_pom_path = validateData.get_pom_path
         validateData.get_pom_path = dummy_get_pom_path
+        _resetClassVars()
 
         # Prepare global variables related to sample profiled for mutations and gene panels
         self.mutation_sample_ids = None
@@ -90,7 +91,6 @@ class ValidateDataSystemTester(unittest.TestCase):
                 3: 'succeeded with warnings'
         '''
 
-        _resetClassVars()
         # build up the argument list
         print("===study 0")
         args = ['--study_directory', 'test_data/study_es_0/',
@@ -102,7 +102,6 @@ class ValidateDataSystemTester(unittest.TestCase):
 
     def test_exit_status_failure(self):
         '''study 1 : errors, expected exit_status = 1.'''
-        _resetClassVars()
         #Build up arguments and run
         print("===study 1")
         args = ['--study_directory', 'test_data/study_es_1/',
@@ -114,7 +113,6 @@ class ValidateDataSystemTester(unittest.TestCase):
 
     def test_exit_status_invalid(self):
         '''test to fail: give wrong hugo file, or let a meta file point to a non-existing data file, expected exit_status = 2.'''
-        _resetClassVars()
         #Build up arguments and run
         print("===study invalid")
         args = ['--study_directory', 'test_data/study_es_invalid/',
@@ -126,7 +124,6 @@ class ValidateDataSystemTester(unittest.TestCase):
 
     def test_exit_status_warnings(self):
         '''study 3 : warnings only, expected exit_status = 3.'''
-        _resetClassVars()
         # data_filename: test
         #Build up arguments and run
         print("===study 3")
@@ -141,7 +138,6 @@ class ValidateDataSystemTester(unittest.TestCase):
         '''
         Test if html file is correctly generated when 'html_table' is given
         '''
-        _resetClassVars()
         #Build up arguments and run
         out_file_name = 'test_data/study_es_0/result_report.html~'
         args = ['--study_directory', 'test_data/study_es_0/',
@@ -157,7 +153,6 @@ class ValidateDataSystemTester(unittest.TestCase):
     def test_portal_mismatch(self):
         '''Test if validation fails when data contradicts the portal.'''
         # build up arguments and run
-        _resetClassVars()
         argv = ['--study_directory', 'test_data/study_portal_mismatch',
                 '--portal_info_dir', PORTAL_INFO_DIR, '--verbose']
         parsed_args = validateData.interface(argv)
@@ -171,7 +166,6 @@ class ValidateDataSystemTester(unittest.TestCase):
 
     def test_no_portal_checks(self):
         '''Test if validation skips portal-specific checks when instructed.'''
-        _resetClassVars()
         # build up arguments and run
         argv = ['--study_directory', 'test_data/study_portal_mismatch',
                 '--verbose',
@@ -191,7 +185,6 @@ class ValidateDataSystemTester(unittest.TestCase):
         Further files cannot be validated in this case, as all sample IDs will
         be undefined. Validate if the script is giving the proper error.
         '''
-        _resetClassVars()
         # build the argument list
         out_file_name = 'test_data/study_wr_clin/result_report.html~'
         print('==test_problem_in_clinical==')
@@ -211,7 +204,6 @@ class ValidateDataSystemTester(unittest.TestCase):
 
         This includes HTML ouput, the error line file and the exit status.
         '''
-        _resetClassVars()
         # build the argument list
         html_file_name = 'test_data/study_various_issues/result_report.html~'
         error_file_name = 'test_data/study_various_issues/error_file.txt~'
@@ -243,7 +235,6 @@ class ValidateDataSystemTester(unittest.TestCase):
         '''
         Tests the scenario where data files contain quotes. This should give errors.
         '''
-        _resetClassVars()
         #Build up arguments and run
         out_file_name = 'test_data/study_quotes/result_report.html~'
         print('==test_files_with_quotes==')
@@ -261,17 +252,16 @@ class ValidateDataSystemTester(unittest.TestCase):
 def _resetClassVars():
     """Reset the state of classes that check mulitple files of the same type.
     
-    GsvaWiseFileValidator and TreatmentWiseFileValidator classes check 
+    GsvaWiseFileValidator and TreatmentWiseFileValidator classes check
     consistency between multiple data files by collecting information in class variables.
     This implementation is not consistent with the unit test environment that simulates
     different studies to be loaded. To ensure real-world fucntionality the class variables 
     should be reset before each unit test that tests multi file consistency."""
-    validateData.TreatmentWiseFileValidator.prior_validated_sample_ids = None
-    validateData.TreatmentWiseFileValidator.prior_validated_feature_ids = None
-    validateData.TreatmentWiseFileValidator.prior_validated_header = None
-    validateData.GsvaWiseFileValidator.prior_validated_sample_ids = None
-    validateData.GsvaWiseFileValidator.prior_validated_feature_ids = None
-    validateData.GsvaWiseFileValidator.prior_validated_header = None
+
+    for c in [ validateData.TreatmentWiseFileValidator, validateData.GsvaWiseFileValidator ]:
+        c.prior_validated_sample_ids = None
+        c.prior_validated_feature_ids = None
+        c.prior_validated_header = None
 
 if __name__ == '__main__':
     unittest.main(buffer=True)

@@ -1009,11 +1009,11 @@ class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
         _resetMultipleFileHandlerClassVars()
 
     def test_identical_columns_are_accepted(self):
-        # Test if no error is issued when an concentration tables have identicat headers
+        # Test if no error is issued when an concentration tables have identical headers
         self.logger.setLevel(logging.ERROR)
 
-        record_list1 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
-        record_list2 = self.validate('study_es_0/data_treatment_ic50.txt', TreatmentMultiFileTestCase.DummyTreatmentValidator)
+        record_list1 = self.validate('study_es_0/data_treatment_ic50.txt', self.DummyTreatmentValidator)
+        record_list2 = self.validate('study_es_0/data_treatment_ic50.txt', self.DummyTreatmentValidator)
         self.assertEqual(len(record_list1), 0)
         self.assertEqual(len(record_list2), 0)
 
@@ -1057,22 +1057,17 @@ class TreatmentMultiFileTestCase(PostClinicalDataFileTestCase):
         self.assertEqual('Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical.', record.getMessage())
         return
 
-    def test_different_name_for_treatment_in_db_method(self):
-
-        self.logger.setLevel(logging.WARNING)
-        self.portal = PORTAL_INSTANCE
-
-        record_list = self.validate('data_treatment_ic50_different_name.txt',
-                            TreatmentMultiFileTestCase.DummyTreatmentValidator)
-
-        self.assertEqual(len(record_list), 1)
-
 # ------------------ end treatment multifile consistency test ------------------
 
 
 # --------------------------- treatment wise test ------------------------------
 
 class TreatmentWiseTestCase(PostClinicalDataFileTestCase):
+
+    # create a dummy class of that has no value checking
+    class DummyTreatmentValidator(validateData.TreatmentWiseFileValidator):
+        def checkValue(self, value, col_index):
+            return
 
     def setUp(self):
         super().setUp()
@@ -1086,7 +1081,7 @@ class TreatmentWiseTestCase(PostClinicalDataFileTestCase):
         self.portal = PORTAL_INSTANCE
 
         record_list = self.validate('data_treatment_ic50_different_name.txt',
-                            TreatmentMultiFileTestCase.DummyTreatmentValidator)
+                            self.DummyTreatmentValidator)
 
         self.assertEqual(len(record_list), 1)
 
@@ -1131,6 +1126,10 @@ class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
     def test_smallerthan_notation_is_allowed(self):
         passConcValue("<10").warning.assert_not_called()
         passConcValue("<10").error.assert_not_called()
+
+    def test_whitespace_after_symbol_is_allowed(self):
+        passConcValue("< 10").warning.assert_not_called()
+        passConcValue("< 10").error.assert_not_called()
 
     def test_floatnumber_is_allowed(self):
         passConcValue("10.23234").warning.assert_not_called()
@@ -2556,12 +2555,11 @@ def _resetMultipleFileHandlerClassVars():
     This implementation is not consistent with the unit test environment that simulates
     different studies to be loaded. To ensure real-world fucntionality the class variables 
     should be reset before each unit test that tests multi file consistency."""
-    validateData.TreatmentWiseFileValidator.prior_validated_sample_ids = None
-    validateData.TreatmentWiseFileValidator.prior_validated_feature_ids = None
-    validateData.TreatmentWiseFileValidator.prior_validated_header = None
-    validateData.GsvaWiseFileValidator.prior_validated_sample_ids = None
-    validateData.GsvaWiseFileValidator.prior_validated_feature_ids = None
-    validateData.GsvaWiseFileValidator.prior_validated_header = None
+
+    for c in [ TreatmentWiseTestCase.DummyTreatmentValidator, TreatmentMultiFileTestCase.DummyTreatmentValidator, validateData.TreatmentWiseFileValidator, validateData.GsvaWiseFileValidator ]:
+        c.prior_validated_sample_ids = None
+        c.prior_validated_feature_ids = None
+        c.prior_validated_header = None
 
 if __name__ == '__main__':
     unittest.main(buffer=True)

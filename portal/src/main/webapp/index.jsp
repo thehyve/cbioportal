@@ -55,9 +55,42 @@
 
     </script>
      
-    <script type="text/javascript" src="//<%=baseUrl%>/js/src/load-frontend.js?<%=GlobalProperties.getAppVersion()%>"></script> 
+    <script type="text/javascript" src="//<%=baseUrl%>/js/src/load-frontend.js?<%=GlobalProperties.getAppVersion()%>"></script>
     
-    
+    <!-- Matomo -->
+    <script type="text/javascript">
+        var _paq = _paq || [];
+        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+        var u="//localhost/";
+        _paq.push(['setTrackerUrl', u+'piwik.php']);
+        _paq.push(['setSiteId', '1']);
+        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+        })();
+
+        // store url on load
+        var currentPage = window.location.href;
+
+        // listen for changes
+        setInterval(function()
+        {
+            if (currentPage != window.location.href)
+            {
+                // page has changed, set new page as 'current'
+                currentPage = window.location.href;
+
+                // register as new view
+                _paq.push(['setCustomUrl', window.location.href]);
+                _paq.push(['setDocumentTitle', window.document.title]);
+                _paq.push(['setGenerationTimeMs', 0]);
+                _paq.push(['trackPageView']);
+            }
+        }, 500);
+    </script>
+    <!-- End Matomo Code -->
           
     <script>
         window.frontendConfig.customTabs && window.frontendConfig.customTabs.forEach(function(tab){

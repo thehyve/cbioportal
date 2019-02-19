@@ -5,6 +5,7 @@
 %>
 <%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="org.mskcc.cbio.portal.util.GlobalProperties" %>
+
 <!DOCTYPE html>
 <html class="cbioportal-frontend">
 <head>
@@ -64,12 +65,12 @@
         _paq.push(['trackPageView']);
         _paq.push(['enableLinkTracking']);
         (function() {
-        var u="//localhost/";
-        _paq.push(['setTrackerUrl', u+'piwik.php']);
-        _paq.push(['setSiteId', '1']);
-        _paq.push(['setUserId', document.getElementsByClassName("identity")[0].textContent.split("|")[0].substring(13)])
-        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+          var u="http://localhost/";
+          _paq.push(['setTrackerUrl', u+'piwik.php']);
+          _paq.push(['setSiteId', '3']);
+          _paq.push(['setUserId', "<%=GlobalProperties.getAuthenticatedUserName()%>"]);
+          var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+          g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
         })();
 
         // store url on load

@@ -48,7 +48,7 @@ import math
 from abc import ABCMeta, abstractmethod
 
 # configure relative imports if running as a script; see PEP 366
-if __name__ == "__main__" and (__package__ is None or __package__ is ''):
+if __name__ == "__main__" and __package__ is None:
     # replace the script's location in the Python search path by the main
     # scripts/ folder, above it, so that the importer package folder is in
     # scope and *not* directly in sys.path; see PEP 395
@@ -461,7 +461,7 @@ class Validator(object):
 
             # init dictionary for detection of unique value columns
             # - will use column indexes as key and a set of values as value
-            # - only columns that are presenet in the data are added
+            # - only columns that are present in the data are added
             for unique_col_name in self.UNIQUE_COLUMNS:
                 col_index = _get_column_index(header_cols, unique_col_name)
                 if col_index > -1:
@@ -475,9 +475,6 @@ class Validator(object):
                 else:
                     self.logger.warning('Ignoring invalid column header. '
                         'Continuing with validation...')
-
-            # keep track of columns that should contain unique data
-            # init a dectionary for bookkeeping
 
             # read through the data lines of the file
             csvreader = csv.reader(itertools.chain(first_data_lines,
@@ -953,7 +950,7 @@ class FeaturewiseFileValidator(Validator):
                 # reached samples group
                 break
         self.num_nonsample_cols = len(self.nonsample_cols)
-        num_errors += self._set_sample_ids_from_columns()
+        num_errors += self.set_sample_ids_from_columns()
         return num_errors
 
     def checkLine(self, data):
@@ -995,7 +992,7 @@ class FeaturewiseFileValidator(Validator):
                                   'validate values in sample columns.'.format(
                                       self.__class__.__name__))
 
-    def _set_sample_ids_from_columns(self):
+    def set_sample_ids_from_columns(self):
         """Extracts sample IDs from column headers and set self.sampleIds."""
         num_errors = 0
         # check whether any sample columns are present
@@ -3415,17 +3412,18 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
 
         """Check the feature id column."""
 
+        ALLOWED_CHARACTERS = r'[^A-Za-z0-9_-]'
+
         feature_id = nonsample_col_vals[0].strip()
 
         # Check if treatment is present
         if feature_id == '':
             # Validator already gives warning for this in checkLine method
             pass
-        # Check if treatment contains whitespace
-        elif ' ' in feature_id:
-            self.logger.error("Whitespace found in feature identifier",
-                              extra={'line_number': self.line_number,
-                                     'cause': feature_id})
+        elif re.search(ALLOWED_CHARACTERS, feature_id) != None:
+            self.logger.error('Feature id contains one or more illegal characters',
+                                extra={'line_number': self.line_number,
+                                        'cause': 'id was`'+feature_id+'` and only alpha-numeric, _ and - are allowed.'})
         else:
             # Check if this is the second treatment data file
             if self.get_prior_validated_feature_ids() is not None:
@@ -3475,7 +3473,7 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
     @classmethod
     def get_prior_validated_header(cls):
-        return cls.prior_validated_header
+        return GsvaWiseFileValidator.prior_validated_header
 
     @classmethod
     def set_prior_validated_header(cls, header_names):
@@ -3483,7 +3481,7 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     
     @classmethod
     def get_prior_validated_feature_ids(cls):
-        return cls.prior_validated_feature_ids
+        return GsvaWiseFileValidator.prior_validated_feature_ids
 
     @classmethod
     def set_prior_validated_feature_ids(cls, feature_ids):
@@ -3491,7 +3489,7 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
     @classmethod
     def get_prior_validated_sample_ids(cls):
-        return cls.prior_validated_sample_ids
+        return GsvaWiseFileValidator.prior_validated_sample_ids
 
     @classmethod
     def set_prior_validated_sample_ids(cls, sample_ids):
@@ -3550,7 +3548,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
     @classmethod
     def get_prior_validated_header(cls):
-        return cls.prior_validated_header
+        return TreatmentWiseFileValidator.prior_validated_header
 
     @classmethod
     def set_prior_validated_header(cls, header_names):
@@ -3558,7 +3556,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     
     @classmethod
     def get_prior_validated_feature_ids(cls):
-        return cls.prior_validated_feature_ids
+        return TreatmentWiseFileValidator.prior_validated_feature_ids
 
     @classmethod
     def set_prior_validated_feature_ids(cls, feature_ids):
@@ -3566,7 +3564,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
 
     @classmethod
     def get_prior_validated_sample_ids(cls):
-        return cls.prior_validated_sample_ids
+        return TreatmentWiseFileValidator.prior_validated_sample_ids
 
     @classmethod
     def set_prior_validated_sample_ids(cls, sample_ids):

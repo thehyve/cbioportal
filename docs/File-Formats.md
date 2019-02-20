@@ -1273,7 +1273,7 @@ Required fields:
 cancer_study_identifier: Same value as specified in study meta file
 genetic_alteration_type: TREATMENT_RESPONSE
 datatype: RESPONSE-VALUE
-stable_id: Any unique identifier using a combination of alphanumeric characters and _
+stable_id: Any unique identifier using a combination of alphanumeric characters, _ and -
 profile_name: A name describing the analysis.
 profile_description: A description of the data processing done.
 data_filename: <your treatment IC50 datafile>

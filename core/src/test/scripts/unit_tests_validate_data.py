@@ -973,14 +973,15 @@ class MultipleDataFileValidatorTestCase(unittest.TestCase):
 
     def feature_id_is_accepted(self):
         mockval = Mock()
-        validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id_without_whitespace"])
+        validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id-without_whitespace"])
         mockval.logger.error.assert_not_called()
         mockval.logger.warning.assert_not_called()
 
-    def test_whitespace_in_feature_id_issues_error(self):
+    def test_illegal_character_in_feature_id_issues_error(self):
         mockval = Mock()
         validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id with whitespace"])
         mockval.logger.error.assert_called()
+
 
 # -------------------- treatment multifile consistency test --------------------
 
@@ -1078,7 +1079,7 @@ class TreatmentWiseTestCase(PostClinicalDataFileTestCase):
 
 # ------------------------- treatment validator test ----------------------------
 
-class EffectiveConcentrationValidatorTestCase(unittest.TestCase):
+class TreatmentResponseValidatorTestCase(unittest.TestCase):
 
     def test_empty_cell_issues_error(self):
         passConcValue("").error.assert_called()

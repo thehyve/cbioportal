@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  cbiodb:
+    image: mysql:5.7
+    container_name: cbiodb
+    volumes:
+      - $MYSQL_DATA_DIR:/var/lib/mysql/
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment: 
+      MYSQL_ROOT_PASSWORD: cbio_user
+      MYSQL_USER: cbio_user
+      MYSQL_PASSWORD: cbio_pass
+      MYSQL_DATABASE: endtoend_local_cbiodb
+  cbioportal:
+    image: cbioportal
+    build:
+        context: $PORTAL_HOME/test/end-to-end_local_db/docker_images
+        dockerfile: Dockerfile.cbioportal
+    container_name: cbioportal
+    ports:
+      - "8080:8080"
+    volumes:
+      - $PORTAL_HOME:/cbioportal
+    command: java -Ddbconnector=dbcp -Dauthenticate=false -jar portal/target/dependency/webapp-runner.jar --enable-compression portal/target/cbioportal.war
+    environment:
+      PORTAL_HOME: /cbioportal/test/end-to-end_local_db/runtime-config
+    working_dir: /cbioportal
+  hub:
+    image: selenium/hub:2.53.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    links:
+      - cbioportal
+  firefox:
+    image: selenium/node-firefox:2.53.0
+    container_name: firefox-node
+    links:
+      - hub
+      - cbioportal
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+  chrome:
+    image: selenium/node-chrome:2.53.0
+    container_name: chrome-node
+    links:
+      - hub
+      - cbioportal
+    environment:
+      HUB_PORT_4444_TCP_ADDR: hub
+  python-selenium:
+    image: inodb/python-selenium
+    container_name: python-selenium-container
+    links:
+      - hub
+      - cbioportal
+    volumes:
+      - $PORTAL_HOME/test/end-to-end_local_db:/end-to-end_local_db
+    working_dir: /end-to-end_local_db
+    # keep image running
+    command: tail -f /dev/null

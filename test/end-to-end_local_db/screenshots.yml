@@ -1,0 +1,17 @@
+portal_url: "http://cbioportal:8080/"
+selenium_hub_url: "http://selenium-hub:4444/wd/hub"
+python_selenium_container: python-selenium-container
+screenshot:
+  names:
+    - landing_page
+  urls:
+    - ""
+  # timeout in seconds
+  timeout:
+    - 10
+  # number of retries before failing
+  retry:
+    - 2
+browsers:
+  - firefox
+  - chrome

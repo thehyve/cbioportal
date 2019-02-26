@@ -1,0 +1,12 @@
+#
+# Copyright (c) 2019 The Hyve B.V.
+# This code is licensed under the GNU Affero General Public License (AGPL),
+# version 3, or (at your option) any later version.
+#
+
+FROM maven:3.3.9-jdk-8
+MAINTAINER Pim van Nierop <pim@thehyve.nl>
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-requests python3-yaml python3-mysqldb \
+    && rm -rf /var/lib/apt/lists/*

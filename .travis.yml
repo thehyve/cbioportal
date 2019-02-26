@@ -13,9 +13,10 @@ env:
   - MAVEN_VERSION=3.3.9 TEST=python-validator
   - MAVEN_VERSION=3.3.9 TEST=sanity-checks
   - MAVEN_VERSION=3.3.9 TEST=end-to-end
+  - MAVEN_VERSION=3.3.9 TEST=end-to-end_local_db
 install:
 - |
-  if [[ "${TEST}" == core || "${TEST}" == end-to-end ]]
+  if [[ "${TEST}" == core || "${TEST}" == end-to-end || "${TEST}" == end-to-end_local_db ]]
   then
       mkdir -p ~/maven
       test -d ~/maven/$MAVEN_VERSION/bin || { \
@@ -78,12 +79,13 @@ script:
           clean integration-test
   fi
 - |
-  if [[ "${TEST}" == end-to-end ]]
+  if [[ "${TEST}" == end-to-end || "${TEST}" == end-to-end_local_db ]]
   then
       ~/maven/$MAVEN_VERSION/bin/mvn \
           -Ppublic -DskipTests \
           -Dfinal.war.name=cbioportal \
           clean install
+    
   fi
 - |
   if [[ "${TEST}" == end-to-end ]]
@@ -95,6 +97,11 @@ script:
       # spot visual regression by comparing screenshots in the repo with
       # screenshots of this portal loaded with the data from the amazon db
       bash test/end-to-end/test_make_screenshots.sh test/end-to-end/screenshots.yml
+  fi
+- | 
+  if [[ "${TEST}" == end-to-end_local_db ]]
+  then
+      ./test/end-to-end_local_db/run.sh
   fi
 notifications:
   slack: cbioportal:S2qVTFTFMtizONhCOe8BYxS6

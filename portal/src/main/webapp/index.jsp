@@ -64,7 +64,7 @@
         _paq.push(['trackPageView']);
         _paq.push(['enableLinkTracking']);
         (function() {
-        var u="//172.25.130.213/piwik/";
+        var u="http://172.25.130.213/piwik/";
         _paq.push(['setTrackerUrl', u+'matomo.php']);
         _paq.push(['setSiteId', '4']);
         var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];

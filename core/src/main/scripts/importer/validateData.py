@@ -494,18 +494,18 @@ class Validator(object):
                         "Data line starting with '#' skipped",
                         extra={'line_number': self.line_number})
                 else:
-                    # check valid data lines for uniqueness of values in 
+                    # check valid data lines for uniqueness of values in
                     # unique data columns (set with UNIQUE_COLUMNS option)
-                    for unique_col_index in self.unique_col_data.keys():
+                    for unique_col_index, previous_values in self.unique_col_data.items():
                         cell_value = fields[unique_col_index]
                         # if a value is already in the set of unique values, raise an error
-                        if (cell_value in self.unique_col_data[unique_col_index]):
-                            col_name = self.cols[unique_col_index]
-                            self.logger.error('Cell value `' + cell_value + '` in column `'
-                                                + col_name + '` is not unique.')
+                        if cell_value in previous_values:
+                            self.logger.error(
+                                'Cell value `%s` in column `%s` is not unique.',
+                                cell_value, self.cols[unique_col_index])
                             continue
                         # add the value to the set for comparison with other rows
-                        self.unique_col_data[unique_col_index].append(cell_value)
+                        previous_values.append(cell_value)
                     self.checkLine(fields)
 
             # (tuple of) string(s) of the newlines read (for 'rU' mode files)
@@ -3407,7 +3407,7 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
         """
         num_errors = super(MultipleDataFileValidator, self).checkHeader(cols)
 
-        if self.get_prior_validated_header() != None:
+        if self.get_prior_validated_header() is not None:
             if self.cols != self.get_prior_validated_header():
                 self.logger.error('Headers from data files are different',
                                   extra={'line_number': self.line_number})
@@ -3429,7 +3429,7 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
         if feature_id == '':
             # Validator already gives warning for this in checkLine method
             pass
-        elif re.search(ALLOWED_CHARACTERS, feature_id) != None:
+        elif re.search(ALLOWED_CHARACTERS, feature_id) is not None:
             self.logger.error('Feature id contains one or more illegal characters',
                                 extra={'line_number': self.line_number,
                                         'cause': 'id was`'+feature_id+'` and only alpha-numeric, _ and - are allowed.'})
@@ -3523,31 +3523,35 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     def parseFeatureColumns(self, nonsample_col_vals):
         self.checkDifferentNameInDb(nonsample_col_vals)
         return super(TreatmentWiseFileValidator, self).parseFeatureColumns(nonsample_col_vals)
-    
+
     def checkDifferentNameInDb(self, nonsample_col_vals):
-        # Check for different combinations of treatment_id and treatment_name
-        # in the database. If true, raise warnings for each discrepancy.
-        nonsample_cols =  self.nonsample_cols
-        if nonsample_cols.index("name") != None and self.portal.treatment_map != None:
+        """Raise warnings for discrepancies with how the db names treatments.
 
-            treatmentId = nonsample_col_vals[ nonsample_cols.index("treatment_id") ]
-            fileTreatmentName = nonsample_col_vals[ nonsample_cols.index("name") ]
+        Check for different combinations of treatment_id and treatment_name
+        in the database. If true, raise warnings for each discrepancy.
+        """
+        nonsample_cols = self.nonsample_cols
+        if 'name' not in nonsample_cols or self.portal.treatment_map is None:
+            return
 
-            # check whether a name for the treatment has been
-            # registered in the database
-            dbTreatmentName = None
-            if treatmentId in self.portal.treatment_map.keys():
-                dbTreatmentName = self.portal.treatment_map[treatmentId]["name"]
+        treatment_id = nonsample_col_vals[nonsample_cols.index("treatment_id")]
+        file_treatment_name = nonsample_col_vals[nonsample_cols.index("name")]
 
-            # when a name has been registered for this treatment and 
-            # is different from the new name, issue a warning.
-            if dbTreatmentName != None and dbTreatmentName != fileTreatmentName:
-                    self.logger.warning(
-                    "Name `" + fileTreatmentName + "` for treatment `" + treatmentId
-                    + "` is different from name `"+ dbTreatmentName + "` present in the cBioPortal database. "
-                    + "Treatment names in cBioPortal always reflect treatment names in the last imported study. ",
-                    extra={'line_number': self.line_number,
-                            'cause': fileTreatmentName})
+        # check whether a name for the treatment has been
+        # registered in the database
+        db_treatment = self.portal.treatment_map.get(treatment_id)
+
+        # when a name has been registered for this treatment and
+        # is different from the new name, issue a warning.
+        if db_treatment is not None and db_treatment['name'] != file_treatment_name:
+            self.logger.warning(
+                "Name `%s` for treatment `%s` is different from name "
+                "`%s` present in the cBioPortal database. "
+                "Treatment names in cBioPortal always reflect treatment names "
+                "in the last imported study.",
+                file_treatment_name, treatment_id, db_treatment['name'],
+                extra={'line_number': self.line_number,
+                       'cause': file_treatment_name})
 
     @staticmethod
     def get_prior_validated_header():
@@ -4618,11 +4622,13 @@ def main_validate(args):
 
     return exit_status_handler.get_exit_status()
 
+
 def _get_column_index(parts, name):
-    for i in range(len(parts)):
-        if name == parts[i]:
+    for i, part in enumerate(parts):
+        if name == part:
             return i
     return -1
+
 
 if __name__ == '__main__':
     try:

@@ -950,7 +950,7 @@ class FeaturewiseFileValidator(Validator):
                 # reached samples group
                 break
         self.num_nonsample_cols = len(self.nonsample_cols)
-        num_errors += self.set_sample_ids_from_columns()
+        num_errors += self._set_sample_ids_from_columns()
         return num_errors
 
     def checkLine(self, data):
@@ -961,7 +961,6 @@ class FeaturewiseFileValidator(Validator):
         # skip line if no feature was identified
         if feature_id is None:
             return
-
         # skip line with an error if the feature was encountered before
         if feature_id in self._feature_id_lines:
             self.logger.warning(
@@ -992,7 +991,7 @@ class FeaturewiseFileValidator(Validator):
                                   'validate values in sample columns.'.format(
                                       self.__class__.__name__))
 
-    def set_sample_ids_from_columns(self):
+    def _set_sample_ids_from_columns(self):
         """Extracts sample IDs from column headers and set self.sampleIds."""
         num_errors = 0
         # check whether any sample columns are present

@@ -9,6 +9,7 @@ version 3, or (at your option) any later version.
 import unittest
 from unittest.mock import Mock
 import sys
+import copy
 import logging.handlers
 import textwrap
 from pathlib import Path
@@ -113,13 +114,18 @@ class DataFileTestCase(LogBufferTestCase):
     particular validator class and collect the log records emitted.
     """
 
-    def validate(self, data_filename, validator_class, extra_meta_fields=None, relaxed_mode=False, strict_maf_checks=False):
+    def validate(self, data_filename, validator_class,
+                 extra_meta_fields=None,
+                 relaxed_mode=False, strict_maf_checks=False,
+                 *, portal_instance=None):
         """Validate a file with a Validator and return the log records."""
+        if portal_instance is None:
+            portal_instance = PORTAL_INSTANCE
         meta_dict = {'data_filename': data_filename}
         if extra_meta_fields is not None:
             meta_dict.update(extra_meta_fields)
         validator = validator_class('test_data', meta_dict,
-                                    PORTAL_INSTANCE,
+                                    portal_instance,
                                     self.logger, relaxed_mode,
                                     strict_maf_checks)
         validator.validate()
@@ -1085,6 +1091,18 @@ class TreatmentWiseTestCase(PostClinicalDataFileTestCase):
                             self.DummyTreatmentValidator)
 
         self.assertEqual(len(record_list), 1)
+
+    def test_that_treatment_db_validation_is_skipped_if_db_unavailable(self):
+        self.logger.setLevel(logging.WARNING)
+        treatmentless_portal_instance = copy.copy(PORTAL_INSTANCE)
+        treatmentless_portal_instance.treatment_map = None
+
+        record_list = self.validate(
+            'data_treatment_ic50_different_name.txt',
+            self.DummyTreatmentValidator,
+            portal_instance=treatmentless_portal_instance)
+
+        self.assertEqual(len(record_list), 0)
 
 # -------------------------- end treatment wise test ----------------------------
 

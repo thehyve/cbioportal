@@ -3355,36 +3355,36 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
         super(MultipleDataFileValidator, self).__init__(*args, **kwargs)
         self.feature_ids = []
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def get_prior_validated_header(cls):
-        pass
+    def get_prior_validated_header():
+        """Return the header for this group of classes."""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def set_prior_validated_header(cls, header_names):
-        pass
+    def set_prior_validated_header(header_names):
+        """Set the header for this group of classes."""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def get_prior_validated_feature_ids(cls):
-        pass
-        
-    @classmethod
-    @abstractmethod
-    def set_prior_validated_feature_ids(cls, feature_ids):
-        pass
+    def get_prior_validated_feature_ids():
+        """Return the feature ID list for this group of classes."""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def get_prior_validated_sample_ids(cls):
-        pass
+    def set_prior_validated_feature_ids(feature_ids):
+        """Set the feature ID list for this group of classes."""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def set_prior_validated_sample_ids(cls, sample_ids):
-        pass
-    
+    def get_prior_validated_sample_ids():
+        """Return the sample ID list for this group of classes."""
+
+    @staticmethod
+    @abstractmethod
+    def set_prior_validated_sample_ids(sample_ids):
+        """Set the sample ID list for this group of classes."""
+
     @classmethod
     @abstractmethod
     def get_message_features_do_not_match(cls):
@@ -3477,28 +3477,28 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     prior_validated_header = None
     REQUIRED_HEADERS = ['geneset_id']
 
-    @classmethod
-    def get_prior_validated_header(cls):
+    @staticmethod
+    def get_prior_validated_header():
         return GsvaWiseFileValidator.prior_validated_header
 
-    @classmethod
-    def set_prior_validated_header(cls, header_names):
+    @staticmethod
+    def set_prior_validated_header(header_names):
         GsvaWiseFileValidator.prior_validated_header = header_names
-    
-    @classmethod
-    def get_prior_validated_feature_ids(cls):
+
+    @staticmethod
+    def get_prior_validated_feature_ids():
         return GsvaWiseFileValidator.prior_validated_feature_ids
 
-    @classmethod
-    def set_prior_validated_feature_ids(cls, feature_ids):
+    @staticmethod
+    def set_prior_validated_feature_ids(feature_ids):
         GsvaWiseFileValidator.prior_validated_feature_ids = feature_ids
 
-    @classmethod
-    def get_prior_validated_sample_ids(cls):
+    @staticmethod
+    def get_prior_validated_sample_ids():
         return GsvaWiseFileValidator.prior_validated_sample_ids
 
-    @classmethod
-    def set_prior_validated_sample_ids(cls, sample_ids):
+    @staticmethod
+    def set_prior_validated_sample_ids(sample_ids):
         GsvaWiseFileValidator.prior_validated_sample_ids = sample_ids
 
     @classmethod
@@ -3549,30 +3549,30 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
                     extra={'line_number': self.line_number,
                             'cause': fileTreatmentName})
 
-    @classmethod
-    def get_prior_validated_header(cls):
+    @staticmethod
+    def get_prior_validated_header():
         return TreatmentWiseFileValidator.prior_validated_header
 
-    @classmethod
-    def set_prior_validated_header(cls, header_names):
+    @staticmethod
+    def set_prior_validated_header(header_names):
         TreatmentWiseFileValidator.prior_validated_header = header_names
-    
-    @classmethod
-    def get_prior_validated_feature_ids(cls):
+
+    @staticmethod
+    def get_prior_validated_feature_ids():
         return TreatmentWiseFileValidator.prior_validated_feature_ids
 
-    @classmethod
-    def set_prior_validated_feature_ids(cls, feature_ids):
+    @staticmethod
+    def set_prior_validated_feature_ids(feature_ids):
         TreatmentWiseFileValidator.prior_validated_feature_ids = feature_ids
 
-    @classmethod
-    def get_prior_validated_sample_ids(cls):
+    @staticmethod
+    def get_prior_validated_sample_ids():
         return TreatmentWiseFileValidator.prior_validated_sample_ids
 
-    @classmethod
-    def set_prior_validated_sample_ids(cls, sample_ids):
+    @staticmethod
+    def set_prior_validated_sample_ids(sample_ids):
         TreatmentWiseFileValidator.prior_validated_sample_ids = sample_ids
-    
+
     @classmethod
     def get_message_features_do_not_match(cls):
         return {"message": "Treatment feature columns (`treatment_id`, ...) in treatment profile data files are not identical.",

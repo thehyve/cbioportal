@@ -3,11 +3,18 @@
 set -e # fail when error occurs
 set -u # unset variables throw error
 set -o pipefail # pipes fail when partial command fails
-shopt -s failglob # empty globs throw error
+# shopt -s failglob # empty globs throw error
 
 CURRENT_DIR=$PWD
 TEST_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # get location of this script file
 cd $TEST_HOME
+
+# exit when no screenshots have been configured
+SCREENSHOTS= python3 -c "import yaml;print(yaml.load(open('screenshots.yaml'))['screenshot']['names'])"
+if [[ "$SCREENSHOTS" == "None" ]]; then
+    echo No screenshots configured for local database end-to-end screenshot tests. Exiting...
+    exit
+fi
 
 mkdir -p /tmp/mysql_end-to-end_test
 
@@ -46,7 +53,7 @@ docker stop $MYSQL_HOST_NAME && docker rm $MYSQL_HOST_NAME
 echo Building docker containers ...
 docker-compose build
 
-# --force-recreate flag is needed for browser nodes to start correctly
+# Note: --force-recreate flag is needed for selenium browser nodes to start correctly
 # (see: https://github.com/SeleniumHQ/docker-selenium/issues/91#issuecomment-167519978)
 docker-compose up -d --force-recreate
 

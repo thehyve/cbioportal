@@ -26,7 +26,7 @@ install:
               tar -C ~/maven/$MAVEN_VERSION --strip-components=1 -xzf -; }
   fi
 - |
-  if [[ "${TEST}" == python-validator ]]
+  if [[ "${TEST}" == python-validator || "${TEST}" == end-to-end_local_db ]]
   then
       sudo apt-get install python3.4-venv
       python3.4 -m venv ~/python-env-validator

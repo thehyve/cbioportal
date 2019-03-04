@@ -126,8 +126,8 @@ if [[ $screenshot_error_count -gt 0 ]]; then
 			png=${screenshots_failed[$i]}
 			url=${screenshots_uploaded[$i]}
             repo_url=${TRAVIS_REPO_SLUG}/${TRAVIS_COMMIT}
-			original_screenshot_url="https://raw.githubusercontent.com/${repo_url}/test/end-to-end_local_db/${png}"
-			echo -e "COPY+PASTE in BROWSER TO COMPARE FAILED SCREENSHOT: ${YELLOW}http://rawgit.com/${repo_url}/test/end-to-end_local_db/image-compare/index.html?img1=${original_screenshot_url}&img2=${url}&label1=${TRAVIS_BRANCH}&label2=$(git rev-parse --short HEAD)&screenshot_name=test/end-to-end_local_db/${png}${NC}"
+			original_screenshot_url="https://raw.githubusercontent.com/${repo_url}/test/end-to-end/${png}"
+			echo -e "COPY+PASTE in BROWSER TO COMPARE FAILED SCREENSHOT: ${YELLOW}http://rawgit.com/${repo_url}/test/end-to-end/image-compare/index.html?img1=${original_screenshot_url}&img2=${url}&label1=${TRAVIS_BRANCH}&label2=$(git rev-parse --short HEAD)&screenshot_name=test/end-to-end_local_db/${png}${NC}"
 		done
 	fi
 	exit 1

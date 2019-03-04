@@ -10,7 +10,7 @@ TEST_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $TEST_HOME
 
 # exit when no screenshots have been configured
-SCREENSHOTS= python3 -c "import yaml;print(yaml.load(open('screenshots.yaml'))['screenshot']['names'])"
+SCREENSHOTS= python3 -c "import yaml;print(yaml.load(open('screenshots.yml'))['screenshot']['names'])"
 if [[ "$SCREENSHOTS" == "None" ]]; then
     echo No screenshots configured for local database end-to-end screenshot tests. Exiting...
     exit

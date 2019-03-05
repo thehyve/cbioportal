@@ -31,24 +31,28 @@
 */
 package org.cbioportal.web;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
 
 import org.cbioportal.model.Treatment;
+import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.service.TreatmentService;
 import org.cbioportal.service.exception.TreatmentNotFoundException;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.cbioportal.web.parameter.HeaderKeyConstants;
 import org.cbioportal.web.parameter.PagingConstants;
 import org.cbioportal.web.parameter.Projection;
+import org.cbioportal.web.parameter.TreatmentFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,6 +98,45 @@ public class TreatmentController {
         }
     }
 
+    @PreAuthorize("hasPermission(#treatmentFilter, 'TreatmentFilter', 'read')")
+    @RequestMapping(value = "/treatments/fetch", method = RequestMethod.POST, 
+        consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Fetch treatments")
+    public ResponseEntity<List<Treatment>> fetchTreatments(
+        @ApiParam(required = true, value = "List of Treatment IDs or List of Study IDs (mutually exclusive)")
+        @Valid @RequestBody TreatmentFilter treatmentFilter,
+        @ApiParam("Level of detail of the response")
+        @RequestParam(defaultValue = "SUMMARY") Projection projection) {
+
+        if (projection == Projection.META) {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            BaseMeta baseMeta;
+            if (treatmentFilter.getStudyIds() != null) {
+                baseMeta = treatmentService.getMetaTreatmentsInStudies(
+                    treatmentFilter.getStudyIds());
+            } else {
+                baseMeta = treatmentService.getMetaTreatments(
+                    treatmentFilter.getTreatmentIds());
+            }
+
+            responseHeaders.add(HeaderKeyConstants.TOTAL_COUNT, String.valueOf(baseMeta.getTotalCount()));
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } else {
+
+            List<Treatment> treatments = new ArrayList<Treatment>();
+
+            if (treatmentFilter.getStudyIds() != null) {
+                treatments = treatmentService.getTreatmentsInStudies(
+                    treatmentFilter.getStudyIds(), projection.name());
+            } else {
+                treatments = treatmentService.getTreatments(
+                    treatmentFilter.getTreatmentIds(), projection.name());
+            }
+
+            return new ResponseEntity<>(treatments, HttpStatus.OK);
+        }
+    }
+
     @RequestMapping(value = "/treatments/{treatmentId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get a treatment by stable ID")
     public ResponseEntity<Treatment> getTreatment(
@@ -101,17 +144,6 @@ public class TreatmentController {
         @PathVariable String treatmentId) throws TreatmentNotFoundException {
 
         return new ResponseEntity<>(treatmentService.getTreatment(treatmentId), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/treatments/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
-	        produces = MediaType.APPLICATION_JSON_VALUE)
-	    @ApiOperation("Fetch treatments by stable ID")
-	    public ResponseEntity<List<Treatment>> fetchTreatments(
-	        @ApiParam(required = true, value = "List of treatment stable IDs")
-	        @Size(min = 1, max = PagingConstants.MAX_PAGE_SIZE)
-	        @RequestBody List<String> treatmentIds) {
-
-	        return new ResponseEntity<>(treatmentService.fetchTreatments(treatmentIds), HttpStatus.OK);
     }
 
 }

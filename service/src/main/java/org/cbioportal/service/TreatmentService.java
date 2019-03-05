@@ -40,6 +40,10 @@ import org.cbioportal.service.exception.TreatmentNotFoundException;
 public interface TreatmentService {
     List<Treatment> getAllTreatments(String projection, Integer pageSize, Integer pageNumber);
     BaseMeta getMetaTreatments();
+	BaseMeta getMetaTreatments(List<String> treatmentIds);
+	BaseMeta getMetaTreatmentsInStudies(List<String> studyIds);
+	List<Treatment> getTreatments(List<String> treatmentIds, String projection);
     Treatment getTreatment(String treatmentId) throws TreatmentNotFoundException;
+	List<Treatment> getTreatmentsInStudies(List<String> studyIds, String projection);
     List<Treatment> fetchTreatments(List<String> treatmentIds);
 }

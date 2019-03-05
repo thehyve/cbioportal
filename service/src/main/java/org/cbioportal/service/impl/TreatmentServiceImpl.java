@@ -48,16 +48,19 @@ public class TreatmentServiceImpl implements TreatmentService {
 	@Autowired
 	private TreatmentRepository treatmentRepository;
 	
-	
 	@Override
 	public List<Treatment> getAllTreatments(String projection, Integer pageSize, Integer pageNumber) {
-		List<Treatment> treatmentList = treatmentRepository.getAllTreatments(projection, pageSize, pageNumber);
-		return treatmentList;
+		return treatmentRepository.getAllTreatments(projection, pageSize, pageNumber);
 	}
 	
 	@Override
 	public BaseMeta getMetaTreatments() {
 		return treatmentRepository.getMetaTreatments();
+	}
+
+	@Override
+	public BaseMeta getMetaTreatments(List<String> treatmentIds) {
+		return null;
 	}
 	
 	@Override
@@ -71,9 +74,25 @@ public class TreatmentServiceImpl implements TreatmentService {
 
 		return treatment;
 	}
-	
+
 	@Override
 	public List<Treatment> fetchTreatments(List<String> treatmentIds) {
 		return treatmentRepository.fetchTreatments(treatmentIds);
 	}
+
+	@Override
+	public BaseMeta getMetaTreatmentsInStudies(List<String> studyIds) {
+		return treatmentRepository.getMetaTreatmentsInStudies(studyIds);
+	}
+
+	@Override
+	public List<Treatment> getTreatments(List<String> treatmentIds, String projection) {
+		return treatmentRepository.getTreatments(treatmentIds, projection);
+	}
+	
+	@Override
+	public List<Treatment> getTreatmentsInStudies(List<String> studyIds, String projection) {
+		return treatmentRepository.getTreatmentsInStudies(studyIds, projection, 0, 0, null, null);
+	}
+
 }

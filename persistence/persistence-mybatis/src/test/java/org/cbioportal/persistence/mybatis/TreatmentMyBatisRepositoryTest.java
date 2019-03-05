@@ -77,6 +77,20 @@ public class TreatmentMyBatisRepositoryTest {
     }
 
     @Test
+    public void getMetaTreatmentsWithTreatmentList() {
+        List<String> treatmentIds = Arrays.asList("17-AAG", "AEW541");
+        BaseMeta result = treatmentMyBatisRepository.getMetaTreatments(treatmentIds);
+        Assert.assertEquals(2, result.getTotalCount().intValue());
+    }
+
+    @Test
+    public void getMetaTreatmentsWithStudyList() {
+        List<String> studyIds = Arrays.asList("study_tcga_pub");
+        BaseMeta result = treatmentMyBatisRepository.getMetaTreatmentsInStudies(studyIds);
+        Assert.assertEquals(2, result.getTotalCount().intValue());
+    }
+
+    @Test
     public void getTreatment() {
         Treatment treatment = treatmentMyBatisRepository.getTreatmentByStableId("17-AAG");
         Assert.assertEquals("https://en.wikipedia.org/wiki/Tanespimycin", treatment.getRefLink());
@@ -99,6 +113,36 @@ public class TreatmentMyBatisRepositoryTest {
         Treatment treatment = result.get(0);
         //data is sorted ASC on treatment ID, so 17-AAG is first:
         Assert.assertEquals("17-AAG", treatment.getStableId());
+    }
+
+    @Test
+    public void getTreatmentsWithStudyListAscending() {
+        List<String> studyIds = Arrays.asList("study_tcga_pub");
+        List<Treatment> result = treatmentMyBatisRepository.getTreatmentsInStudies(studyIds, PersistenceConstants.SUMMARY_PROJECTION, 0, 0, "stableId", "ASC");
+        
+        //expect: ordered ASC by treatment id:
+        Treatment treatment = result.get(0);
+        Assert.assertEquals("17-AAG", treatment.getStableId());
+        Assert.assertEquals("https://en.wikipedia.org/wiki/Tanespimycin", treatment.getRefLink());
+        treatment = result.get(1);
+        Assert.assertEquals("AEW541", treatment.getStableId());
+        Assert.assertEquals("TrkA/B/C inhibitor", treatment.getDescription());
+
+    }
+    @Test
+
+    public void getTreatmentsWithStudyListDescending() {
+        List<String> studyIds = Arrays.asList("study_tcga_pub");
+        List<Treatment> result = treatmentMyBatisRepository.getTreatmentsInStudies(studyIds, PersistenceConstants.SUMMARY_PROJECTION, 0, 0, "stableId", "DESC");
+        
+        //expect: ordered ASC by treatment id:
+        Treatment treatment = result.get(0);
+        Assert.assertEquals("AEW541", treatment.getStableId());
+        Assert.assertEquals("TrkA/B/C inhibitor", treatment.getDescription());
+        treatment = result.get(1);
+        Assert.assertEquals("17-AAG", treatment.getStableId());
+        Assert.assertEquals("https://en.wikipedia.org/wiki/Tanespimycin", treatment.getRefLink());
+
     }
 
 }

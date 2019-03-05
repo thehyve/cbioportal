@@ -32,6 +32,7 @@
 package org.cbioportal.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.cbioportal.model.Treatment;
@@ -52,9 +53,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class TreatmentServiceImplTest extends BaseServiceImplTest {
 
     public static final String TREATMENT_ID_1 = "treatment_id_1";
+    public static final String STUDY_ID_1 = "study_id_1";
     private static final int INTERNAL_ID_1 = 1;
     public static final String TREATMENT_ID_2 = "treatment_id_2";
+    public static final String STUDY_ID_2 = "study_id_2";
     private static final int INTERNAL_ID_2 = 2;
+
+    private static final List<String> idList = Arrays.asList(TREATMENT_ID_1, TREATMENT_ID_2);
+    private static final  List<Treatment> mockTreatmentList = createTreatmentList();
 
     @InjectMocks
     private TreatmentServiceImpl treatmentService;
@@ -91,7 +97,7 @@ public class TreatmentServiceImplTest extends BaseServiceImplTest {
     @Test
     public void getTreatment() throws TreatmentNotFoundException {
 
-        Treatment treatment = createTreatmentList().get(0);
+        Treatment treatment = mockTreatmentList.get(0);
         Mockito.when(treatmentRepository.getTreatmentByStableId(TREATMENT_ID_1))
             .thenReturn(treatment);
 
@@ -102,14 +108,37 @@ public class TreatmentServiceImplTest extends BaseServiceImplTest {
     @Test(expected = TreatmentNotFoundException.class)
     public void getTreatmentByStableIdNotFound() throws TreatmentNotFoundException {
 
-        Treatment treatment = createTreatmentList().get(0);
+        Treatment treatment = mockTreatmentList.get(0);
         Mockito.when(treatmentRepository.getTreatmentByStableId(TREATMENT_ID_1))
             .thenReturn(treatment);
         //expect TreatmentNotFoundException here:
         treatmentService.getTreatment("wrongId");
     }
 
-    private List<Treatment> createTreatmentList() {
+    @Test
+    public void fetchTreatments() {
+        Mockito.when(treatmentRepository.fetchTreatments(Mockito.anyList()))
+            .thenReturn(mockTreatmentList);
+        Assert.assertEquals(treatmentService.fetchTreatments(idList), mockTreatmentList );
+    }
+
+    @Test
+    public void getMetaTreatmentsInStudies() {
+        BaseMeta baseMetaStudy = new BaseMeta();
+        baseMetaStudy.setTotalCount(1);
+        Mockito.when(treatmentRepository.getMetaTreatmentsInStudies(Mockito.anyList()))
+            .thenReturn(baseMetaStudy);
+        Assert.assertEquals(treatmentService.getMetaTreatmentsInStudies(idList).getTotalCount(), (Integer) 1 );
+    }
+
+    @Test
+    public void getTreatments() {
+        Mockito.when(treatmentRepository.getTreatments(Mockito.anyList(), Mockito.anyString()))
+            .thenReturn(mockTreatmentList);
+        Assert.assertEquals(treatmentService.getTreatments(idList, "SUMMARY"), mockTreatmentList );
+    }
+
+    private static List<Treatment> createTreatmentList() {
 
         List<Treatment> treatmentList = new ArrayList<>();
 

@@ -39,6 +39,10 @@ import org.cbioportal.model.meta.BaseMeta;
 public interface TreatmentRepository {
     List<Treatment> getAllTreatments(String projection, Integer pageSize, Integer pageNumber);
     BaseMeta getMetaTreatments();
+    BaseMeta getMetaTreatments(List<String> treatmentIds);
 	Treatment getTreatmentByStableId(String treatmentId);
     List<Treatment> fetchTreatments(List<String> treatmentIds);
+	List<Treatment> getTreatments(List<String> treatmentIds, String projection);
+	List<Treatment> getTreatmentsInStudies(List<String> studyIds, String projection, Integer limit, Integer offset, String sortBy, String direction);
+	BaseMeta getMetaTreatmentsInStudies(List<String> studyIds);
 }

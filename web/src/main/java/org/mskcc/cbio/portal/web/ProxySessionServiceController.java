@@ -40,6 +40,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.HASH;
 
 @Controller
 @RequestMapping("/proxy/session")
@@ -201,6 +202,11 @@ public class ProxySessionServiceController {
         // (Jackson 2 is on classpath)
         // was String when default converter StringHttpMessageConverter was used
         RestTemplate restTemplate = new RestTemplate();
+        System.out.println("SESSION SERVICE URL: "+sessionServiceURL);
+        System.out.println("TYPE: "+type);
+        System.out.println("HTTP METHOD: "+HttpMethod.POST);
+        System.out.println("HTTP ENTITY: "+httpEntity);
+        System.out.println("HASHMAP CLASS: "+HashMap.class);
         ResponseEntity<HashMap> responseEntity = restTemplate.exchange(sessionServiceURL + type, HttpMethod.POST, httpEntity, HashMap.class);
 
         return responseEntity.getBody();

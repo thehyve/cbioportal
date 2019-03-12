@@ -22,7 +22,12 @@ public class JdbcDataSource extends BasicDataSource {
         this.setPassword(password);
         this.setUrl(url);
         //  By pooling/reusing PreparedStatements, we get a major performance gain
-        this.setPoolPreparedStatements(true);
-        this.setMaxTotal(100);
+        this.setPoolPreparedStatements(false);
+        this.setMaxTotal(500);
+        this.setMaxIdle(30);
+        this.setMaxWaitMillis(10000);
+        this.setMinEvictableIdleTimeMillis(30000);
+        this.setTestOnBorrow(true);
+        this.setValidationQuery("SELECT 1");
     }
 }

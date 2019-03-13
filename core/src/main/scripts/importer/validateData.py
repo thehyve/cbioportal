@@ -3389,6 +3389,16 @@ class MultipleDataFileValidator(FeaturewiseFileValidator, metaclass=ABCMeta):
     @classmethod
     @abstractmethod
     def get_message_features_do_not_match(cls):
+        """Return information on error type 'features do not match'.
+
+        An error will be raised when features are not constent between
+        files loaded within the context of a MultipleFileValidator.
+        Classes that extend MultipleDataFileValidator must implement 
+        the get_message_features_do_not_match() method. The expected\
+        return  value is a dictionary with keys:
+        - 'message': text describing the type of error
+        - 'cause: text that details cause of the error
+        """
         pass
 
     def checkHeader(self, cols):
@@ -4612,9 +4622,6 @@ def main_validate(args):
         html_handler.generateHtml()
 
     return exit_status_handler.get_exit_status()
-
-
-# ------------------------------------------------------------------------------
 
 def _get_column_index(parts, name):
     for i in range(len(parts)):

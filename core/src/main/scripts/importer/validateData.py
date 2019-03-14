@@ -3478,9 +3478,6 @@ class GsvaWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     prior_validated_header = None
     REQUIRED_HEADERS = ['geneset_id']
 
-    def __init__(self, *args, **kwargs):
-        super(GsvaWiseFileValidator, self).__init__(*args, **kwargs)
-
     @classmethod
     def get_prior_validated_header(cls):
         return GsvaWiseFileValidator.prior_validated_header
@@ -3524,9 +3521,6 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
     OPTIONAL_HEADERS = ['name', 'description', 'url']
     UNIQUE_COLUMNS = ['treatment_id','name']
 
-    def __init__(self, *args, **kwargs):
-        super(TreatmentWiseFileValidator, self).__init__(*args, **kwargs)
-
     def parseFeatureColumns(self, nonsample_col_vals):
         self.checkDifferentNameInDb(nonsample_col_vals)
         return super(TreatmentWiseFileValidator, self).parseFeatureColumns(nonsample_col_vals)
@@ -3535,7 +3529,7 @@ class TreatmentWiseFileValidator(MultipleDataFileValidator, metaclass=ABCMeta):
         # Check for different combinations of treatment_id and treatment_name
         # in the database. If true, raise warnings for each discrepancy.
         nonsample_cols =  self.nonsample_cols
-        if (nonsample_cols.index("name") != None):
+        if nonsample_cols.index("name") != None and self.portal.treatment_map != None:
 
             treatmentId = nonsample_col_vals[ nonsample_cols.index("treatment_id") ]
             fileTreatmentName = nonsample_col_vals[ nonsample_cols.index("name") ]
@@ -3592,9 +3586,6 @@ class GsvaScoreValidator(GsvaWiseFileValidator):
     in R can calculate a GSVA score or GSVA-like score (such as ssGSEA) per sample per gene set.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(GsvaScoreValidator, self).__init__(*args, **kwargs)
-
     # Score must be between -1 and 1
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
@@ -3613,9 +3604,6 @@ class GsvaPvalueValidator(GsvaWiseFileValidator):
     calculate a p-value for each GSVA score using a bootstrapping method.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(GsvaPvalueValidator, self).__init__(*args, **kwargs)
-
     # Score must be between -0 and 1
     def checkValue(self, value, col_index):
         """Check a value in a sample column."""
@@ -3632,9 +3620,6 @@ class TreatmentValidator(TreatmentWiseFileValidator):
 
     """ Validator for files containing treatment response values.
     """
-
-    def __init__(self, *args, **kwargs):
-        super(TreatmentValidator, self).__init__(*args, **kwargs)
 
     # (1) Natural positive number (not 0)
     # (2) Number may be prefixed by ">" or "<"; f.i. ">n" means that the treatment was ineffective at the highest tested concentration of n.

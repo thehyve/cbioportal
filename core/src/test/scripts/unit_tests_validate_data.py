@@ -984,8 +984,6 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual('Gene sets column in score and p-value file are not equal.', record.getMessage())
         return
         
-#    TODO: test other subclasses of FeatureWiseValidator
-
 class MultipleDataFileValidatorTestCase(unittest.TestCase):
 
     def feature_id_is_accepted(self):
@@ -997,6 +995,11 @@ class MultipleDataFileValidatorTestCase(unittest.TestCase):
     def test_illegal_character_in_feature_id_issues_error(self):
         mockval = Mock()
         validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id with whitespace"])
+        mockval.logger.error.assert_called()
+
+    def test_comma_in_feature_id_issues_error(self):
+        mockval = Mock()
+        validateData.MultipleDataFileValidator.parseFeatureColumns(mockval, ["id,with-comma"])
         mockval.logger.error.assert_called()
 
 

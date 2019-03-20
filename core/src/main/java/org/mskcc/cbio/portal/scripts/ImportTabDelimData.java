@@ -32,47 +32,18 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.mskcc.cbio.portal.dao.DaoCnaEvent;
-import org.mskcc.cbio.portal.dao.DaoException;
-import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
-import org.mskcc.cbio.portal.dao.DaoGeneset;
-import org.mskcc.cbio.portal.dao.DaoGeneticAlteration;
-import org.mskcc.cbio.portal.dao.DaoGeneticEntity;
-import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
-import org.mskcc.cbio.portal.dao.DaoGeneticProfileSamples;
-import org.mskcc.cbio.portal.dao.DaoSample;
-import org.mskcc.cbio.portal.dao.DaoTreatment;
-import org.mskcc.cbio.portal.dao.MySQLbulkLoader;
-import org.mskcc.cbio.portal.model.CanonicalGene;
-import org.mskcc.cbio.portal.model.CnaEvent;
-import org.mskcc.cbio.portal.model.Geneset;
-import org.mskcc.cbio.portal.model.GeneticAlterationType;
-import org.mskcc.cbio.portal.model.GeneticProfile;
-import org.mskcc.cbio.portal.model.Sample;
-import org.mskcc.cbio.portal.model.Treatment;
-import org.mskcc.cbio.portal.util.ConsoleUtil;
-import org.mskcc.cbio.portal.util.ImportDataUtil;
-import org.mskcc.cbio.portal.util.ProgressMonitor;
-import org.mskcc.cbio.portal.util.StableIdUtil;
+import org.mskcc.cbio.portal.dao.*;
+import org.mskcc.cbio.portal.model.*;
+import org.mskcc.cbio.portal.util.*;
+
 
 /**
  * Code to Import Copy Number Alteration, MRNA Expression Data, Methylation, or protein RPPA data

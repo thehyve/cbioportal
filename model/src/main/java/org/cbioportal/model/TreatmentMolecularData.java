@@ -14,4 +14,9 @@ public class TreatmentMolecularData extends MolecularData implements Serializabl
         this.treatmentId = treatmentId;
     }
 
+    @Override
+    public String getStableId() {
+        return getTreatmentId();
+    }
+
 }

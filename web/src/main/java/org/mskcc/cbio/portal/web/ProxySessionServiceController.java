@@ -46,7 +46,7 @@ import com.jcraft.jsch.HASH;
 @RequestMapping("/proxy/session")
 public class ProxySessionServiceController {
 
-    @Value("${session.service.url:}")
+    @Value("${session.service.url}")
     private String sessionServiceURL;
 
     @Value("${session.service.user:}")

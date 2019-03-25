@@ -1279,7 +1279,7 @@ profile_description: A description of the data processing done.
 data_filename: <your treatment IC50 datafile>
 show_profile_in_analysis_tab: true
 pivot_threshold_value: A threshold value beyond which a treatment response is considered effective
-value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last.
+value_sort_order: A flag that determines whether samples with small treatment response values are displayed first or last; can be 'ASC' for small first, 'DESC' for small last. 
 ```
 
 Example:
@@ -1295,6 +1295,9 @@ show_profile_in_analysis_tab: true
 pivot_threshold_value: 0.1
 value_sort_order: ASC
 ```
+
+## Note on `value_sort_order`
+When values are sorted based on the `value_sort_order`, data points at the start of the sequence are considered more significant than data points at the end. This concept is used by the oncoprint when aggregating treatment response data from multiple samples from a single patient. When `value_sort_order` is `ASC` the sample with the smallest response value will be shown for that patient. When `value_sort_order` is `DESC` the sample with the largest response value will be shown for that patient.
 
 ### Treatment response IC50 data file
 The data file will be a simple tab separated format, similar to the expression data file: each sample is a column, each tested treatment (a compound or combination thereof) is a row, each cell contains treatment IC50 values for that sample x treatment combination.

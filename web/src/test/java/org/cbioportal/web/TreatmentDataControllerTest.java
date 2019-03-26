@@ -94,7 +94,7 @@ public class TreatmentDataControllerTest {
     }
     
     @Test
-    public void fetchGeneticDataItems() throws Exception {
+    public void fetchTreatmentGeneticDataItems() throws Exception {
 
         List<TreatmentMolecularData> treatmentDataItems = createTreatmentDataItemsList();
         Mockito.when(treatmentDataService.fetchTreatmentData(Mockito.anyString(), Mockito.anyListOf(String.class),

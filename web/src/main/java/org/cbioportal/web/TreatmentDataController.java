@@ -69,7 +69,7 @@ public class TreatmentDataController {
     @RequestMapping(value = "/genetic-profiles/{geneticProfileId}/treatment-genetic-data/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch treatment \"genetic data\" items (treatment response values) by profile Id, treatment Ids and sample Ids")
-    public ResponseEntity<List<TreatmentMolecularData>> fetchGeneticDataItems(
+    public ResponseEntity<List<TreatmentMolecularData>> fetchTreatmentGeneticDataItems(
             @ApiParam(required = true, value = "Genetic profile ID, e.g. study_es_0_treatment_ic50")
             @PathVariable String geneticProfileId,
             @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and treatment items. "

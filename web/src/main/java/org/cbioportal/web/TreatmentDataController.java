@@ -72,7 +72,7 @@ public class TreatmentDataController {
     public ResponseEntity<List<TreatmentMolecularData>> fetchTreatmentGeneticDataItems(
             @ApiParam(required = true, value = "Genetic profile ID, e.g. study_es_0_treatment_ic50")
             @PathVariable String geneticProfileId,
-            @ApiParam(required = true, value = "Search criteria to return the values for a given set of samples and treatment items. "
+            @ApiParam(required = true, value = "Search parameters to return the values for a given set of samples and treatment items. "
             		+ "treatmentIds: The list of identifiers (STABLE_ID) for the treatments of interest, e.g. 17-AAG. "
             		+ "Use one of these if you want to specify a subset of samples:"
             		+ "(1) sampleListId: Identifier of pre-defined sample list with samples to query, e.g. brca_tcga_all " 

@@ -5,19 +5,19 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.cbioportal.model.Gene;
-import org.cbioportal.model.GeneMolecularData;
+import org.cbioportal.model.GeneMolecularAlteration;
 import org.cbioportal.model.Geneset;
-import org.cbioportal.model.GenesetMolecularData;
+import org.cbioportal.model.MolecularAlteration;
 import org.cbioportal.model.MolecularData;
 import org.cbioportal.model.MolecularProfile;
 import org.cbioportal.model.CoExpression.GeneticEntityType;
 import org.cbioportal.model.CoExpression;
+import org.cbioportal.service.CoExpressionService;
 import org.cbioportal.service.GeneService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.GenesetService;
 import org.cbioportal.service.MolecularDataService;
 import org.cbioportal.service.MolecularProfileService;
-import org.cbioportal.service.CoExpressionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +49,7 @@ public class CoExpressionServiceImpl implements CoExpressionService {
                                               String molecularProfileIdA, String molecularProfileIdB, Double threshold) throws Exception {
         
         List<CoExpression> computedCoExpressions = null;
+
         List<? extends MolecularData>  molecularDataListA = null;
         List<? extends MolecularData>  molecularDataListB = null;
         if (geneticEntityType.equals(GeneticEntityType.GENE)) {
@@ -98,14 +100,14 @@ public class CoExpressionServiceImpl implements CoExpressionService {
         return computedCoExpressions;
     }
     
-    private List<CoExpression> computeCoExpressions(List<? extends MolecularData> molecularDataListB, Boolean isMolecularProfileBOfGenesetType,
-                                                    List<? extends MolecularData> molecularDataListA, String queryGeneticEntityId, Double threshold) 
+    private List<CoExpression> computeCoExpressions(List<? extends MolecularAlteration> molecularAlterationListB, Boolean isMolecularProfileBOfGenesetType,
+                                                    List<? extends MolecularAlteration> molecularAlterationListA, String queryGeneticEntityId, Double threshold) 
                                                     throws Exception {
-        
-        Map<String , List<MolecularData>> molecularDataMapA = molecularDataListA.stream()
-            .collect(Collectors.groupingBy(MolecularData::getStableId));
-        Map<String , List<MolecularData>> molecularDataMapB = molecularDataListB.stream()
-            .collect(Collectors.groupingBy(MolecularData::getStableId));
+
+        Map<String , List<MolecularAlteration>> molecularDataMapA = molecularAlterationListA.stream()
+            .collect(Collectors.toMap(MolecularAlteration::getStableId, Function.identity()));
+        Map<String , List<MolecularAlteration>> molecularDataMapB = molecularAlterationListB.stream()
+            .collect(Collectors.toMap(MolecularAlteration::getStableId, Function.identity()));
         
         List<CoExpression> coExpressionList = new ArrayList<>();
         
@@ -154,22 +156,19 @@ public class CoExpressionServiceImpl implements CoExpressionService {
             }
             
 
-            double[] valuesBNumber = valuesBCopy.stream().mapToDouble(Double::parseDouble).toArray();
+            double[] queryValuesNumber = valuesBCopy.stream().mapToDouble(Double::parseDouble).toArray();
             double[] valuesNumber = values.stream().mapToDouble(Double::parseDouble).toArray();
 
             if (valuesNumber.length <= 2) {
                 continue;
             }
             
-            double[][] arrays = new double[valuesNumber.length][2];
-            for (int i = 0; i < valuesNumber.length; i++) {
-                arrays[i][0] = valuesBNumber[i];
-                arrays[i][1] = valuesNumber[i];
-            }
+            double[][] arrays = new double[2][valuesNumber.length];
+            arrays[0] = queryValuesNumber;
+            arrays[1] = valuesNumber;
+            SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation((new Array2DRowRealMatrix(arrays, false)).transpose());
 
-            SpearmansCorrelation spearmansCorrelation = new SpearmansCorrelation(new Array2DRowRealMatrix(arrays, false));
-
-            double spearmansValue = spearmansCorrelation.correlation(valuesBNumber, valuesNumber);
+            double spearmansValue = spearmansCorrelation.correlation(queryValuesNumber, valuesNumber);
             if (Double.isNaN(spearmansValue) || Math.abs(spearmansValue) < threshold) {
                 continue;
             }

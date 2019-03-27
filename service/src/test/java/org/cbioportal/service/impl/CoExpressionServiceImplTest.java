@@ -6,11 +6,16 @@ import org.cbioportal.model.Geneset;
 import org.cbioportal.model.GeneMolecularData;
 import org.cbioportal.model.GenesetMolecularData;
 import org.cbioportal.model.MolecularProfile;
+import org.cbioportal.model.GeneMolecularAlteration;
+import org.cbioportal.model.Sample;
+import org.cbioportal.persistence.MolecularDataRepository;
+import org.cbioportal.persistence.SampleListRepository;
 import org.cbioportal.service.GeneService;
 import org.cbioportal.service.GenesetService;
 import org.cbioportal.service.MolecularDataService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.MolecularProfileService;
+import org.cbioportal.service.SampleService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,10 +46,19 @@ public class CoExpressionServiceImplTest extends BaseServiceImplTest {
     @Mock
     private GenesetService genesetService;
     @Mock
+    private SampleListRepository sampleListRepository;
+    @Mock
+    private MolecularDataRepository molecularDataRepository;
+    @Mock
     private MolecularProfileService molecularProfileService;
+    @Mock
+    private SampleService sampleService;
     
     @Test
     public void getGeneCorrelationForQueriedGene() throws Exception {
+
+        Mockito.when(sampleListRepository.getAllSampleIdsInSampleList(SAMPLE_LIST_ID))
+            .thenReturn(Arrays.asList(SAMPLE_ID1, SAMPLE_ID2, SAMPLE_ID3));
 
         List<GeneMolecularData> molecularDataList = createGeneMolecularData();
         Mockito.when(molecularDataService.getMolecularData(MOLECULAR_PROFILE_ID, SAMPLE_LIST_ID, null, "SUMMARY"))
@@ -60,14 +74,17 @@ public class CoExpressionServiceImplTest extends BaseServiceImplTest {
 
         Mockito.when(geneService.getGene("4"))
             .thenReturn(genes.get(2));
-        
+
+        Mockito.when(molecularDataRepository.getCommaSeparatedSampleIdsOfMolecularProfile(MOLECULAR_PROFILE_ID))
+            .thenReturn("1,2,3");
+
         MolecularProfile geneMolecularProfile = createGeneMolecularProfile();
-        
+    
         Mockito.when(molecularProfileService.getMolecularProfile(MOLECULAR_PROFILE_ID))
-            .thenReturn(geneMolecularProfile);
-        
+            .thenReturn(geneMolecularProfile);    
+
         List<CoExpression> result = coExpressionService.getCoExpressions("1", CoExpression.GeneticEntityType.GENE, 
-        SAMPLE_LIST_ID, MOLECULAR_PROFILE_ID, MOLECULAR_PROFILE_ID, THRESHOLD);
+            SAMPLE_LIST_ID, MOLECULAR_PROFILE_ID, MOLECULAR_PROFILE_ID, THRESHOLD);
 
         Assert.assertEquals(2, result.size());
         CoExpression coExpression1 = result.get(0);
@@ -102,10 +119,13 @@ public class CoExpressionServiceImplTest extends BaseServiceImplTest {
         Mockito.when(geneService.getGene("4"))
             .thenReturn(genes.get(2));
 
+        Mockito.when(molecularDataRepository.getCommaSeparatedSampleIdsOfMolecularProfile(MOLECULAR_PROFILE_ID))
+            .thenReturn("1,2,3");
+
         MolecularProfile geneMolecularProfile = createGeneMolecularProfile();
 
         Mockito.when(molecularProfileService.getMolecularProfile(MOLECULAR_PROFILE_ID))
-            .thenReturn(geneMolecularProfile);
+        .thenReturn(geneMolecularProfile);
 
         List<CoExpression> result = coExpressionService.fetchCoExpressions("1", CoExpression.GeneticEntityType.GENE,
             Arrays.asList(SAMPLE_ID1, SAMPLE_ID2), MOLECULAR_PROFILE_ID, MOLECULAR_PROFILE_ID, THRESHOLD);
@@ -261,6 +281,29 @@ public class CoExpressionServiceImplTest extends BaseServiceImplTest {
         geneMolecularData12.setValue("0");
         molecularDataList.add(geneMolecularData12);
         return molecularDataList;
+    }
+    
+    private List<GeneMolecularAlteration> createGeneAlterations() {
+
+        List<GeneMolecularAlteration> molecularAlterations = new ArrayList<>();
+        GeneMolecularAlteration geneMolecularAlteration1 = new GeneMolecularAlteration();
+        geneMolecularAlteration1.setEntrezGeneId(1);
+        geneMolecularAlteration1.setValues("2.1,3,3");
+        molecularAlterations.add(geneMolecularAlteration1);
+        GeneMolecularAlteration geneMolecularAlteration2 = new GeneMolecularAlteration();
+        geneMolecularAlteration2.setEntrezGeneId(2);
+        geneMolecularAlteration2.setValues("2,3,2");
+        molecularAlterations.add(geneMolecularAlteration2);
+        GeneMolecularAlteration geneMolecularAlteration3 = new GeneMolecularAlteration();
+        geneMolecularAlteration3.setEntrezGeneId(3);
+        geneMolecularAlteration3.setValues("1.1,5,3");
+        molecularAlterations.add(geneMolecularAlteration3);
+        GeneMolecularAlteration geneMolecularAlteration4 = new GeneMolecularAlteration();
+        geneMolecularAlteration4.setEntrezGeneId(4);
+        geneMolecularAlteration4.setValues("1,4,0");
+        molecularAlterations.add(geneMolecularAlteration4);
+
+        return molecularAlterations;
     }
 
     private List<Gene> createGenes() {

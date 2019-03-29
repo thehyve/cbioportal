@@ -109,15 +109,7 @@
                 <artifactItem>
                   <groupId>${frontend.groupId}</groupId>
                   <artifactId>cbioportal-frontend</artifactId>
-<<<<<<< HEAD
-<<<<<<< HEAD
                   <version>${frontend.version}</version>
-=======
-                  <version>a8d91b415ed13415e6f47a9f271edb942130ce7b</version>
->>>>>>> cfaf78146... Add quick search beta configuration and docs (#5863)
-=======
-                  <version>v2.1.1</version>
->>>>>>> 8f9f129b7... release-2.1.1
                   <type>jar</type>
                   <outputDirectory>.</outputDirectory>
                   <excludes>*index*</excludes>

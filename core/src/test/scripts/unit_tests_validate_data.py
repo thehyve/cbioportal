@@ -2444,8 +2444,8 @@ class MetaFilesTestCase(LogBufferTestCase):
             PORTAL_INSTANCE,
             self.logger, False, False)
         record_list = self.get_log_records()
-        # expecting 1 warning, 1 error:
-        self.assertEqual(len(record_list), 3)
+        # expecting 1 warning, 3 errors:
+        self.assertEqual(len(record_list), 4)
         # get both into a variable to avoid dependency on order:
         errors = []
         for record in record_list:
@@ -2455,9 +2455,10 @@ class MetaFilesTestCase(LogBufferTestCase):
                 warning = record
 
         # expecting one error about wrong stable_id in meta_expression:
-        self.assertEqual(len(errors), 2)
+        self.assertEqual(len(errors), 3)
         self.assertIn('mrna_test', errors)
         self.assertIn('gistic', errors)
+        self.assertIn('treatment ic50', errors)
 
         # expecting one warning about stable_id not being recognized in _samples
         self.assertEqual(warning.levelno, logging.WARNING)

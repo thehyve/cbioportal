@@ -3723,6 +3723,7 @@ def process_metadata_files(directory, portal_instance, logger, relaxed_mode, str
     global meta_dictionary
     tags_file_path = None
 
+    DISALLOWED_CHARACTERS = r'[^A-Za-z0-9_-]'
 
     for filename in filenames:
 
@@ -3733,7 +3734,17 @@ def process_metadata_files(directory, portal_instance, logger, relaxed_mode, str
             continue
         # validate stable_id to be unique (check can be removed once we deprecate this field):
         if 'stable_id' in meta_dictionary:
-            stable_id = meta_dictionary['stable_id']
+            stable_id = meta_dictionary['stable_id'].strip()
+
+            # Check for non-supported characters in the stable_id
+            # Note: this check is needed because when using a wildcard for STABLE_ID
+            # in the allowed_file_types.txt the user can specify a custom stable_id in the meta file.
+            if stable_id == '' or re.search(DISALLOWED_CHARACTERS, stable_id) != None:
+                logger.error(
+                    '`stable_id` is not valid (empty string or contains one or more illegal characters)',
+                    extra={'filename_': filename,
+                           'cause': stable_id})
+
             if stable_id in stable_ids:
                 # stable id already used in other meta file, give error:
                 logger.error(

@@ -5,9 +5,7 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.cbioportal.model.Gene;
-import org.cbioportal.model.GeneMolecularAlteration;
 import org.cbioportal.model.Geneset;
-import org.cbioportal.model.MolecularAlteration;
 import org.cbioportal.model.MolecularData;
 import org.cbioportal.model.MolecularProfile;
 import org.cbioportal.model.CoExpression.GeneticEntityType;
@@ -27,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,14 +97,14 @@ public class CoExpressionServiceImpl implements CoExpressionService {
         return computedCoExpressions;
     }
     
-    private List<CoExpression> computeCoExpressions(List<? extends MolecularAlteration> molecularAlterationListB, Boolean isMolecularProfileBOfGenesetType,
-                                                    List<? extends MolecularAlteration> molecularAlterationListA, String queryGeneticEntityId, Double threshold) 
+    private List<CoExpression> computeCoExpressions(List<? extends MolecularData> molecularDataListB, Boolean isMolecularProfileBOfGenesetType,
+                                                    List<? extends MolecularData> molecularDataListA, String queryGeneticEntityId, Double threshold) 
                                                     throws Exception {
-
-        Map<String , List<MolecularAlteration>> molecularDataMapA = molecularAlterationListA.stream()
-            .collect(Collectors.toMap(MolecularAlteration::getStableId, Function.identity()));
-        Map<String , List<MolecularAlteration>> molecularDataMapB = molecularAlterationListB.stream()
-            .collect(Collectors.toMap(MolecularAlteration::getStableId, Function.identity()));
+        
+        Map<String , List<MolecularData>> molecularDataMapA = molecularDataListA.stream()
+            .collect(Collectors.groupingBy(MolecularData::getStableId));
+        Map<String , List<MolecularData>> molecularDataMapB = molecularDataListB.stream()
+            .collect(Collectors.groupingBy(MolecularData::getStableId));
         
         List<CoExpression> coExpressionList = new ArrayList<>();
         

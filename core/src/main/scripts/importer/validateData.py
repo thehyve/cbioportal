@@ -2837,7 +2837,7 @@ class ProteinLevelValidator(FeaturewiseFileValidator):
                                      'cause': nonsample_col_vals[0]})
             return None
         symbol_element, antibody = value.split('|', 1)
-        symbol_list = symbol_element.split(' ')
+        symbol_list = symbol_element.strip().split(' ')
         for symbol in symbol_list:
             entrez_id = None
             if symbol.strip() == 'NA':

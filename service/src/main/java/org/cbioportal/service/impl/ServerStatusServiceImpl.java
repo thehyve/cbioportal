@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ServerStatusServiceImpl implements  ServerStatusService {
     
-    public static final String MESSAGE_RUNNING = "Server running";
-    public static final String MESSAGE_DOWN = "Server down";
+    public static final String MESSAGE_RUNNING = "UP";
+    public static final String MESSAGE_DOWN = "DOWN";
 
     @Autowired
     private CancerTypeRepository cancerTypeRepository;

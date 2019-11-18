@@ -139,6 +139,15 @@ dat.uuid.max_number_per_user=1
 dat.uuid.revoke_other_tokens=true
 dat.jwt.secret_key=
 
+# OAuth2 token data access settings
+#dat.oauth2.clientId=cbioportal_api
+#dat.oauth2.clientSecret=<client-secret>
+#dat.oauth2.accessTokenUri=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/token
+#dat.oauth2.userAuthorizationUri=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/auth
+#dat.oauth2.issuer=<authorization-server-url>/auth/realms/cbio
+#dat.oauth2.jwkUrl=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/certs
+#dat.oauth2.redirectUri=<portal-url>/token/login
+
 # study view settings
 # always show studies with this group
 always_show_study_group=

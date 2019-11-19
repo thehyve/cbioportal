@@ -55,6 +55,9 @@ public class OAuth2TokenAuthenticationFilter extends AbstractAuthenticationProce
     @Value("${dat.oauth2.clientId}")
     private String clientId;
 
+    @Value("${dat.method:none}") // default value is none
+    private String datMethod;
+
     @Autowired
     TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
@@ -68,6 +71,14 @@ public class OAuth2TokenAuthenticationFilter extends AbstractAuthenticationProce
     @Autowired
     public void setAuthenticationManager(final AuthenticationManager authenticationManager) {
         super.setAuthenticationManager(authenticationManager);
+    }
+
+    @Override
+    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        // only try to authenticate with this filter when:
+        // 1. super class is ok with it (the request path matched the defaultFilterProcessesUrl)
+        // 2. the dat.method is jwt-oauth2 (i.e., uses a OAuth2 authorization server)
+        return super.requiresAuthentication(request, response) && datMethod.equals("oauth2");
     }
 
     @Override

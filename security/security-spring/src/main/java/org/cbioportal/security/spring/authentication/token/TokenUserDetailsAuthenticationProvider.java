@@ -32,11 +32,15 @@
 
 package org.cbioportal.security.spring.authentication.token;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cbioportal.security.spring.authentication.social.PortalUserDetailsService;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -46,13 +50,25 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 public class TokenUserDetailsAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
+    private static final Log LOG = LogFactory.getLog(TokenUserDetailsAuthenticationProvider.class);
+
+    @Value("${dat.method:none}")
+    private String datMethod;
+
+    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt");
+
     private PortalUserDetailsService userDetailsService;
 
     public TokenUserDetailsAuthenticationProvider(PortalUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
-    private static final Log LOG = LogFactory.getLog(TokenUserDetailsAuthenticationProvider.class);
+    @Override
+    // This provider only handles "uuid" and "jwt" dat methods
+    // and ignores the "oauth2" dat method.
+    public boolean supports(Class<?> authentication) {
+        return SUPPORTED_DAT_METHODS.contains(datMethod);
+    }
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication)

@@ -32,16 +32,21 @@
 
 package org.cbioportal.service.impl;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
 import org.cbioportal.service.exception.InvalidDataAccessTokenException;
 import org.cbioportal.service.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.cbioportal.model.DataAccessToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Service
 @Component("jwt")
@@ -52,7 +57,11 @@ public class JwtDataAccessTokenServiceImpl implements DataAccessTokenService {
 
     private static final Log LOG = LogFactory.getLog(JwtDataAccessTokenServiceImpl.class);
 
-    //TODO : we could add a persistence layer to store pairs of <username, revokeDate> ... then a user can revoke all thier tokens before a particular date and we would only need to store the most recent revoke date for that user.  But it would have to be persisted, or else a restart of the server would lose the memory of revocation
+    // TODO : we could add a persistence layer to store pairs of <username,
+    // revokeDate> ... then a user can revoke all thier tokens before a particular
+    // date and we would only need to store the most recent revoke date for that
+    // user. But it would have to be persisted, or else a restart of the server
+    // would lose the memory of revocation
 
     @Override
     public DataAccessToken createDataAccessToken(String username) {
@@ -66,27 +75,32 @@ public class JwtDataAccessTokenServiceImpl implements DataAccessTokenService {
 
     @Override
     public List<DataAccessToken> getAllDataAccessTokens(String username) {
-        throw new UnsupportedOperationException("this implementation of (pure) JWT Data Access Tokens does not allow retrieval of stored tokens");
+        throw new UnsupportedOperationException(
+                "this implementation of (pure) JWT Data Access Tokens does not allow retrieval of stored tokens");
     }
 
     @Override
     public DataAccessToken getDataAccessToken(String username) {
-        throw new UnsupportedOperationException("this implementation of (pure) JWT Data Access Tokens does not allow retrieval of stored tokens");
+        throw new UnsupportedOperationException(
+                "this implementation of (pure) JWT Data Access Tokens does not allow retrieval of stored tokens");
     }
 
     @Override
     public DataAccessToken getDataAccessTokenInfo(String token) {
-        throw new UnsupportedOperationException("this implementation of (pure) JWT Data Access Tokens does not allow this operation");
+        throw new UnsupportedOperationException(
+                "this implementation of (pure) JWT Data Access Tokens does not allow this operation");
     }
 
     @Override
     public void revokeAllDataAccessTokens(String username) {
-        throw new UnsupportedOperationException("this implementation of (pure) JWT Data Access Tokens does not allow revocation of tokens");
+        throw new UnsupportedOperationException(
+                "this implementation of (pure) JWT Data Access Tokens does not allow revocation of tokens");
     }
 
     @Override
     public void revokeDataAccessToken(String token) {
-        throw new UnsupportedOperationException("this implementation of (pure) JWT Data Access Tokens does not allow revocation of tokens");
+        throw new UnsupportedOperationException(
+                "this implementation of (pure) JWT Data Access Tokens does not allow revocation of tokens");
     }
 
     @Override
@@ -118,4 +132,12 @@ public class JwtDataAccessTokenServiceImpl implements DataAccessTokenService {
             return null;
         }
     }
+
+    @Override
+    public Set<GrantedAuthority> getAuthorities(String token) {
+        // This service does not extract user roles from the token (handled 
+        // by AuthenticationProvider). Instead, it returns emtpy list of authorities.
+        return new HashSet<GrantedAuthority>();
+    }
+
 }

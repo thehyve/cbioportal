@@ -32,28 +32,30 @@
 
 package org.cbioportal.security.spring.authentication.token;
 
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
-
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cbioportal.service.DataAccessTokenService;
+import org.cbioportal.service.DataAccessTokenServiceFactory;
+import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.stereotype.Component; // TODO is this the correct one to use?
 import org.springframework.util.StringUtils;
@@ -66,6 +68,7 @@ import org.springframework.util.StringUtils;
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt");
+
     @Value("${dat.method:none}") // default value is none
     private String datMethod;
 
@@ -116,10 +119,13 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
             throw new BadCredentialsException("Invalid token");
         }
 
+        Set<GrantedAuthority> authorities = tokenService.getAuthorities(token);
+        String userName = tokenService.getUsername(token);
+
         // when DaoAuthenticationProvider does authentication on user returned by PortalUserDetailsService
         // which has password "unused", this password won't match, and then there is a BadCredentials exception thrown
         // this is a good way to catch that the wrong authetication provider is being used
-        Authentication auth = new UsernamePasswordAuthenticationToken(tokenService.getUsername(token), "does not match unused");
+        Authentication auth = new UsernamePasswordAuthenticationToken(userName, "does not match unused", authorities);
         return getAuthenticationManager().authenticate(auth);
     }
 

@@ -32,7 +32,13 @@
 
 package org.cbioportal.service.impl;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cbioportal.model.DataAccessToken;
@@ -41,9 +47,10 @@ import org.cbioportal.service.DataAccessTokenService;
 import org.cbioportal.service.exception.MaxNumberTokensExceededException;
 import org.cbioportal.service.exception.TokenNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Service
 @Component("uuid")
@@ -68,7 +75,8 @@ public class UuidDataAccessTokenServiceImpl implements DataAccessTokenService {
         return createDataAccessToken(username, revokeOtherTokens);
     }
 
-    // create a data access token (randomly generated UUID) and insert corresponding record into table with parts:
+    // create a data access token (randomly generated UUID) and insert corresponding
+    // record into table with parts:
     // username
     // uuid
     // expiration date (current time + 1 month)
@@ -81,7 +89,9 @@ public class UuidDataAccessTokenServiceImpl implements DataAccessTokenService {
             if (allowRevocationOfOtherTokens) {
                 revokeOldestDataAccessTokenForUsername(username);
             } else {
-                throw new MaxNumberTokensExceededException("User has reached max number of tokens allowed (" + maxNumberOfAccessTokens + "). An existing token must expire or be revoked before another token can be assigned.");
+                throw new MaxNumberTokensExceededException("User has reached max number of tokens allowed ("
+                        + maxNumberOfAccessTokens
+                        + "). An existing token must expire or be revoked before another token can be assigned.");
             }
         }
         String uuid = UUID.randomUUID().toString();
@@ -98,14 +108,16 @@ public class UuidDataAccessTokenServiceImpl implements DataAccessTokenService {
     // get all user tokens/uuids sorted from oldest to newest
     @Override
     public List<DataAccessToken> getAllDataAccessTokens(String username) {
-        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository.getAllDataAccessTokensForUsername(username);
+        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository
+                .getAllDataAccessTokensForUsername(username);
         return allDataAccessTokens;
     }
 
     // get newest data access token for a given username
     @Override
     public DataAccessToken getDataAccessToken(String username) {
-        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository.getAllDataAccessTokensForUsername(username);
+        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository
+                .getAllDataAccessTokensForUsername(username);
         DataAccessToken newestDataAccessToken = allDataAccessTokens.get(allDataAccessTokens.size() - 1);
         return newestDataAccessToken;
     }
@@ -163,14 +175,21 @@ public class UuidDataAccessTokenServiceImpl implements DataAccessTokenService {
     }
 
     private int getNumberOfTokensForUsername(String username) {
-        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository.getAllDataAccessTokensForUsername(username);
+        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository
+                .getAllDataAccessTokensForUsername(username);
         return allDataAccessTokens.size();
     }
 
     // revokes oldest token in token management system for a user
     private void revokeOldestDataAccessTokenForUsername(String username) {
-        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository.getAllDataAccessTokensForUsername(username);
+        List<DataAccessToken> allDataAccessTokens = dataAccessTokenRepository
+                .getAllDataAccessTokensForUsername(username);
         DataAccessToken oldestDataAccessToken = allDataAccessTokens.get(0);
         dataAccessTokenRepository.removeDataAccessToken(oldestDataAccessToken.getToken());
+    }
+
+    @Override
+    public Set<GrantedAuthority> getAuthorities(String token) {
+        return new HashSet<GrantedAuthority>();
     }
 }

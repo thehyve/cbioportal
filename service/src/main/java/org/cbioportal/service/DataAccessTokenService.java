@@ -32,8 +32,12 @@
 
 package org.cbioportal.service;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import org.cbioportal.model.DataAccessToken;
+import org.springframework.security.core.GrantedAuthority;
 
 public interface DataAccessTokenService {
 
@@ -46,6 +50,7 @@ public interface DataAccessTokenService {
     public void revokeDataAccessToken(String token);
     public String getUsername(String token);
     public Date getExpiration(String token);
+    public Set<GrantedAuthority> getAuthorities(String token);
 
     /**
      * Tests token validity.

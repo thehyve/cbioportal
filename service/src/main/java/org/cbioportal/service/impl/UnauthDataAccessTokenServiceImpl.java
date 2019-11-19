@@ -32,11 +32,15 @@
 
 package org.cbioportal.service.impl;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
-
-import java.util.*;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +100,11 @@ public class UnauthDataAccessTokenServiceImpl implements DataAccessTokenService 
     @Override
     public Boolean isValid(String token) {
         throw new AccessDeniedException("Data Access Tokens are not supported for unauthenticated portals.");
+    }
+
+    @Override
+    public Set<GrantedAuthority> getAuthorities(String token) {
+        return new HashSet<GrantedAuthority>();
     }
 
 }

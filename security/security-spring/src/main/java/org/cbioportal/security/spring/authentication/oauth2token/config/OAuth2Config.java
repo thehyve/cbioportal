@@ -3,6 +3,9 @@ package org.cbioportal.security.spring.authentication.oauth2token.config;
 import java.util.Arrays;
 
 import org.cbioportal.security.spring.authentication.oauth2token.TokenRefreshRestTemplate;
+import org.cbioportal.security.spring.authentication.oauth2token.filter.OAuth2TokenAuthenticationFilter;
+import org.cbioportal.security.spring.authentication.oauth2token.filter.OAuth2TokenRetrievalFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,8 +34,11 @@ public class OAuth2Config {
     @Value("${dat.oauth2.redirectUri}")
     private String redirectUri;
 
+    @Autowired
+    private OAuth2ClientContext oAuth2clientContext;
+
     @Bean
-    public OAuth2ProtectedResourceDetails resourceDetails() {
+    public OAuth2ProtectedResourceDetails oAuth2ResourceDetails() {
         final AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
         details.setClientId(clientId);
         details.setClientSecret(clientSecret);
@@ -45,15 +51,26 @@ public class OAuth2Config {
     }
 
     @Bean
-    public OAuth2RestTemplate restTemplate(final OAuth2ClientContext clientContext) {
-        final OAuth2RestTemplate template = new OAuth2RestTemplate(resourceDetails(), clientContext);
-        return template;
+    @Autowired
+    public OAuth2RestTemplate tokenRetrievalRestTemplate() {
+        return new OAuth2RestTemplate(oAuth2ResourceDetails(), oAuth2clientContext);
     }
 
     @Bean
-    public TokenRefreshRestTemplate refreshTokenRestTemplate() {
-        final TokenRefreshRestTemplate template = new TokenRefreshRestTemplate(resourceDetails());
-        return template;
+    public TokenRefreshRestTemplate tokenRefreshRestTemplate() {
+        return new TokenRefreshRestTemplate(oAuth2ResourceDetails());
+    }
+
+    @Bean
+    public OAuth2TokenRetrievalFilter oAuth2TokenRetrievalFilter() {
+        final OAuth2TokenRetrievalFilter filter = new OAuth2TokenRetrievalFilter("/token/login");
+        filter.setRestTemplate(tokenRetrievalRestTemplate());
+        return filter;
+    }
+
+    @Bean
+    public OAuth2TokenAuthenticationFilter oAuth2TokenAccessFilter() {
+        return new OAuth2TokenAuthenticationFilter("/closed");
     }
 
 }

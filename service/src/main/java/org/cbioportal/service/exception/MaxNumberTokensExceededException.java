@@ -51,6 +51,11 @@ package org.cbioportal.service.exception;
 
 public class MaxNumberTokensExceededException extends RuntimeException {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
     public MaxNumberTokensExceededException() {
         super();
     }

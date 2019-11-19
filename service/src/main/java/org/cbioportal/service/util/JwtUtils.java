@@ -48,23 +48,30 @@
 
 package org.cbioportal.service.util;
 
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+
+import javax.crypto.SecretKey;
+
 import com.mysql.jdbc.StringUtils;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.exception.InvalidDataAccessTokenException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
-import java.util.*;
-import javax.crypto.SecretKey;
-import org.apache.commons.logging.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtils {

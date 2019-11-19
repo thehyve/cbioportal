@@ -38,9 +38,11 @@ import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFilter {
+@Component
+public class OAuth2TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -56,7 +58,8 @@ public class OAuth2TokenAccessFilter extends AbstractAuthenticationProcessingFil
     @Autowired
     TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
-    public OAuth2TokenAccessFilter(final String defaultFilterProcessesUrl) {
+
+    public OAuth2TokenAuthenticationFilter(final String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
         setAuthenticationSuccessHandler(customRedirectHandler());
     }

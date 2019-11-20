@@ -69,6 +69,17 @@
         <artifactId>spring-security-web</artifactId>
         <version>${spring.security.version}</version>
       </dependency>
+        <!-- OAuth2 token data access -->
+      <dependency>
+          <groupId>org.springframework.security.oauth</groupId>
+          <artifactId>spring-security-oauth2</artifactId>
+          <version>${spring-security-oauth2.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>spring-security-jwt</artifactId>
+          <version>${spring-security-jwt.version}</version>
+        </dependency>
       <!-- Spring Social -->
       <dependency>
         <groupId>org.springframework.social</groupId>

@@ -122,6 +122,11 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
         Set<GrantedAuthority> authorities = tokenService.getAuthorities(token);
         String userName = tokenService.getUsername(token);
 
+        if (userName == null) {
+            LOG.error("No username found in token " + token);
+            throw new BadCredentialsException("No username found in token");
+        }
+
         // when DaoAuthenticationProvider does authentication on user returned by PortalUserDetailsService
         // which has password "unused", this password won't match, and then there is a BadCredentials exception thrown
         // this is a good way to catch that the wrong authetication provider is being used

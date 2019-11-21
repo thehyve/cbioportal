@@ -30,8 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service;
-
+package org.cbioportal.security.spring.authentication.token.service;
 /**
  *
  * @author ochoaa

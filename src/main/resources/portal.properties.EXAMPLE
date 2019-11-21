@@ -146,7 +146,7 @@ dat.jwt.secret_key=
 #dat.oauth2.userAuthorizationUri=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/auth
 #dat.oauth2.issuer=<authorization-server-url>/auth/realms/cbio
 #dat.oauth2.jwkUrl=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/certs
-#dat.oauth2.redirectUri=<portal-url>/token/login
+#dat.oauth2.redirectUri=<portal-url>/api/token/login
 
 # study view settings
 # always show studies with this group

@@ -46,7 +46,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service.exception;
+package org.cbioportal.security.spring.authentication.token.exception;
 
 public class DataAccessTokenNoUserIdentityException extends RuntimeException {
 

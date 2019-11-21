@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2018 Memorial Sloan-Kettering Cancer Center.
  *
@@ -48,20 +47,15 @@
 */
 
 // TODO move back package org.cbioportal.security.exception;
-package org.cbioportal.service.exception;
+package org.cbioportal.security.spring.authentication.token.exception;
 
-public class TokenNotFoundException extends RuntimeException {
+public class InvalidDataAccessTokenException extends Exception {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
-    public TokenNotFoundException() {
+    public InvalidDataAccessTokenException() {
         super();
     }
 
-    public TokenNotFoundException(String message) {
+    public InvalidDataAccessTokenException(String message) {
         super(message);
     }
 

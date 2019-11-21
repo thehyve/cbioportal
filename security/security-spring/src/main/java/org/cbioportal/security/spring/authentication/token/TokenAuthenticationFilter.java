@@ -47,9 +47,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
+import org.cbioportal.security.spring.authentication.token.service.DataAccessTokenService;
+import org.cbioportal.security.spring.authentication.token.service.DataAccessTokenServiceFactory;
+import org.cbioportal.security.spring.authentication.token.service.UnauthDataAccessTokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;

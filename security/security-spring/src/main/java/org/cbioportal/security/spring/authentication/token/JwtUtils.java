@@ -46,7 +46,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service.util;
+package org.cbioportal.security.spring.authentication.token;
 
 import java.util.Base64;
 import java.util.Calendar;
@@ -60,7 +60,7 @@ import com.mysql.jdbc.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cbioportal.model.DataAccessToken;
-import org.cbioportal.service.exception.InvalidDataAccessTokenException;
+import org.cbioportal.security.spring.authentication.token.exception.InvalidDataAccessTokenException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

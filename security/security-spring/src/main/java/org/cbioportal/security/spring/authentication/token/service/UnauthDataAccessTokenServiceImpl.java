@@ -30,7 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service.impl;
+package org.cbioportal.security.spring.authentication.token.service;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.cbioportal.model.DataAccessToken;
-import org.cbioportal.service.DataAccessTokenService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;

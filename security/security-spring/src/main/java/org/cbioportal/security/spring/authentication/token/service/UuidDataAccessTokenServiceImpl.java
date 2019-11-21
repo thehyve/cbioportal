@@ -30,7 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service.impl;
+package org.cbioportal.security.spring.authentication.token.service;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -43,9 +43,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.persistence.DataAccessTokenRepository;
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.exception.MaxNumberTokensExceededException;
-import org.cbioportal.service.exception.TokenNotFoundException;
+import org.cbioportal.security.spring.authentication.token.exception.MaxNumberTokensExceededException;
+import org.cbioportal.security.spring.authentication.token.exception.TokenNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;

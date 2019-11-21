@@ -46,21 +46,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// TODO move back package org.cbioportal.security.exception;
-package org.cbioportal.service.exception;
+package org.cbioportal.security.spring.authentication.token.exception;
 
-public class MaxNumberTokensExceededException extends RuntimeException {
+public class DataAccessTokenProhibitedUserException extends RuntimeException {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-
-    public MaxNumberTokensExceededException() {
+    public DataAccessTokenProhibitedUserException() {
         super();
     }
 
-    public MaxNumberTokensExceededException(String message) {
+    public DataAccessTokenProhibitedUserException(String message) {
         super(message);
     }
 

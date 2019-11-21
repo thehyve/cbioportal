@@ -30,7 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.service;
+package org.cbioportal.security.spring.authentication.token.service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -57,6 +57,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
@@ -176,7 +177,8 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
         return extractAuthorities(claimsMap);
     }
 
-    public String getOfflineToken(Authentication authentication) {
+    public String getOfflineTokenFromContext() {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         final OAuth2UserDetails user = (OAuth2UserDetails) authentication.getPrincipal();
         final OAuth2AccessToken accessToken = user.getToken();
         return accessToken.getRefreshToken().toString();

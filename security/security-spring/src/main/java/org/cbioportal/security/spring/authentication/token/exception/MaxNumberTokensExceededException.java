@@ -47,15 +47,20 @@
 */
 
 // TODO move back package org.cbioportal.security.exception;
-package org.cbioportal.service.exception;
+package org.cbioportal.security.spring.authentication.token.exception;
 
-public class InvalidDataAccessTokenException extends Exception {
+public class MaxNumberTokensExceededException extends RuntimeException {
 
-    public InvalidDataAccessTokenException() {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
+    public MaxNumberTokensExceededException() {
         super();
     }
 
-    public InvalidDataAccessTokenException(String message) {
+    public MaxNumberTokensExceededException(String message) {
         super(message);
     }
 

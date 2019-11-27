@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
@@ -32,6 +33,7 @@ import org.cbioportal.service.exception.DataAccessTokenProhibitedUserException;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +56,6 @@ import io.swagger.annotations.ApiParam;
 public class DataAccessTokenController {
 
     private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2", "none");
-    private final String unhandledMethod =
     
     @Value("${dat.method:none}") // default value is none
     private String datMethod;
@@ -63,6 +64,23 @@ public class DataAccessTokenController {
     private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
     
     private DataAccessTokenService tokenService;
+
+    @Value("${dat.oauth2.clientId}")
+    private String clientId;
+
+    @Value("${dat.oauth2.clientSecret}")
+    private String clientSecret;
+
+    @Value("${dat.oauth2.accessTokenUri}")
+    private String accessTokenUri;
+
+    @Value("${dat.oauth2.frontChanelAuthorizationUri}")
+    private String userAuthorizationUri;
+
+    @Value("${dat.oauth2.redirectUri}")
+    private String redirectUri;
+
+    private String oauth2TokenDownloadEndpointUrl = "https://localhost/api/oauth2-token-download";
     
     @PostConstruct
     public void postConstruct() {
@@ -85,6 +103,7 @@ public class DataAccessTokenController {
     @RequestMapping(method = RequestMethod.POST, value = "/data-access-tokens", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DataAccessToken> createDataAccessToken(Authentication authentication,
                                     @RequestParam(required = false) Boolean allowRevocationOfOtherTokens) throws HttpClientErrorException {
+
         DataAccessToken createdToken;
         if (allowRevocationOfOtherTokens != null) {
             createdToken = tokenService.createDataAccessToken(getAuthenticatedUser(authentication), allowRevocationOfOtherTokens);
@@ -99,7 +118,20 @@ public class DataAccessTokenController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens")
-    public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(Authentication authentication) {
+    public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(HttpServletRequest request, Authentication authentication) {
+
+        String serverUrl = request.getRequestURI();
+
+        if (datMethod.equals("oauth2")) {
+            
+            String url = userAuthorizationUri + "?response_type=token&client_id=" + clientId + "&redirect_uri=" + oauth2TokenDownloadEndpointUrl;
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", url);
+            
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
+        
         List<DataAccessToken> allDataAccessTokens = tokenService.getAllDataAccessTokens(getAuthenticatedUser(authentication));
         return new ResponseEntity<>(allDataAccessTokens, HttpStatus.OK);
     }
@@ -120,6 +152,11 @@ public class DataAccessTokenController {
     public void revokeDataAccessToken(
             @ApiParam(required = true, value = "token") @PathVariable String token) {
         tokenService.revokeDataAccessToken(token);
+    }
+
+    @RequestMapping("/oauth2-token-download")
+    public void getOAuth2DataAccessToken(HttpServletRequest request) {
+        int i = 1;
     }
 
     private String getAuthenticatedUser(Authentication authentication) {

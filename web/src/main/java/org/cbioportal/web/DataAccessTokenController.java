@@ -17,23 +17,35 @@
 
 package org.cbioportal.web;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
 import org.cbioportal.service.DataAccessTokenServiceFactory;
 import org.cbioportal.service.exception.DataAccessTokenNoUserIdentityException;
 import org.cbioportal.service.exception.DataAccessTokenProhibitedUserException;
-import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
 import org.cbioportal.web.config.annotation.InternalApi;
-
-import io.swagger.annotations.*;
-import java.util.*;
-import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.http.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 
 @InternalApi
 @RestController
@@ -41,21 +53,23 @@ import org.springframework.web.client.HttpClientErrorException;
 @Api(tags = "Data Access Tokens", description = " ")
 public class DataAccessTokenController {
 
-    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "none");
-
+    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2", "none");
+    private final String unhandledMethod =
+    
     @Value("${dat.method:none}") // default value is none
     private String datMethod;
-
+    
     @Autowired
     private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
-
+    
     private DataAccessTokenService tokenService;
+    
     @PostConstruct
     public void postConstruct() {
-        if (datMethod == null || !SUPPORTED_DAT_METHODS.contains(datMethod)) {
-            throw new RuntimeException("Specified data access token method, " + datMethod + " is not supported");
-        } else {
+        if (SUPPORTED_DAT_METHODS.contains(datMethod)) {
             this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService(this.datMethod);
+        } else {
+            throw new RuntimeException("Specified data access token method, " + datMethod + " is not supported");
         }
     }
 

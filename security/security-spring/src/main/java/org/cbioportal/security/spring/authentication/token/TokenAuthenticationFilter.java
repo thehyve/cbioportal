@@ -32,30 +32,29 @@
 
 package org.cbioportal.security.spring.authentication.token;
 
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
-
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cbioportal.service.DataAccessTokenService;
+import org.cbioportal.service.DataAccessTokenServiceFactory;
+import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.stereotype.Component; // TODO is this the correct one to use?
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,7 +64,8 @@ import org.springframework.util.StringUtils;
 @Component
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt");
+    // TODO: can we remove the need for check of supported methods?
+    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2");
     @Value("${dat.method:none}") // default value is none
     private String datMethod;
 
@@ -73,6 +73,8 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
     private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
 
     private DataAccessTokenService tokenService;
+
+    // TODO: can we remove the need for check of supported methods?
     @PostConstruct
     public void postConstruct() {
         if (datMethod == null || !SUPPORTED_DAT_METHODS.contains(datMethod)) {
@@ -110,16 +112,13 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
 
         String token = extractHeaderToken(request);
 
-        if (token == null || !tokenService.isValid(token)) {
-            // TODO should this be a custom subclass of AuthenticationException?
-            LOG.error("invalid token = " + token);
-            throw new BadCredentialsException("Invalid token");
+        if (token == null) {
+            LOG.error("No token was found in request header.");
+            throw new BadCredentialsException("No token was found in request header.");
         }
 
-        // when DaoAuthenticationProvider does authentication on user returned by PortalUserDetailsService
-        // which has password "unused", this password won't match, and then there is a BadCredentials exception thrown
-        // this is a good way to catch that the wrong authetication provider is being used
-        Authentication auth = new UsernamePasswordAuthenticationToken(tokenService.getUsername(token), "does not match unused");
+        Authentication auth = tokenService.createAuthenticationRequest(token);
+
         return getAuthenticationManager().authenticate(auth);
     }
 

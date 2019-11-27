@@ -1,13 +1,17 @@
-package org.cbioportal.service;
+package org.cbioportal.service.impl;
 
-import org.cbioportal.persistence.util.CustomEhCachingProvider;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+
 import org.cbioportal.persistence.util.EhCacheStatistics;
+import org.cbioportal.service.CacheStatisticsService;
 import org.cbioportal.service.exception.CacheNotFoundException;
-
-import java.lang.String;
-import java.util.*;
-import javax.cache.*;
-import org.ehcache.jsr107.EhcacheCachingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -49,7 +53,7 @@ public class CacheStatisticsServiceImpl implements CacheStatisticsService {
         }
         List<String> keyCountsPerClass = new ArrayList<String>();
         for (Map.Entry<String, Integer> entry : classToKeyCount.entrySet()) {
-           keyCountsPerClass.add(entry.getKey().toString() + ": " + entry.getValue().toString() + " keys");
+            keyCountsPerClass.add(entry.getKey().toString() + ": " + entry.getValue().toString() + " keys");
         }
         return keyCountsPerClass;
     }

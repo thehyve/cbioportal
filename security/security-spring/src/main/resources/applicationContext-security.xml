@@ -28,25 +28,36 @@
     -->
 
     <!-- Data Access Tokens beans -->
+
+        <!-- Data access token (dat) profiles
+            Spring profiles determine the active implementation of data access tokens. Profiles are selected through the java
+            system property "dat.method" (e.g. java -Dauthenticate=jwt). The default dat method is "none"; this means that the
+            portal instance does not distribute tokens to users or accept tokens for data access.
+            The following profiles are available:
+                "none"      - dat is not supported by cBioPortal instance (default)
+                "jwt"       - JSON Web Token implementation
+                "uuid"      - Universally Unique IDentifier implementation
+                "oauth2"    - OAuth2 protocol implementation. Requires an external OAuth2/OpenID Connect Authentication provider.
+        -->
+
+    <!-- make sure externally defined beans are added to the spring context -->
+    <context:component-scan base-package="org.cbioportal.security.spring.authentication.token.oauth2"/>
+
     <b:bean id="tokenAuthenticationFilter" class="org.cbioportal.security.spring.authentication.token.TokenAuthenticationFilter">
         <b:property name="authenticationManager" ref="tokenAuthenticationManager" />
         <b:property name="authenticationSuccessHandler" ref="tokenSuccessRedirectHandler"/>
     </b:bean>
 
-    <!-- Choose a supported Data Access Token method implementation [uuid, jwt, none (default)] by setting value of dat.method in portal.properties.
-        Note: UUID implementation requires a backend database/token store but allows for greater control over tokens -->
-    <b:alias name="${dat.method:none}" alias="tokenService" />
-    <b:bean  id="tokenServiceFactory" class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
-        <b:property name="serviceLocatorInterface" value="org.cbioportal.service.DataAccessTokenServiceFactory"/>
-    </b:bean>
-
     <!-- WARNING: if you define another authentication-manager AFTER this one, this one
         will be overridden, even if you use <http ... pattern="/api/**" ... authentication-manager-ref="tokenAuthenticationManager">
         AND even though the authenticationManager is defined as a property of tokenAuthenticationFilter
-        so you must add <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/> to your
-        other authentication-manager, and tokenUserDetailsAuthenticationProvider should come before other authentication-providers -->
+        so you must add <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/> and 
+        <authentication-provider ref="oauth2TokenAuthenticationProvider"/> to your
+        other authentication-manager, and tokenUserDetailsAuthenticationProvider and oauth2TokenAuthenticationProvider
+        should come before other authentication-providers. -->
     <authentication-manager alias="tokenAuthenticationManager">
         <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/>
+        <authentication-provider ref="oauth2TokenAuthenticationProvider"/>
     </authentication-manager>
 
     <b:bean id="tokenSuccessRedirectHandler" class="org.cbioportal.security.spring.authentication.token.TokenAuthenticationSuccessHandler"/>
@@ -57,6 +68,7 @@
 
     <!-- Used to compare token returned by authentication-provider against portal user db tables -->
     <b:bean id="tokenUserDetailsService" class="org.cbioportal.security.spring.authentication.social.PortalUserDetailsService"/>
+
     <!-- End of Data Access Tokens beans -->
 
     <!-- beans shared across any authentication system -->
@@ -174,6 +186,7 @@
     <authentication-manager alias="authenticationManager">
         <!-- token access for the API -->
         <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/>
+        <authentication-provider ref="oauth2TokenAuthenticationProvider"/>
         <authentication-provider ref="socialAuthenticationProvider"/>
     </authentication-manager>
 
@@ -253,6 +266,7 @@
     <authentication-manager alias="authenticationManager">
         <!-- token access for the API -->
         <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/>
+        <authentication-provider ref="oauth2TokenAuthenticationProvider"/>
     </authentication-manager>
 
     <b:bean id="customUserService" class="org.cbioportal.security.spring.authentication.openID.PortalUserDetailsService">
@@ -308,6 +322,7 @@
     <authentication-manager alias="authenticationManager">
         <!-- token access for the API -->
         <authentication-provider ref="tokenUserDetailsAuthenticationProvider"/>
+        <authentication-provider ref="oauth2TokenAuthenticationProvider"/>
         <authentication-provider ref="samlAuthenticationProvider"/>
     </authentication-manager>
 

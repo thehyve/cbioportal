@@ -32,31 +32,33 @@
 
 package org.cbioportal.security.spring.authentication.token.oauth2;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
 
 @Component
 public class OAuth2TokenRefreshRestTemplate extends RestTemplate {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    OAuth2ProtectedResourceDetails resourceDetails;
+    @Value("${dat.oauth2.clientId}")
+    private String clientId;
+
+    @Value("${dat.oauth2.clientSecret}")
+    private String clientSecret;
+
+    @Value("${dat.oauth2.accessTokenUri}")
+    private String accessTokenUri;
 
     public String getAccessToken(String offline_token) throws BadCredentialsException {
         HttpHeaders headers = new HttpHeaders();
@@ -64,26 +66,22 @@ public class OAuth2TokenRefreshRestTemplate extends RestTemplate {
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type", "refresh_token");
-        map.add("client_id", resourceDetails.getClientId());
-        map.add("client_secret", resourceDetails.getClientSecret());
+        map.add("client_id", clientId);
+        map.add("client_secret", clientSecret);
         map.add("refresh_token", offline_token);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = postForEntity(
-            resourceDetails.getAccessTokenUri(), request , String.class);
+        ResponseEntity<String> response = postForEntity(accessTokenUri, request, String.class);
 
-        Pattern pattern = Pattern.compile("access_token\":\"([^\"]+)");
-        String body = response.getBody();
-        Matcher matcher = pattern.matcher(body);
-        String accessToken = null;
-        if (matcher.find()) {
-            accessToken = matcher.group(1);
+        try {
+            String accessToken = new ObjectMapper().readTree(response.getBody()).get("access_token").asText();
             logger.debug("Received access token from authentication server:\n" + accessToken);
-        } else {
-            logger.debug("Authentication server did not return an access token. Server response:\n" + response);
+            return accessToken;
+        } catch (Exception e) {
+            logger.error("Authentication server did not return an access token. Server response:\n" + response);
             throw new BadCredentialsException("Authentication server did not return an access token.");
         }
-        return accessToken;
+
     }
 
 }

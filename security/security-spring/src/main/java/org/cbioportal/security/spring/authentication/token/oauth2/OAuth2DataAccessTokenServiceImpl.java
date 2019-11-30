@@ -50,6 +50,9 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.Jwt;
@@ -57,6 +60,9 @@ import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Component("oauth2")
@@ -71,12 +77,47 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
     @Value("${dat.oauth2.clientId}")
     private String clientId;
 
+    @Value("${dat.oauth2.clientSecret}")
+    private String clientSecret;
+
+    @Value("${dat.oauth2.accessTokenUri}")
+    private String accessTokenUri;
+
+    @Value("${dat.oauth2.userAuthorizationUri}")
+    private String userAuthorizationUri;
+
+    @Value("${dat.oauth2.redirectUri}")
+    private String redirectUri;
+
     @Autowired
     OAuth2TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
     @Override
-    public DataAccessToken createDataAccessToken(final String username) {
-        throw new UnsupportedOperationException("this implementation of OAuth2 tokens does not allow creation of t");
+    // request offline token from authentication server via back channel
+    public DataAccessToken createDataAccessToken(final String accessCode) {
+        
+        HttpHeaders headers = new HttpHeaders();
+        
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("grant_type", "authorization_code");
+        map.add("code", accessCode);
+        map.add("client_id", clientId);
+        map.add("client_secret", clientSecret);
+        map.add("redirect_uri", redirectUri);
+        map.add("scope", "offline_access");
+        
+        HttpEntity<MultiValueMap<String, String>> offlineRequest = new HttpEntity<>(map, headers);
+        
+        ResponseEntity<String> response = new RestTemplate().postForEntity(accessTokenUri, offlineRequest, String.class);
+
+        String offlineToken = "";
+        try {
+            offlineToken = new ObjectMapper().readTree(response.getBody()).get("refresh_token").asText();
+        } catch (IOException e) {
+            throw new BadCredentialsException("Offline token could not be retrieved using access_code: "+ accessCode );
+        }
+
+        return new DataAccessToken(offlineToken);
     }
 
     @Override
@@ -136,7 +177,7 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
 
     @Override
     public String getUsername(final String token) {
-        
+
         final Jwt tokenDecoded = JwtHelper.decode(token);
 
         final String claims = tokenDecoded.getClaims();
@@ -170,13 +211,13 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
     }
 
     private void hasValidIssuer(final JsonNode claimsMap) throws BadCredentialsException {
-        if (! claimsMap.get("iss").asText().equals(issuer)) {
+        if (!claimsMap.get("iss").asText().equals(issuer)) {
             throw new BadCredentialsException("Wrong Issuer found in token");
         }
     }
 
     private void hasValidClientId(final JsonNode claimsMap) throws BadCredentialsException {
-        if (! claimsMap.get("aud").asText().equals(clientId)) {
+        if (!claimsMap.get("aud").asText().equals(clientId)) {
             throw new BadCredentialsException("Wrong clientId found in token");
         }
     }

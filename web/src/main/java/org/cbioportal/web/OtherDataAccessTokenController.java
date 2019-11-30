@@ -36,7 +36,6 @@ import org.cbioportal.web.config.annotation.InternalApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,54 +55,28 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @Validated
 @Api(tags = "Data Access Tokens", description = " ")
-@Profile("!oauth2")
-public class DataAccessTokenController {
+@Profile({"dat.uuid", "dat.jwt"})
+public class OtherDataAccessTokenController {
     
-    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2", "none");
-    
-    @Value("${dat.method:none}")
+    @Value("${dat.method}")
     private String datMethod;
-
-    @Autowired
-    private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
-    
-    private DataAccessTokenService tokenService;
 
     @Value("${dat.uuid_revoke_other_tokens:false}")
     private Boolean allowRevocationOfOtherTokens;
     
-    // fields for OAuth2 token data access 
-    @Value("${dat.oauth2.userAuthorizationUri:}")
-    private String oauth2UserAuthorizationUri;
-
-    @Value("${dat.oauth2.redirectUri:}")
-    private String oauth2RedirectUri;
-
-    @Value("${dat.oauth2.clientId:}")
-
-    private String oauth2ClientId;
-    private String oauth2AuthorizationUrl;
-    private String oauth2TokenDownloadFileName;
-
-    @PostConstruct
-    public void postConstruct() {
-        if (SUPPORTED_DAT_METHODS.contains(datMethod)) {
-
-            this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService(this.datMethod);
-
-            // FIXME: compose url using 3rd party lib <-- dangerous because of link forgery
-            if (datMethod.equals("oauth2")) {
-                oauth2AuthorizationUrl = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", oauth2UserAuthorizationUri, oauth2ClientId, oauth2RedirectUri);
-            }
-
-        } else {
-            throw new RuntimeException("Specified data access token method, " + datMethod + " is not supported");
-        }
-    }
-    
     @Value("${dat.unauth_users:anonymousUser}")
     private String[] USERS_WHO_CANNOT_USE_TOKENS;
+    
+    @Autowired
+    private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
+    
+    private DataAccessTokenService tokenService;
     private Set<String> usersWhoCannotUseTokenSet;
+    
+    @PostConstruct
+    public void postConstruct() {
+        this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService(this.datMethod);
+    }
     
     @Autowired
     private void initializeUsersWhoCannotUseTokenSet() {
@@ -154,42 +127,15 @@ public class DataAccessTokenController {
     public ResponseEntity<String> downloadDataAccessToken(Authentication authentication, HttpServletRequest request, HttpServletResponse response,
         @RequestParam(required = false, value = "file_name", defaultValue = "token.txt") @PathVariable String fileName) throws IOException {
 
-        if (datMethod.equals("oauth2")) {
-
-            oauth2TokenDownloadFileName = fileName;
-
-            // for oauth2 redirect to authenticatoin endpoint
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", oauth2AuthorizationUrl);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        } else {
-            // for other methods add header to trigger download of the token by the browser
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-            String userName = getAuthenticatedUser(authentication);
-            DataAccessToken token = createDataAccessToken(userName, allowRevocationOfOtherTokens);
-            if (token == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(token.toString(), HttpStatus.CREATED);
+        // for other methods add header to trigger download of the token by the browser
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        String userName = getAuthenticatedUser(authentication);
+        DataAccessToken token = createDataAccessToken(userName, allowRevocationOfOtherTokens);
+        if (token == null) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-
-    }
-
-    // retrieve and trigger download OAuth2 offline token
-    @RequestMapping("/data-access-token/oauth2")
-    public ResponseEntity<String> downloadOAuth2DataAccessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
-        String accessCode = request.getParameter("code");
-        DataAccessToken offlineToken = tokenService.createDataAccessToken(accessCode);
-
-        if (offlineToken == null) {
-            throw new DataAccessTokenProhibitedUserException();
-        }
-
-        // add header to trigger download of the token by the browser
-        response.setHeader("Content-Disposition", "attachment; filename=" + oauth2TokenDownloadFileName);
-        
-        return new ResponseEntity<>(offlineToken.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(token.toString(), HttpStatus.CREATED);
     }
 
     private String getAuthenticatedUser(Authentication authentication) {

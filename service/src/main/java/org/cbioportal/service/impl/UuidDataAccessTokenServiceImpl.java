@@ -52,8 +52,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
 
 @Service
+@Component
 @Profile("dat.uuid")
 public class UuidDataAccessTokenServiceImpl implements DataAccessTokenService {
 

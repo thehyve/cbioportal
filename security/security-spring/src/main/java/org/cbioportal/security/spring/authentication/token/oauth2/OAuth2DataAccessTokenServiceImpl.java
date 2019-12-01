@@ -57,6 +57,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -66,6 +67,7 @@ import org.springframework.context.annotation.Profile;
 
 
 @Service
+@Component
 @Profile("dat.oauth2")
 public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService {
 

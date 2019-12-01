@@ -45,11 +45,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import org.springframework.context.annotation.Profile;
+
 @Service
-@Component("jwt")
+@Profile("dat.jwt")
 public class JwtDataAccessTokenServiceImpl implements DataAccessTokenService {
 
     @Autowired

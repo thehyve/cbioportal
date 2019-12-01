@@ -68,15 +68,8 @@ public class OtherDataAccessTokenController {
     private String[] USERS_WHO_CANNOT_USE_TOKENS;
     
     @Autowired
-    private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
-    
     private DataAccessTokenService tokenService;
     private Set<String> usersWhoCannotUseTokenSet;
-    
-    @PostConstruct
-    public void postConstruct() {
-        this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService(this.datMethod);
-    }
     
     @Autowired
     private void initializeUsersWhoCannotUseTokenSet() {

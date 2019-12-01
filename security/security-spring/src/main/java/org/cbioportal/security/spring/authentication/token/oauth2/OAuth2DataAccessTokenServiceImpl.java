@@ -48,7 +48,6 @@ import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -58,14 +57,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.context.annotation.Profile;
+
+
 @Service
-@Component("oauth2")
+@Profile("dat.oauth2")
 public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService {
 
     @Value("${dat.oauth2.jwkUrl:}")
@@ -88,9 +89,6 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
 
     @Value("${dat.oauth2.redirectUri:}")
     private String redirectUri;
-
-    @Autowired
-    OAuth2TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
     @Override
     // request offline token from authentication server via back channel

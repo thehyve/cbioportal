@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
 import org.cbioportal.service.exception.DataAccessTokenProhibitedUserException;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,15 +64,12 @@ public class OAuth2DataAccessTokenController {
     private String clientId;
     
     @Autowired
-    private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
-    
     private DataAccessTokenService tokenService;
     private String authorizationUrl;
     private String fileName;
 
     @PostConstruct
     public void postConstruct() {
-        this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService("oauth2");
         // FIXME: compose url using 3rd party lib <-- dangerous because of link forgery
         authorizationUrl = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", userAuthorizationUri, clientId, redirectUri);
     }

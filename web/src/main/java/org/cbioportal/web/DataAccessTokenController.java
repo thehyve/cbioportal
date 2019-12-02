@@ -73,13 +73,13 @@ public class DataAccessTokenController {
     private Boolean allowRevocationOfOtherTokens;
     
     // fields for OAuth2 token data access 
-    @Value("${dat.oauth2.userAuthorizationUri}")
+    @Value("${dat.oauth2.userAuthorizationUri:}")
     private String oauth2UserAuthorizationUri;
 
-    @Value("${dat.oauth2.redirectUri}")
+    @Value("${dat.oauth2.redirectUri:}")
     private String oauth2RedirectUri;
 
-    @Value("${dat.oauth2.clientId}")
+    @Value("${dat.oauth2.clientId:}")
 
     private String oauth2ClientId;
     private String oauth2AuthorizationUrl;

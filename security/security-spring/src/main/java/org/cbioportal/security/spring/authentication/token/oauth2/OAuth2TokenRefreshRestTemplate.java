@@ -51,13 +51,13 @@ public class OAuth2TokenRefreshRestTemplate extends RestTemplate {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${dat.oauth2.clientId}")
+    @Value("${dat.oauth2.clientId:}")
     private String clientId;
 
-    @Value("${dat.oauth2.clientSecret}")
+    @Value("${dat.oauth2.clientSecret:}")
     private String clientSecret;
 
-    @Value("${dat.oauth2.accessTokenUri}")
+    @Value("${dat.oauth2.accessTokenUri:}")
     private String accessTokenUri;
 
     public String getAccessToken(String offline_token) throws BadCredentialsException {

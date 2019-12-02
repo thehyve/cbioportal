@@ -56,9 +56,6 @@ import io.swagger.annotations.ApiParam;
 @Profile({"dat.uuid", "dat.jwt"})
 public class OtherDataAccessTokenController {
     
-    @Value("${dat.method}")
-    private String datMethod;
-
     @Value("${dat.uuid_revoke_other_tokens:false}")
     private Boolean allowRevocationOfOtherTokens;
     

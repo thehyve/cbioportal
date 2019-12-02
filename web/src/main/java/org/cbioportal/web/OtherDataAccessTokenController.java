@@ -96,15 +96,15 @@ public class OtherDataAccessTokenController {
         }
         return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens")
-    public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(HttpServletRequest request,
-    Authentication authentication) {
-        String userName = getAuthenticatedUser(authentication);
-        List<DataAccessToken> allDataAccessTokens = tokenService.getAllDataAccessTokens(userName);
-        return new ResponseEntity<>(allDataAccessTokens, HttpStatus.OK);
-    }
-    
+        
+        @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens")
+        public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(HttpServletRequest request,
+        Authentication authentication) {
+            String userName = getAuthenticatedUser(authentication);
+            List<DataAccessToken> allDataAccessTokens = tokenService.getAllDataAccessTokens(userName);
+            return new ResponseEntity<>(allDataAccessTokens, HttpStatus.OK);
+        }
+        
     @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens/{token}")
     public ResponseEntity<DataAccessToken> getDataAccessToken(
     @ApiParam(required = true, value = "token") @PathVariable String token) {

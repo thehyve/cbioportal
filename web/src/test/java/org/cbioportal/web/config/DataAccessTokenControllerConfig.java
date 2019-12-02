@@ -34,9 +34,7 @@ package org.cbioportal.web.config;
 
 import org.cbioportal.service.DataAccessTokenService;
 import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UuidDataAccessTokenServiceImpl;
-import org.cbioportal.web.DataAccessTokenController;
-
+import org.cbioportal.web.OtherDataAccessTokenController;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
@@ -69,7 +67,7 @@ public class DataAccessTokenControllerConfig {
     }
 
     @Bean
-    public DataAccessTokenController dataAccessTokenController() {
-        return new DataAccessTokenController();
+    public OtherDataAccessTokenController dataAccessTokenController() {
+        return new OtherDataAccessTokenController();
     }
 }

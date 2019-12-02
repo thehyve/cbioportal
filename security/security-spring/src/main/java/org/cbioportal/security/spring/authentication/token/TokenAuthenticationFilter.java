@@ -35,8 +35,6 @@ package org.cbioportal.security.spring.authentication.token;
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
@@ -60,9 +58,6 @@ import org.springframework.util.StringUtils;
  */
 @Component
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-
-    // TODO: can we remove the need for check of supported methods?
-    private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2");
 
     @Autowired
     private DataAccessTokenService tokenService;

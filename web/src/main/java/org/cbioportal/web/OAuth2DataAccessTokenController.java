@@ -20,7 +20,6 @@ package org.cbioportal.web;
 import java.io.IOException;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -57,9 +56,6 @@ public class OAuth2DataAccessTokenController {
     @Value("${dat.oauth2.userAuthorizationUri}")
     private String userAuthorizationUri;
     
-    @Value("${dat.oauth2.redirectUri}")
-    private String redirectUri;
-    
     @Value("${dat.oauth2.clientId}")
     private String clientId;
     
@@ -68,21 +64,29 @@ public class OAuth2DataAccessTokenController {
     private String authorizationUrl;
     private String fileName;
 
-    @PostConstruct
-    public void postConstruct() {
-        // FIXME: compose url using 3rd party lib <-- dangerous because of link forgery
-        authorizationUrl = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", userAuthorizationUri, clientId, redirectUri);
-    }
+    private final String REDIRECT_PATH = "/api/data-access-token/oauth2";
     
-    // this is the entrypoint for the cBioPortal frontend to download a single user token
+    // This is the entrypoint for the cBioPortal frontend to download a single user token
+    // The user is redirected to retrieve an access code (later used by the backend to 
+    // request an offline token).
     @RequestMapping("/data-access-token")
-    public ResponseEntity<String> downloadDataAccessToken(Authentication authentication, HttpServletRequest request, HttpServletResponse response,
-        @ApiParam(required = false, value = "file_name", defaultValue = "token.txt") @PathVariable String fileName) throws IOException {
+    public ResponseEntity<String> downloadDataAccessToken(final Authentication authentication, final HttpServletRequest request, final HttpServletResponse response,
+        @ApiParam(required = false, value = "file_name", defaultValue = "token.txt") @PathVariable final String fileName) throws IOException {
+
+        // The authorization url contains the redirect url as a url param
+        // The redirect url is resolved using the base url of the server to
+        // remove the need for an extra entry in portal.properties.
+        if (authorizationUrl == null) {
+            String url = request.getRequestURL().toString();
+            String baseURL = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath();
+            String redirectUri = baseURL + REDIRECT_PATH;
+            authorizationUrl = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", userAuthorizationUri, clientId, redirectUri);
+        }
 
         this.fileName = fileName;
 
         // redirect to authentication endpoint
-        HttpHeaders headers = new HttpHeaders();
+        final HttpHeaders headers = new HttpHeaders();
         headers.add("Location", authorizationUrl);
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
 
@@ -90,10 +94,10 @@ public class OAuth2DataAccessTokenController {
 
     // retrieve and trigger download OAuth2 offline token
     @RequestMapping("/data-access-token/oauth2")
-    public ResponseEntity<String> downloadOAuth2DataAccessToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> downloadOAuth2DataAccessToken(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         
-        String accessCode = request.getParameter("code");
-        DataAccessToken offlineToken = tokenService.createDataAccessToken(accessCode);
+        final String accessCode = request.getParameter("code");
+        final DataAccessToken offlineToken = tokenService.createDataAccessToken(accessCode);
 
         if (offlineToken == null) {
             throw new DataAccessTokenProhibitedUserException();
@@ -106,31 +110,31 @@ public class OAuth2DataAccessTokenController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/data-access-tokens", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DataAccessToken> createDataAccessToken(Authentication authentication,
-    @RequestParam(required = false) Boolean myAllowRevocationOfOtherTokens) throws HttpClientErrorException {
+    public ResponseEntity<DataAccessToken> createDataAccessToken(final Authentication authentication,
+    @RequestParam(required = false) final Boolean myAllowRevocationOfOtherTokens) throws HttpClientErrorException {
         throw new UnsupportedOperationException("this endpoint is does not apply to OAuth2 data access token method.");
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens")
-    public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(HttpServletRequest request,
-    Authentication authentication) {
+    public ResponseEntity<List<DataAccessToken>> getAllDataAccessTokens(final HttpServletRequest request,
+    final Authentication authentication) {
         throw new UnsupportedOperationException("this endpoint is does not apply to OAuth2 data access token method.");
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/data-access-tokens/{token}")
     public ResponseEntity<DataAccessToken> getDataAccessToken(
-        @ApiParam(required = true, value = "token") @PathVariable String token) {
+        @ApiParam(required = true, value = "token") @PathVariable final String token) {
         throw new UnsupportedOperationException("this endpoint is does not apply to OAuth2 data access token method.");
     
     }
     
     @RequestMapping(method = RequestMethod.DELETE, value = "/data-access-tokens")
-    public void revokeAllDataAccessTokens(Authentication authentication) {
+    public void revokeAllDataAccessTokens(final Authentication authentication) {
         throw new UnsupportedOperationException("this endpoint is does not apply to OAuth2 data access token method.");
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/data-access-tokens/{token}")
-    public void revokeDataAccessToken(@ApiParam(required = true, value = "token") @PathVariable String token) {
+    public void revokeDataAccessToken(@ApiParam(required = true, value = "token") @PathVariable final String token) {
         throw new UnsupportedOperationException("this endpoint is does not apply to OAuth2 data access token method.");
     }
 

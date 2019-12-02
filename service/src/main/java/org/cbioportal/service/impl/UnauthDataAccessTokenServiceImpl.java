@@ -37,11 +37,11 @@ import java.util.List;
 
 import org.cbioportal.model.DataAccessToken;
 import org.cbioportal.service.DataAccessTokenService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
-import org.springframework.context.annotation.Profile;
 
 
 /**
@@ -49,6 +49,7 @@ import org.springframework.context.annotation.Profile;
  * @author ochoaa
  */
 @Service
+@Component
 @Profile("dat.none")
 public class UnauthDataAccessTokenServiceImpl implements DataAccessTokenService {
 

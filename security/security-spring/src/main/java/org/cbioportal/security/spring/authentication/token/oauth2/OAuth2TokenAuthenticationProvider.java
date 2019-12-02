@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.cbioportal.service.DataAccessTokenService;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider
     OAuth2TokenRefreshRestTemplate tokenRefreshRestTemplate;
 
     @Autowired
-    OAuth2DataAccessTokenServiceImpl tokenService;
+    DataAccessTokenService tokenService;
 
     @Override
     public boolean supports(Class<?> authentication) {

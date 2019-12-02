@@ -33,8 +33,7 @@
         <b:property name="authenticationSuccessHandler" ref="tokenSuccessRedirectHandler"/>
     </b:bean>
 
-    <!-- TODO: check whether this component scan is really needed -->
-    <!-- make sure oauth2 token service is added to the spring context -->
+    <!-- make sure externally defined beans are added to the spring context -->
     <context:component-scan base-package="org.cbioportal.security.spring.authentication.token.oauth2"/>
 
     <!-- WARNING: if you define another authentication-manager AFTER this one, this one

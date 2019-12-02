@@ -47,10 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UnauthDataAccessTokenServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
@@ -66,24 +63,9 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
 
     // TODO: can we remove the need for check of supported methods?
     private final List<String> SUPPORTED_DAT_METHODS = Arrays.asList("uuid", "jwt", "oauth2");
-    @Value("${dat.method:none}") // default value is none
-    private String datMethod;
 
     @Autowired
-    private DataAccessTokenServiceFactory dataAccessTokenServiceFactory;
-
     private DataAccessTokenService tokenService;
-
-    // TODO: can we remove the need for check of supported methods?
-    @PostConstruct
-    public void postConstruct() {
-        if (datMethod == null || !SUPPORTED_DAT_METHODS.contains(datMethod)) {
-            this.tokenService = new UnauthDataAccessTokenServiceImpl();
-        }
-        else {
-            this.tokenService = this.dataAccessTokenServiceFactory.getDataAccessTokenService(this.datMethod);
-        }
-    }
 
     private static final String BEARER = "Bearer";
 
@@ -93,6 +75,12 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
         // allow any request to contain an authorization header
         super("/**");
     }
+
+    @PostConstruct
+    public void postConstruct() {
+        int o = 1;
+    }
+
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {

@@ -152,7 +152,7 @@ public class DataAccessTokenController {
     // this is the entrypoint for the cBioPortal frontend to download a single user token
     @RequestMapping("/data-access-token")
     public ResponseEntity<String> downloadDataAccessToken(Authentication authentication, HttpServletRequest request, HttpServletResponse response,
-        @ApiParam(required = false, value = "file_name", defaultValue = "token.txt") @PathVariable String fileName) throws IOException {
+        @RequestParam(required = false, value = "file_name", defaultValue = "token.txt") @PathVariable String fileName) throws IOException {
 
         if (datMethod.equals("oauth2")) {
 

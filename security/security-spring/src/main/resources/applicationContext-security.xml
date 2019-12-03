@@ -28,6 +28,9 @@
     -->
 
     <!-- Data Access Tokens beans -->
+    <!-- make sure externally defined beans are added to the spring context -->
+    <context:component-scan base-package="org.cbioportal.security.spring.authentication.token.oauth2"/>
+
     <b:bean id="tokenAuthenticationFilter" class="org.cbioportal.security.spring.authentication.token.TokenAuthenticationFilter">
         <b:property name="authenticationManager" ref="tokenAuthenticationManager" />
         <b:property name="authenticationSuccessHandler" ref="tokenSuccessRedirectHandler"/>
@@ -52,10 +55,9 @@
         <b:constructor-arg index="0" ref="tokenUserDetailsService" />
     </b:bean>
 
-    <b:bean id="oauth2TokenAuthenticationProvider" class="org.cbioportal.security.spring.authentication.token.oauth2.OAuth2TokenAuthenticationProvider" />
-
     <!-- Used to compare token returned by authentication-provider against portal user db tables -->
     <b:bean id="tokenUserDetailsService" class="org.cbioportal.security.spring.authentication.social.PortalUserDetailsService"/>
+
     <!-- End of Data Access Tokens beans -->
 
     <!-- beans shared across any authentication system -->

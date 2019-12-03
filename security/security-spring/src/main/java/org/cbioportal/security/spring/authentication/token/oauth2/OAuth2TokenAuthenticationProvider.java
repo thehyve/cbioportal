@@ -48,7 +48,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
+import org.springframework.stereotype.Component;
 
+@Component("oauth2TokenAuthenticationProvider")
 public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired

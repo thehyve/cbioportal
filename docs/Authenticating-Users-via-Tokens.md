@@ -27,20 +27,25 @@ mysql> describe data_access_tokens;
 ```
 In addition to storing the token (the unique number), its creation and expiration dates along with the associated username is also stored prior to presenting it to the user.  When the data access token is presented in a subsequent web service request, the cBioPortal compares the token presented in the request against this table for validity.  If the token exists in the table and has not yet expired, the request will be satisfied.  The creation date is used by the cBioPortal when a user requests a new data access token.  Based on the server configuration, if the number of outstanding data access tokens together with this new one exceeds the number of allowable data access tokens per user, the cBioPortal may refuse to present a new one or it may invalidate the oldest one before presenting the new one to the user.
 
+A third implementation makes use an external OAuth2-authentication provider and can integrate with single-sign on (SSO) solutions. The OAuth2 provider provides users with an __offline token__ that does not allow for direct access to protected cBioPortal resources. Instead, the offline token is passed to the OAuth2 authorization server that returns an __access token__, a short-lived permission to access cBioPortal resources. The access token contains up-to-date user permissions (the studies that the user is permitted to view). This implemetation ensures that any changes of user permissions registered at the authentication provider are effective immediately and do not relie on the expiration date of the token of the user. At any moment OAuth2 offline tokens can be revoked by the Authentication provider on a per-user basis. A step-by-step guide to configure KeyCloak to provide OAuth2 client functionality can be found <here>.
+
 ### Modifying Configuration
+The token access implementation can be specified with the `dat.method` Java parameter at startup of cBioPortal. Allowed values are `jwt`, `uuid`, `oauth2` and `none`. When no parameter is specified, `none` will be used as default value and access using tokens is not possible. 
+
+To for instance enable the JWT token implementation (at `...` other startup parameters are omitted for clarity):
+
+```
+java -Dauthenticate=social_auth_google -Ddat.method=jwt ... -jar /webapp-runner.jar /cbioportal-webapp
+```
+
 The following properties must be present in portal.properties in order to allow direct access to the cBioPortal web service when login is required:
 
-**Property**: dat.method (required)
-- **Description**: The desired data access token implementation.
-- **Permissible Values**: jwt, uuid, none
-- **Default Value**: none
-
-**Property**: dat.unauth_users (optional)
+**Property**: dat.unauth_users (optional, not used for dat.method = oauth2)
 - **Description**: A list of users that should not be allowed to download a data access token.
 - **Permissible Values**: A comma-delimited list of valid user names as found in the users table.
 - **Default Value**: anonymousUser
 
-**Property**: dat.ttl_seconds (required)
+**Property**: dat.ttl_seconds (required, not used for dat.method = oauth2)
 - **Description**: The time in seconds between token creation and token expiration.
 - **Permissible Values**: An integer value greater than zero.
 - **Default Value**: 2592000 (30 days)

@@ -36,7 +36,6 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -70,12 +69,6 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
         // allow any request to contain an authorization header
         super("/**");
     }
-
-    @PostConstruct
-    public void postConstruct() {
-        int o = 1;
-    }
-
 
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {

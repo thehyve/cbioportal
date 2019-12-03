@@ -63,8 +63,7 @@ public class DataAccessToken implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append("token: ").append(token).append("\n");
+        StringBuilder b = new StringBuilder().append("token: ").append(token).append("\n");
         if (creation != null) {
             b.append("creation_date: ").append(creation.toString()).append("\n");
         }

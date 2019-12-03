@@ -141,11 +141,10 @@ dat.jwt.secret_key=
 # OAuth2 token data access settings
 #dat.oauth2.clientId=<client-id>
 #dat.oauth2.clientSecret=<client-secret>
-#dat.oauth2.accessTokenUri=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/token
-#dat.oauth2.userAuthorizationUri=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/auth
-#dat.oauth2.issuer=<authorization-server-url>/auth/realms/cbio
-#dat.oauth2.jwkUrl=<authorization-server-url>/auth/realms/cbio/protocol/openid-connect/certs
-#dat.oauth2.redirectUri=<portal-url>/api/token/login
+#dat.oauth2.issuer=<token-issuer>
+#dat.oauth2.accessTokenUri=<authorization-server-url>/token
+#dat.oauth2.userAuthorizationUri=<authorization-server-url>/auth
+#dat.oauth2.jwkUrl=<authorization-server-url>/certs
 
 # study view settings
 # always show studies with this group

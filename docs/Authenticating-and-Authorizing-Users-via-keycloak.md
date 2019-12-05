@@ -270,11 +270,11 @@ With cBioPortal instances that require user authentication the API can be querie
 | Enabled      | ON      |   (default value) |
 | Consent Required      | OFF        |   (default value) |
 | Client Protocol      | openid-connect   |   (default value) |
-| Access Type | public      |     (default value) |
+| Access Type | confidential      |     (default value) |
 | Standard Flow Enabled | ON      |     (default value) |
 | Implicit Flow Enabled | OFF      |     (default value) |
 | Direct Access Grants Enabled | OFF      |    |
-| Service Accounts Enabled | OFF      |    |
+| Service Accounts Enabled | OFF      |  (default value)   |
 | Authorization Enabled | OFF      |  (default value)  |
 | Valid Redirect URIs | _url_/api/data-access-token/oauth2  |  _url_ refers to base url of cBioPortal instance |
 
@@ -285,7 +285,7 @@ Select `Client Id and Secret`. Take notice of the value of _Secret_ the secret f
 
 | parameter        | value  | comment  |
 | ------------- |:-------------:| -----:|
-| Client Authenticator     | Client Id and Secret |  |
+| Client Authenticator     | Client Id and Secret |   (default value) |
 
 ![](images/previews/oauth2_client_6.png)
 
@@ -302,7 +302,7 @@ Create a new _Audience_ mapper with name `cbioportal_api_audience`. This value w
 | Name       | cbioportal_api_audience |  |
 | Mapper Type     | Audience      |   |
 | Included Client Audience      | cbioportal_api      |    |
-| Add to ID token      | OFF        |    |
+| Add to ID token      | OFF        |  (default value)  |
 | Add to access token  | ON      |   (default value)  |
 
 ![](images/previews/oauth2_client_4.png)

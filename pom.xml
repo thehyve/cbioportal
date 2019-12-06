@@ -270,7 +270,7 @@
   </profiles>
 
   <properties>
-    <frontend.version>80438a03cefc1bf77be854de737909b113147d5e</frontend.version>
+    <frontend.version>5848d1f359c9f238020b136450fa3809cdb620c6</frontend.version>
     <frontend.groupId>com.github.thehyve</frontend.groupId>
     <slf4j.version>1.6.6</slf4j.version>
     <spring.version>4.3.14.RELEASE</spring.version>

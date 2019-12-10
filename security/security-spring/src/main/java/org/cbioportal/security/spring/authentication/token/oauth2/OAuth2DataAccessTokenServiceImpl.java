@@ -94,19 +94,19 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
     @Override
     // request offline token from authentication server via back channel
     public DataAccessToken createDataAccessToken(final String accessCode) {
-        
+
         HttpHeaders headers = new HttpHeaders();
-        
+
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("grant_type", "authorization_code");
         map.add("code", accessCode);
         map.add("client_id", clientId);
         map.add("client_secret", clientSecret);
         map.add("redirect_uri", redirectUri);
-        map.add("scope", "offline_access");
-        
+        map.add("scope", "openid offline_access"); // `openid must be included according to OIDC standards
+
         HttpEntity<MultiValueMap<String, String>> offlineRequest = new HttpEntity<>(map, headers);
-        
+
         ResponseEntity<String> response = new RestTemplate().postForEntity(accessTokenUri, offlineRequest, String.class);
 
         String offlineToken = "";

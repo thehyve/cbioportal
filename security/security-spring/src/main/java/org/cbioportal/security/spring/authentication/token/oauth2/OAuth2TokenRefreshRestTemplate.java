@@ -71,9 +71,12 @@ public class OAuth2TokenRefreshRestTemplate extends RestTemplate {
         map.add("refresh_token", offline_token);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-        ResponseEntity<String> response = postForEntity(accessTokenUri, request, String.class);
+
+        ResponseEntity<String> response = null;
 
         try {
+            response = postForEntity(accessTokenUri, request, String.class);
+
             String accessToken = new ObjectMapper().readTree(response.getBody()).get("access_token").asText();
             logger.debug("Received access token from authentication server:\n" + accessToken);
             return accessToken;

@@ -65,13 +65,9 @@ script:
           -e \
           -U \
           -Ppublic \
-          -Dauthenticate=false \
-          -Dfinal.war.name=cbioportal \
           -Ddb.test.username=cbio_user \
           -Ddb.test.password=somepassword \
-          clean \
-          install \
-          integration-test
+          install
   fi
 - |
   if [[ "${TEST}" == end-to-end ]]

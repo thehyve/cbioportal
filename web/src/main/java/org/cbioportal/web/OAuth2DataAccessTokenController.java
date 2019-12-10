@@ -18,6 +18,9 @@
 package org.cbioportal.web;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -53,27 +56,31 @@ import io.swagger.annotations.ApiParam;
 @Api(tags = "Data Access Tokens", description = " ")
 @Profile("dat.oauth2")
 public class OAuth2DataAccessTokenController {
-    
+
     @Value("${dat.oauth2.userAuthorizationUri}")
     private String userAuthorizationUri;
-    
+
     @Value("${dat.oauth2.redirectUri}")
     private String redirectUri;
-    
+
     @Value("${dat.oauth2.clientId}")
     private String clientId;
-    
+
     @Autowired
     private DataAccessTokenService tokenService;
     private String authorizationUrl;
     private String fileName;
 
     @PostConstruct
-    public void postConstruct() {
-        // FIXME: compose url using 3rd party lib <-- dangerous because of link forgery
-        authorizationUrl = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s", userAuthorizationUri, clientId, redirectUri);
+    public void postConstruct() throws UnsupportedEncodingException {
+        
+        String scopeEncoded = URLEncoder.encode("openid offline_access", StandardCharsets.UTF_8.toString());
+        String clientIdEncoded = URLEncoder.encode(clientId, StandardCharsets.UTF_8.toString());
+        String redirUriEncode = URLEncoder.encode(redirectUri, StandardCharsets.UTF_8.toString());
+
+        authorizationUrl = String.format("%s?response_type=%s&scope=%s&client_id=%s&redirect_uri=%s", userAuthorizationUri, "code", scopeEncoded, clientIdEncoded, redirUriEncode);
     }
-    
+
     // this is the entrypoint for the cBioPortal frontend to download a single user token
     @RequestMapping("/data-access-token")
     public ResponseEntity<String> downloadDataAccessToken(Authentication authentication, HttpServletRequest request, HttpServletResponse response,

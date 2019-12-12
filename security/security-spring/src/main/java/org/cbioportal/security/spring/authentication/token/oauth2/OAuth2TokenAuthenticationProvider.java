@@ -77,10 +77,7 @@ public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider
         
         Set<GrantedAuthority> authorities = extractAuthorities(accessToken);
 
-        Authentication auth = new OAuth2BearerAuthenticationToken(authorities);
-        auth.setAuthenticated(true);
-
-        return auth;
+        return new OAuth2BearerAuthenticationToken(authentication.getPrincipal(), authorities);
     }
 
     private Set<GrantedAuthority> extractAuthorities(final String token) throws BadCredentialsException {

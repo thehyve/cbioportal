@@ -188,7 +188,7 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
             return null;
         }
 
-        return extractUserName(claimsMap);
+        return extractSubject(claimsMap);
     }
 
     @Override
@@ -196,9 +196,9 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
         return null;
     }
 
-    private String extractUserName(final JsonNode claimsMap) {
+    private String extractSubject(final JsonNode claimsMap) {
         String userName;
-        userName = claimsMap.get("user_name").asText();
+        userName = claimsMap.get("sub").asText();
         return userName;
     }
 
@@ -224,7 +224,8 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
     @Override
     public Authentication createAuthenticationRequest(String offlineToken) {
         // validity of the offline token is checked by the OAuth2 authentication server
-        return new OAuth2BearerAuthenticationToken(offlineToken);
+        String principal = getUsername(offlineToken);
+        return new OAuth2BearerAuthenticationToken(principal, offlineToken);
     }
 
 }

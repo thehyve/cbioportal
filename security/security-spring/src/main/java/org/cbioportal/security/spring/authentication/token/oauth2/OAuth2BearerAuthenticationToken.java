@@ -45,15 +45,19 @@ public class OAuth2BearerAuthenticationToken extends AbstractAuthenticationToken
 
     private static final long serialVersionUID = 1L;
     private final String accessToken;
+    private final Object principal;
 
-    public OAuth2BearerAuthenticationToken(String accessToken) {
+    public OAuth2BearerAuthenticationToken(Object principal, String accessToken) {
         super(new HashSet<>());
         this.accessToken = accessToken;
+        this.principal = principal;
     }
-
-    public OAuth2BearerAuthenticationToken(Collection<? extends GrantedAuthority> authorities) {
+    
+    public OAuth2BearerAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         accessToken = null;
+        this.principal = principal;
+        setAuthenticated(true);
     }
 
     @Override
@@ -63,7 +67,8 @@ public class OAuth2BearerAuthenticationToken extends AbstractAuthenticationToken
 
     @Override
     public Object getPrincipal() {
-        return null;
+        return principal;
     }
+
 
 }

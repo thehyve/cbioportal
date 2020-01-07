@@ -33,13 +33,8 @@
 package org.cbioportal.web.config;
 
 import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.UuidDataAccessTokenServiceImpl;
 import org.cbioportal.web.DataAccessTokenController;
-
-import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,19 +44,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class DataAccessTokenControllerConfig {
-    @Bean
-    public ServiceLocatorFactoryBean tokenServiceFactory() {
-        ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
-        factoryBean.setServiceLocatorInterface(DataAccessTokenServiceFactory.class);
-        return factoryBean;
-    }
-
-    @Bean
-    public DataAccessTokenServiceFactory dataAccessTokenServiceFactory() {
-        DataAccessTokenServiceFactory factory = Mockito.mock(DataAccessTokenServiceFactory.class);
-        Mockito.when(factory.getDataAccessTokenService(Matchers.anyString())).thenReturn(tokenService());
-        return factory;
-    }
 
     @Bean
     public DataAccessTokenService tokenService() {
@@ -72,4 +54,5 @@ public class DataAccessTokenControllerConfig {
     public DataAccessTokenController dataAccessTokenController() {
         return new DataAccessTokenController();
     }
+    
 }

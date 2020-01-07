@@ -48,18 +48,18 @@
 
 package org.cbioportal.security.spring.authentication.token;
 
-import org.cbioportal.security.spring.authentication.social.PortalUserDetailsService;
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.service.DataAccessTokenServiceFactory;
-import org.cbioportal.service.impl.JwtDataAccessTokenServiceImpl;
-import org.cbioportal.service.util.JwtUtils;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.cbioportal.security.spring.authentication.social.PortalUserDetailsService;
+import org.cbioportal.service.DataAccessTokenService;
+import org.cbioportal.service.impl.JwtDataAccessTokenServiceImpl;
+import org.cbioportal.service.util.JwtUtils;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -92,20 +92,6 @@ public class TokenAuthenticationFilterTestConfiguration {
         TokenAuthenticationFilter filter = new TokenAuthenticationFilter();
         filter.setAuthenticationManager(authenticationManager());
         return filter;
-    }
-
-    @Bean
-    public ServiceLocatorFactoryBean tokenServiceFactory() {
-        ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
-        factoryBean.setServiceLocatorInterface(DataAccessTokenServiceFactory.class);
-        return factoryBean;
-    }
-
-    @Bean
-    public DataAccessTokenServiceFactory dataAccessTokenServiceFactory() {
-        DataAccessTokenServiceFactory factory = Mockito.mock(DataAccessTokenServiceFactory.class);
-        Mockito.when(factory.getDataAccessTokenService(Matchers.anyString())).thenReturn(tokenService());
-        return factory;
     }
 
     @Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Memorial Sloan-Kettering Cancer Center.
+ * Copyright (c) 2020 The Hyve B.V.
  *
  * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS
@@ -29,29 +29,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 package org.cbioportal.web.config;
 
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.web.DataAccessTokenController;
-import org.mockito.Mockito;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
-/**
- *
- * @author ochoaa
- */
-@Configuration
-public class DataAccessTokenControllerConfig {
+public class OtherDatMethodCondition implements Condition {
 
-    @Bean
-    public DataAccessTokenService tokenService() {
-        return Mockito.mock(DataAccessTokenService.class);
+    public OtherDatMethodCondition() {
+        super();
     }
 
-    @Bean
-    public DataAccessTokenController dataAccessTokenController() {
-        return new DataAccessTokenController();
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String datMethod = context.getEnvironment().getProperty("dat.method");
+        return datMethod != null && ! datMethod.equalsIgnoreCase("oauth2");
     }
+
 }

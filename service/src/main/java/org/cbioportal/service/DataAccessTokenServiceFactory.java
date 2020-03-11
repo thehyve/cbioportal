@@ -30,28 +30,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.cbioportal.web.config;
-
-import org.cbioportal.service.DataAccessTokenService;
-import org.cbioportal.web.DataAccessTokenController;
-import org.mockito.Mockito;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package org.cbioportal.service;
 
 /**
  *
  * @author ochoaa
  */
-@Configuration
-public class DataAccessTokenControllerConfig {
-
-    @Bean
-    public DataAccessTokenService tokenService() {
-        return Mockito.mock(DataAccessTokenService.class);
-    }
-
-    @Bean
-    public DataAccessTokenController dataAccessTokenController() {
-        return new DataAccessTokenController();
-    }
+public interface DataAccessTokenServiceFactory {
+    DataAccessTokenService getDataAccessTokenService(String dataAccessTokenServiceType);
 }

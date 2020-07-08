@@ -2158,7 +2158,7 @@ class MutationsExtendedValidator(Validator):
 
     def checkMutationStatus(self, value):
         """Check values in mutation status column."""
-        if value.lower() in ['loh', 'none', 'wildtype']:
+        if value.lower() in ['none', 'wildtype']:
             self.logger.info('Mutation will not be loaded due to value in Mutation_Status',
                                 extra={'line_number': self.line_number, 'cause': value})
         if value.lower() not in ['none', 'germline', 'somatic', 'loh', 'post-transcriptional modification', 'unknown', 'wildtype'] and value != '':

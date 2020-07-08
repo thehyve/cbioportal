@@ -37,7 +37,7 @@ IMPORT_CASE_LIST_CLASS = "org.mskcc.cbio.portal.scripts.ImportSampleList"
 ADD_CASE_LIST_CLASS = "org.mskcc.cbio.portal.scripts.AddCaseList"
 VERSION_UTIL_CLASS = "org.mskcc.cbio.portal.util.VersionUtil"
 
-# provides a key for data types to metafile specification dict.  
+# provides a key for data types to metafile specification dict.
 class MetaFileTypes(object):
     """how we differentiate between data types."""
     STUDY = 'meta_study'
@@ -85,7 +85,8 @@ META_FIELD_MAP = {
         'pmid': False,
         'groups': False,
         'add_global_case_list': False,
-        'tags_file': False
+        'tags_file': False,
+        'namespaces': False
     },
     MetaFileTypes.SAMPLE_ATTRIBUTES: {
         'cancer_study_identifier': True,
@@ -274,7 +275,7 @@ META_FIELD_MAP = {
         'cancer_study_identifier': True,
         'genetic_alteration_type': True,
         'datatype': True,
-        'stable_id': True,      
+        'stable_id': True,
         'show_profile_in_analysis_tab': True,
         'profile_name': True,
         'profile_description': True,

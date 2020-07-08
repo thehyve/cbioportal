@@ -31,6 +31,34 @@ class ValidateDataSystemTester(unittest.TestCase):
     the html report when requested?", etc)
     '''
 
+    @classmethod
+    def setUpClass(cls):
+        """Override a static method to skip a UCSC HTTP query in each test."""
+        super(ValidateDataSystemTester, cls).setUpClass()
+        @staticmethod
+        def load_chromosome_lengths(genome_build, _):
+            if genome_build == 'hg19':
+                return {'1': 249250621, '10': 135534747, '11': 135006516,
+                        '12': 133851895, '13': 115169878, '14': 107349540,
+                        '15': 102531392, '16': 90354753, '17': 81195210,
+                        '18': 78077248, '19': 59128983, '2': 243199373,
+                        '20': 63025520, '21': 48129895, '22': 51304566,
+                        '3': 198022430, '4': 191154276, '5': 180915260,
+                        '6': 171115067, '7': 159138663, '8': 146364022,
+                        '9': 141213431, 'X': 155270560, 'Y': 59373566}
+            else:
+                raise ValueError(
+                    "load_chromosome_lengths() called with genome build '{}'".format(
+                        genome_build))
+        cls.orig_chromlength_method = validateData.SegValidator.load_chromosome_lengths
+        validateData.Validator.load_chromosome_lengths = load_chromosome_lengths
+
+    @classmethod
+    def tearDownClass(cls):
+        """Restore the environment to before setUpClass() was called."""
+        validateData.Validator.load_chromosome_lengths = cls.orig_chromlength_method
+        super(ValidateDataSystemTester, cls).tearDownClass()
+
     def setUp(self):
         _resetClassVars()
 

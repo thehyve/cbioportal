@@ -1340,7 +1340,8 @@ class MutationsExtendedValidator(Validator):
         'cbp_driver_tiers': 'checkDriverTiers',
         'cbp_driver_annotation': 'checkFilterAnnotation',
         'cbp_driver_tiers_annotation': 'checkFilterAnnotation',
-        'Mutation_Status': 'checkMutationStatus'
+        'Mutation_Status': 'checkMutationStatus',
+        'ZYGOSITY.status': 'checkZygosityStatus'
     }
 
     def __init__(self, *args, **kwargs):
@@ -1408,11 +1409,14 @@ class MutationsExtendedValidator(Validator):
         namespaces = []
         missing_ascn_columns = []
         ascn_namespace_defined = False
+        zygosity_namespace_defined = False
         if 'namespaces' in self.meta_dict:
             namespaces = self.meta_dict['namespaces'].split(',')
             for namespace in namespaces:
                 if 'ascn' == namespace.strip().lower():
                     ascn_namespace_defined = True
+                if 'zygosity' == namespace.strip().lower():
+                    zygosity_namespace_defined = True
 
         if ascn_namespace_defined:
             for required_ascn_column in self.REQUIRED_ASCN_COLUMNS:
@@ -1422,6 +1426,12 @@ class MutationsExtendedValidator(Validator):
                 self.logger.error('ASCN namespace defined but MAF '
                                   'missing required ASCN columns. '
                                   'Missing %s' % (','.join(missing_ascn_columns)))
+                num_errors += 1
+
+        if zygosity_namespace_defined:
+            if 'ZYGOSITY.status' not in self.cols:
+                self.logger.error('ZYGOSITY namespace defined but MAF '
+                                  'is missing required ZYGOSITY.status column.')
                 num_errors += 1
 
         for namespace in namespaces:
@@ -2163,6 +2173,13 @@ class MutationsExtendedValidator(Validator):
                                 extra={'line_number': self.line_number, 'cause': value})
         if value.lower() not in ['none', 'germline', 'somatic', 'loh', 'post-transcriptional modification', 'unknown', 'wildtype'] and value != '':
             self.logger.warning('Mutation_Status value is not in MAF format',
+                                extra={'line_number': self.line_number, 'cause': value})
+        return True
+
+    def checkZygosityStatus(self, value):
+        """Check values in mutation status column."""
+        if value.lower() not in ['homozygous', 'heterozygous'] and value != '':
+            self.logger.error('Incorrect value in ZYGOSITY.status column (allowed are "homozygous" and "heterozygous")',
                                 extra={'line_number': self.line_number, 'cause': value})
         return True
 

@@ -225,7 +225,7 @@ class UniqueColumnTestCase(PostClinicalDataFileTestCase):
         def parseFeatureColumns(self, nonsample_col_vals):
             return
         def checkValue(self, value, column_index):
-            return 
+            return
 
     def test_uniquecolumns_are_accepted(self):
         self.logger.setLevel(logging.ERROR)
@@ -412,10 +412,10 @@ class PatientAttrFileTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.column_number, 3)
         self.assertEqual(record.cause, '0:ALIVE')
         # DFS_STATUS having an OS_STATUS value
-        record = next(record_iterator)	
-        self.assertEqual(record.levelno, logging.ERROR)	
-        self.assertEqual(record.line_number, 7)	
-        self.assertEqual(record.column_number, 5)	
+         record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual(record.line_number, 7)
+        self.assertEqual(record.column_number, 5)
         self.assertEqual(record.cause, '0:LIVING')
         # PFS_STATUS not start with 0 / 1
         record = next(record_iterator)
@@ -423,7 +423,7 @@ class PatientAttrFileTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.line_number, 8)
         self.assertEqual(record.column_number, 7)
         self.assertEqual(record.cause, 'PROGRESSION')
-        # wrong casing for OS_STATUS	
+        # wrong casing for OS_STATUS
         record = next(record_iterator)
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(record.line_number, 9)
@@ -443,7 +443,7 @@ class PatientAttrFileTestCase(PostClinicalDataFileTestCase):
                       'will be excluded from survival curve and month of death '
                       'will not be shown on patient view timeline.',
                       record.getMessage())
-        
+
     def test_patient_with_invalid_characters_in_patient_id(self):
         """Test when a invalid characters are found in PATIENT_ID."""
         self.logger.setLevel(logging.WARNING)
@@ -480,14 +480,14 @@ class PatientAttrFileTestCase(PostClinicalDataFileTestCase):
 
 
 class TimelineValuesDataValidationTest(DataFileTestCase):
-    
+
     """Test values specific to timeline files are appropriately validated."""
-    
+
     def test_start_date_validation_TimelineValidator(self):
         """timeline validator requires START_DATE in timeline values to
            have a non-'NA' value.
         """
-        
+
         # set level according to this test case:
         self.logger.setLevel(logging.ERROR)
         record_list = self.validate('data_timeline_invalid_start_date.txt',
@@ -497,7 +497,7 @@ class TimelineValuesDataValidationTest(DataFileTestCase):
             self.assertEqual("ERROR", error.levelname)
             self.assertIn("Invalid START_DATE", error.getMessage())
 
-        
+
 # TODO: make tests in this testcase check the number of properly defined types
 class CancerTypeFileValidationTestCase(DataFileTestCase):
 
@@ -1013,7 +1013,7 @@ class FeatureWiseValuesTestCase(PostClinicalDataFileTestCase):
             self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual("Gene sets column in score and p-value file are not equal. The same set of gene sets should be used in the score and p-value files for this study. Please ensure that all gene set id's of one file are present in the other gene set data file.", record.getMessage())
         return
-        
+
 class MultipleDataFileValidatorTestCase(unittest.TestCase):
 
     def feature_id_is_accepted(self):
@@ -1165,7 +1165,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         record = next(record_iterator)
         self.assertEqual(record.line_number, 11)
         self.assertIn('Allele Based column Reference_Allele contains invalid character.', record.getMessage())
-        
+
     def test_special_allele_cases(self):
         """Test errors in mutation file which contain special cases of the Allele Based columns"""
         # set level according to this test case:
@@ -1173,7 +1173,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         # Test file is a variant on test_output.custom_isoforms.maf from vcf2maf
         record_list = self.validate('mutations/data_mutations_check_special_cases_allele.maf',
                                     validateData.MutationsExtendedValidator, None, True, True)
-        
+
         # We expect 3 errors
         self.assertEqual(len(record_list), 3)
         record_iterator = iter(record_list)
@@ -1202,7 +1202,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         # Test file is a variant on mutation file from study_es_0
         record_list = self.validate('mutations/data_mutations_validation_status.maf',
                                     validateData.MutationsExtendedValidator, None, True, True)
-        
+
         # We expect 6 errors
         self.assertEqual(len(record_list), 6)
         record_iterator = iter(record_list)
@@ -1236,6 +1236,8 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertIn('When Validation_Status is valid and Mutation_Status is Somatic, the Match_Norm_Validation_Allele'
                       ' columns should be equal to the Reference Allele and one of the Tumor_Validation_Allele columns'
                       ' should not be.', record.getMessage())
+
+          # TODO implement data consistency test for lines where Mutation_Status is LOH
 
     def test_warning_for_missing_SWISSPROT(self):
         """If SWISSPROT is missing (or present and empty), user should be warned about it"""
@@ -1436,7 +1438,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record_list[4].levelno, logging.INFO)
 
     def test_customized_variants_skipped(self):
-        
+
         """Test if customized mutations are skipped with a message."""
         # set level according to this test case:
         self.logger.setLevel(logging.INFO)
@@ -1449,14 +1451,14 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         # we expect 6 infos: 4 about filtered mutations, 2 general info messages:
         self.assertEqual(len(record_list), 6)
         # First 3 INFO messages should be something like: "Line will not be loaded due to the variant classification filter. Filtered types:"
-        for record in record_list[:4]: 
+        for record in record_list[:4]:
             self.assertIn("filtered types", record.getMessage().lower())
-        
+
         # restore the default skipped variant types
         validateData.MutationsExtendedValidator.SKIP_VARIANT_TYPES = old_variant_types
-               
+
     def test_isValidGenePosition(self):
-        """Test if proper warnings/errors are given for wrong/blank gene positions 
+        """Test if proper warnings/errors are given for wrong/blank gene positions
         (Start_Position and End_Position) change vals."""
         # set level according to this test case:
         self.logger.setLevel(logging.ERROR)
@@ -1487,11 +1489,11 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertIn('The end position of this variant is not '
                       'an integer', record.getMessage())
-        
+
     def test_absence_custom_values_columns_when_custom_annotation_columns(self):
-        """Test that the validator raises an error when the 
+        """Test that the validator raises an error when the
         cbp_driver_annotation and the cbp_driver_tiers_annotation
-        columns are present but the cbp_driver and the 
+        columns are present but the cbp_driver and the
         cbp_driver_tiers columns are not.
         """
         # set level according to this test case:
@@ -1502,13 +1504,13 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 5 ERRORs :
         self.assertEqual(len(record_list), 5)
-        
+
         # First 2 ERRORs should be something like: "Column X found without any X column"
         self.assertIn("found without any", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
         self.assertIn("found without any", record_list[1].getMessage().lower())
         self.assertEqual(record_list[1].levelno, logging.ERROR)
-        
+
         # Last 3 ERRORs should be something like: "This line has no value for X and a value for Y. Please, fill the Z column."
         self.assertIn("please, fill the", record_list[2].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
@@ -1516,11 +1518,11 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record_list[0].levelno, logging.ERROR)
         self.assertIn("please, fill the", record_list[4].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
-    
+
     def test_absence_custom_annotation_columns_when_custom_values_columns(self):
-        """Test that the validator raises an error when the 
-        cbp_driver and the cbp_driver_tiers columns are present 
-        but the cbp_driver_annotation and the 
+        """Test that the validator raises an error when the
+        cbp_driver and the cbp_driver_tiers columns are present
+        but the cbp_driver_annotation and the
         cbp_driver_tiers_annotation columns are not.
         """
         # set level according to this test case:
@@ -1531,13 +1533,13 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 5 ERRORs :
         self.assertEqual(len(record_list), 5)
-        
+
         # First 2 ERRORs should be something like: "Column X found without any Y column"
         self.assertIn("found without any", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
         self.assertIn("found without any", record_list[1].getMessage().lower())
         self.assertEqual(record_list[1].levelno, logging.ERROR)
-        
+
         # Last 3 ERRORs should be something like: "This line has no value for X and a value for Y. Please, fill the annotation column."
         self.assertIn("please, fill the annotation column", record_list[2].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
@@ -1545,7 +1547,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record_list[0].levelno, logging.ERROR)
         self.assertIn("please, fill the annotation column", record_list[4].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
-        
+
     def test_empty_custom_annotation_fields(self):
         """Test that the validator raises errors when one multiclass
         column is empty and the other is full, and that the binary
@@ -1560,13 +1562,13 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 2 ERRORs :
         self.assertEqual(len(record_list), 2)
-        
+
         # 2 ERRORs should be something like: "This line has no value for X and a value for Y. Please, fill the Z column."
         self.assertIn("please, fill the", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
         self.assertIn("please, fill the", record_list[1].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
-    
+
     def test_warning_more_than_10_types_in_driver_class(self):
         """Test that the validator raises a warning when the column
         cbp_driver_tiers contains more than 10 types.
@@ -1579,7 +1581,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 3 WARNINGs :
         self.assertEqual(len(record_list), 3)
-        
+
         # WARNINGs should be something like: "cbp_driver_tiers contains more than 10 different values"
         self.assertIn("cbp_driver_tiers contains more than 10 different tiers.", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.WARNING)
@@ -1587,7 +1589,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record_list[1].levelno, logging.WARNING)
         self.assertIn("cbp_driver_tiers contains more than 10 different tiers.", record_list[2].getMessage().lower())
         self.assertEqual(record_list[2].levelno, logging.WARNING)
-        
+
     def test_annotation_more_than_80_characters_in_custom_annotation_columns(self):
         """Test if the validator raises an error if any value of the annotation
         columns has more than 80 characters.
@@ -1600,11 +1602,11 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 1 ERROR :
         self.assertEqual(len(record_list), 1)
-        
+
         # ERROR should be something like: "cbp_driver_annotation and cbp_driver_tiers_annotation columns do not support annotations longer than 80 characters"
         self.assertIn("columns do not support annotations longer than 80 characters", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
-        
+
     def test_not_supported_custom_driver_annotation_values(self):
         """Test if the validator raises an error if any value of the
         cbp_driver is not Putative_Passenger or
@@ -1618,13 +1620,13 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 1 ERROR :
         self.assertEqual(len(record_list), 1)
-        
+
         # ERROR should be something like: "Only "Putative_Passenger", "Putative_Driver", "NA", "Unknown" and "" (empty) are allowed."
         self.assertIn('only "putative_passenger", "putative_driver", "na", "unknown" and "" (empty) are allowed.', record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
-        
+
     def test_custom_driver_column_more_than_50_characters(self):
-        """Test if the validator raises an error if any value of the 
+        """Test if the validator raises an error if any value of the
         cbp_driver_tiers column has more than 50 characters.
         """
         # set level according to this test case:
@@ -1635,7 +1637,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                             'swissprot_identifier': 'name'})
         # we expect 1 ERROR :
         self.assertEqual(len(record_list), 1)
-        
+
         # ERROR should be something like: "cbp_driver_tiers column does not support values longer than 50 characters"
         self.assertIn("does not support values longer than 50 characters", record_list[0].getMessage().lower())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
@@ -1699,12 +1701,6 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.levelno, logging.INFO)
         self.assertEqual(record.line_number, 3)
         self.assertEqual(record.cause, 'None')
-        self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
-        # Expected info message due to value "loh" in Mutation_Status
-        record = next(record_iterator)
-        self.assertEqual(record.levelno, logging.INFO)
-        self.assertEqual(record.line_number, 5)
-        self.assertEqual(record.cause, 'loh')
         self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
         # Expected info message due to value "Wildtype" in Mutation_Status
         record = next(record_iterator)
@@ -2143,7 +2139,7 @@ class StudyCompositionTestCase(LogBufferTestCase):
                          {'cancer_type_luad.txt', 'cancer_type_lung.txt'})
         # assert that the second error complains about the cancer type
         self.assertEqual(record_list[1].cause, 'luad')
-        
+
     def test_invalid_tags_file(self):
         """Test if an error is reported when giving a study tags file with wrong format."""
         with temp_inputfolder({
@@ -2187,7 +2183,7 @@ class StudyCompositionTestCase(LogBufferTestCase):
             for record in record_list:
                 self.assertEqual(record.levelno, logging.ERROR)
                 self.assertIn('yaml', record.getMessage().lower())
-                
+
     def test_valid_JSON_tags_file(self):
         """Test if no errors are reported when giving a study tags file in JSON format."""
         with temp_inputfolder({
@@ -2229,7 +2225,7 @@ class StudyCompositionTestCase(LogBufferTestCase):
             self.assertEqual(len(record_list), 0)
             for record in record_list:
                 self.assertEqual(record.levelno, logging.ERROR)
-    
+
     def test_valid_YAML_tags_file(self):
         """Test if no errors are reported when giving a study tags file in YAML format."""
         with temp_inputfolder({
@@ -2483,11 +2479,11 @@ class MetaFilesTestCase(LogBufferTestCase):
         record_list = self.get_log_records()
         # expecting 1 error:
         self.assertEqual(len(record_list), 1)
-        
+
         # Should raise an error when show_profile_in_analysis_tab is not false for non-discrete CNA metafile
         record = record_list.pop()
         self.assertEqual("The 'show_profile_in_analysis_tab' setting must be 'false', as this is only applicable for CNA data of the DISCRETE type.", record.getMessage())
-                
+
 class HeaderlessClinicalDataValidationTest(PostClinicalDataFileTestCase):
 
     """Tests for validation of clinical data files without metadata headers.
@@ -2560,11 +2556,11 @@ class DataFileIOTestCase(PostClinicalDataFileTestCase):
 
 def _resetMultipleFileHandlerClassVars():
     """Reset the state of classes that check mulitple files of the same type.
-    
-    GsvaWiseFileValidator classes check 
+
+    GsvaWiseFileValidator classes check
     consistency between multiple data files by collecting information in class variables.
     This implementation is not consistent with the unit test environment that simulates
-    different studies to be loaded. To ensure real-world fucntionality the class variables 
+    different studies to be loaded. To ensure real-world fucntionality the class variables
     should be reset before each unit test that tests multi file consistency."""
 
     for c in [ validateData.GsvaWiseFileValidator ]:

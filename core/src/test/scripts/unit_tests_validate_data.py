@@ -80,19 +80,48 @@ class LogBufferTestCase(unittest.TestCase):
     to standard output.
     """
 
+    @classmethod
+    def setUpClass(cls):
+        """Override a static method to skip a UCSC HTTP query in each test."""
+        super(LogBufferTestCase, cls).setUpClass()
+        @staticmethod
+        def load_chromosome_lengths(genome_build, _):
+            if genome_build == 'hg19':
+                return {'1': 249250621, '10': 135534747, '11': 135006516,
+                        '12': 133851895, '13': 115169878, '14': 107349540,
+                        '15': 102531392, '16': 90354753, '17': 81195210,
+                        '18': 78077248, '19': 59128983, '2': 243199373,
+                        '20': 63025520, '21': 48129895, '22': 51304566,
+                        '3': 198022430, '4': 191154276, '5': 180915260,
+                        '6': 171115067, '7': 159138663, '8': 146364022,
+                        '9': 141213431, 'X': 155270560, 'Y': 59373566}
+            else:
+                raise ValueError(
+                    "load_chromosome_lengths() called with genome build '{}'".format(
+                        genome_build))
+        cls.orig_chromlength_method = validateData.SegValidator.load_chromosome_lengths
+        validateData.Validator.load_chromosome_lengths = load_chromosome_lengths
+
+    @classmethod
+    def tearDownClass(cls):
+        """Restore the environment to before setUpClass() was called."""
+        validateData.Validator.load_chromosome_lengths = cls.orig_chromlength_method
+        super(LogBufferTestCase, cls).tearDownClass()
+
     def setUp(self):
-        """Set up a logger with a buffering handler."""
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.setLevel(logging.DEBUG)
-        # add a handler to buffer log records for validation
-        self.buffer_handler = logging.handlers.BufferingHandler(capacity=1e6)
-        self.logger.addHandler(self.buffer_handler)
-        # add a handler to pretty-print log messages to the output
-        self.output_handler = logging.StreamHandler(sys.stdout)
-        self.output_handler.setFormatter(
-            cbioportal_common.LogfileStyleFormatter(
-                'test_data/'))
-        self.logger.addHandler(self.output_handler)
+            """Set up a logger with a buffering handler."""
+            self.logger = logging.getLogger(self.__class__.__name__)
+            self.logger.setLevel(logging.DEBUG)
+            # add a handler to buffer log records for validation
+            self.buffer_handler = logging.handlers.BufferingHandler(capacity=1e6)
+            self.logger.addHandler(self.buffer_handler)
+            # add a handler to pretty-print log messages to the output
+            self.output_handler = logging.StreamHandler(sys.stdout)
+            self.output_handler.setFormatter(
+                cbioportal_common.LogfileStyleFormatter(
+                    'test_data/'))
+            self.logger.addHandler(self.output_handler)
+            print(self.shortDescription())
 
     def tearDown(self):
         """Remove the logger handlers (and any buffers they may have)."""
@@ -1846,34 +1875,6 @@ class StructuralVariantValidationTestCase(PostClinicalDataFileTestCase):
 class SegFileValidationTestCase(PostClinicalDataFileTestCase):
 
     """Tests for the various validations of data in segment CNA data files."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Override a static method to skip a UCSC HTTP query in each test."""
-        super(SegFileValidationTestCase, cls).setUpClass()
-        @staticmethod
-        def load_chromosome_lengths(genome_build, _):
-            if genome_build == 'hg19':
-                return {'1': 249250621, '10': 135534747, '11': 135006516,
-                        '12': 133851895, '13': 115169878, '14': 107349540,
-                        '15': 102531392, '16': 90354753, '17': 81195210,
-                        '18': 78077248, '19': 59128983, '2': 243199373,
-                        '20': 63025520, '21': 48129895, '22': 51304566,
-                        '3': 198022430, '4': 191154276, '5': 180915260,
-                        '6': 171115067, '7': 159138663, '8': 146364022,
-                        '9': 141213431, 'X': 155270560, 'Y': 59373566}
-            else:
-                raise ValueError(
-                    "load_chromosome_lengths() called with genome build '{}'".format(
-                        genome_build))
-        cls.orig_chromlength_method = validateData.SegValidator.load_chromosome_lengths
-        validateData.SegValidator.load_chromosome_lengths = load_chromosome_lengths
-
-    @classmethod
-    def tearDownClass(cls):
-        """Restore the environment to before setUpClass() was called."""
-        validateData.SegValidator.load_chromosome_lengths = cls.orig_chromlength_method
-        super(SegFileValidationTestCase, cls).tearDownClass()
 
     def test_valid_seg(self):
         """Validate a segment file without file format errors."""

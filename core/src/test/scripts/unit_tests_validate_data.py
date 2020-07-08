@@ -1752,6 +1752,46 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertIn("File contains invalid UTF-8 bytes. Please check values in file", record_list[0].getMessage())
         self.assertEqual(record_list[0].levelno, logging.ERROR)
 
+    def test_zygosity_status_allowed_values(self):
+
+        """Test allowed values for the ZYGOSITY.status column."""
+        self.logger.setLevel(logging.INFO)
+        record_list = self.validate('mutations/data_mutations_zygosity_status.maf',
+                                    validateData.MutationsExtendedValidator,
+                                    extra_meta_fields={'swissprot_identifier': 'name'})
+        self.assertEqual(len(record_list), 3)
+        record_iterator = iter(record_list)
+        record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual(record.line_number, 5)
+        self.assertEqual(record.cause, 'not-allowed-value')
+        self.assertEqual(record.getMessage(), 'Incorrect value in ZYGOSITY.status column (allowed are "homozygous" and "heterozygous")')
+
+    def test_mutation_status_allowed_values(self):
+
+        """Test allowed values in the Mutation_Status column of MAF file"""
+        self.logger.setLevel(logging.INFO)
+        record_list = self.validate('mutations/data_mutations_mutation_status_allowed_values.maf',
+                                    validateData.MutationsExtendedValidator,
+                                    extra_meta_fields={'swissprot_identifier': 'name'})
+        print(record_list)
+        self.assertEqual(len(record_list), 5)
+        record_iterator = iter(record_list)
+        record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.INFO)
+        self.assertEqual(record.line_number, 8)
+        self.assertEqual(record.cause, 'None')
+        self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
+        record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.INFO)
+        self.assertEqual(record.line_number, 9)
+        self.assertEqual(record.cause, 'WildType')
+        self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
+        record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.WARNING)
+        self.assertEqual(record.line_number, 10)
+        self.assertEqual(record.cause, 'NotAllowedValue')
+        self.assertEqual(record.getMessage(), "Mutation_Status value is not in MAF format")
 
 class FusionValidationTestCase(PostClinicalDataFileTestCase):
 

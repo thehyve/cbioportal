@@ -412,7 +412,7 @@ class PatientAttrFileTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.column_number, 3)
         self.assertEqual(record.cause, '0:ALIVE')
         # DFS_STATUS having an OS_STATUS value
-         record = next(record_iterator)
+        record = next(record_iterator)
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertEqual(record.line_number, 7)
         self.assertEqual(record.column_number, 5)
@@ -1687,25 +1687,25 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
     def test_mutation_not_loaded_ms(self):
 
         """Test if info message is given when Mutation_Status columns have either
-        LOH, None or Wildtype. In these cases the mutation is not loaded in cBioPortal."""
+        None or Wildtype. In these cases the mutation is not loaded in cBioPortal."""
         self.logger.setLevel(logging.INFO)
         record_list = self.validate('mutations/data_mutations_not_loaded_ms.maf',
                                     validateData.MutationsExtendedValidator,
                                     extra_meta_fields={'swissprot_identifier': 'name'})
 
-        # We expect 5 info messages, 3 from not loaded mutations and 2 general lines
-        self.assertEqual(len(record_list), 5)
+        # We expect 4 info messages, 2 from not loaded mutations and 2 general lines
+        self.assertEqual(len(record_list), 4)
         record_iterator = iter(record_list)
         # Expected info message due to value "None" in Mutation_Status
         record = next(record_iterator)
         self.assertEqual(record.levelno, logging.INFO)
-        self.assertEqual(record.line_number, 3)
+        self.assertEqual(record.line_number, 5)
         self.assertEqual(record.cause, 'None')
         self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
         # Expected info message due to value "Wildtype" in Mutation_Status
         record = next(record_iterator)
         self.assertEqual(record.levelno, logging.INFO)
-        self.assertEqual(record.line_number, 9)
+        self.assertEqual(record.line_number, 8)
         self.assertEqual(record.cause, 'Wildtype')
         self.assertEqual(record.getMessage(), "Mutation will not be loaded due to value in Mutation_Status")
 

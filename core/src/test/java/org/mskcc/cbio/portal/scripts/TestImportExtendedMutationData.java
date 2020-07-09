@@ -32,7 +32,6 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import io.jsonwebtoken.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,10 +46,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Arthur Goldberg goldberg@cbio.mskcc.org
@@ -315,7 +315,7 @@ public class TestImportExtendedMutationData {
 
         List<ClinicalData> clinicalData = DaoClinicalData.getSampleData(study.getInternalId(), new ArrayList<String>(Arrays.asList("TCGA-AA-3664-01")), clinicalAttribute);
         assert(clinicalData.size() == 1);
-        assertEquals("8", clinicalData.get(0).getAttrVal());
+        assertEquals("9", clinicalData.get(0).getAttrVal());
     }
 
     private void loadGenes() throws DaoException {

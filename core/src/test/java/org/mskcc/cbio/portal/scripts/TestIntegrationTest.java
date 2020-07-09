@@ -23,29 +23,11 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.cbioportal.model.GenericAssayData;
 import org.cbioportal.model.GenesetMolecularData;
 import org.cbioportal.model.StructuralVariant;
@@ -56,29 +38,8 @@ import org.cbioportal.service.StructuralVariantService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mskcc.cbio.portal.dao.DaoCancerStudy;
-import org.mskcc.cbio.portal.dao.DaoException;
-import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
-import org.mskcc.cbio.portal.dao.DaoGeneset;
-import org.mskcc.cbio.portal.dao.DaoGeneticEntity;
-import org.mskcc.cbio.portal.dao.DaoGistic;
-import org.mskcc.cbio.portal.dao.DaoSampleList;
-import org.mskcc.cbio.portal.dao.MySQLbulkLoader;
-import org.mskcc.cbio.portal.dao.DaoMutation;
-import org.mskcc.cbio.portal.dao.DaoTypeOfCancer;
-import org.mskcc.cbio.portal.dao.DaoClinicalData;
-import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
-import org.mskcc.cbio.portal.dao.DaoGeneticAlteration;
-import org.mskcc.cbio.portal.dao.DaoClinicalAttributeMeta;
-import org.mskcc.cbio.portal.model.ClinicalData;
-import org.mskcc.cbio.portal.model.ClinicalAttribute;
-import org.mskcc.cbio.portal.model.GeneticProfile;
-import org.mskcc.cbio.portal.model.SampleList;
-import org.mskcc.cbio.portal.model.CancerStudy;
-import org.mskcc.cbio.portal.model.TypeOfCancer;
-import org.mskcc.cbio.portal.model.CanonicalGene;
-import org.mskcc.cbio.portal.model.ExtendedMutation;
-import org.mskcc.cbio.portal.model.Gistic;
+import org.mskcc.cbio.portal.dao.*;
+import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.util.ConsoleUtil;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.mskcc.cbio.portal.util.SpringUtil;
@@ -89,6 +50,14 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration test using the same data that is used by validation system test
@@ -162,9 +131,9 @@ public class TestIntegrationTest {
 
             // ===== Check MUTATION data ========
             List<ExtendedMutation> mutations = DaoMutation.getAllMutations();
-            //there are 36 records in the mutation file and there are 5 extra records added from fusion
-            // so we expect 41 records in DB:
-            assertEquals(41, mutations.size());
+            //there are 45 records in the mutation file and there are 5 extra records added from fusion
+            // so we expect 50 records in DB:
+            assertEquals(50, mutations.size());
 
             // ===== Check FUSION data ========
             // Are there 3 fusion entries in mutation profile? true

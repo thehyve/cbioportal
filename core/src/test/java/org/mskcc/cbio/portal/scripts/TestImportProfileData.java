@@ -23,50 +23,27 @@
 
 package org.mskcc.cbio.portal.scripts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mskcc.cbio.portal.dao.DaoCancerStudy;
-import org.mskcc.cbio.portal.dao.DaoClinicalAttributeMeta;
-import org.mskcc.cbio.portal.dao.DaoClinicalData;
-import org.mskcc.cbio.portal.dao.DaoCnaEvent;
-import org.mskcc.cbio.portal.dao.DaoException;
-import org.mskcc.cbio.portal.dao.DaoGeneOptimized;
-import org.mskcc.cbio.portal.dao.DaoGeneticProfile;
-import org.mskcc.cbio.portal.dao.DaoMutation;
-import org.mskcc.cbio.portal.dao.DaoPatient;
-import org.mskcc.cbio.portal.dao.DaoSample;
-import org.mskcc.cbio.portal.dao.DaoSampleProfile;
-import org.mskcc.cbio.portal.dao.MySQLbulkLoader;
-import org.mskcc.cbio.portal.model.CancerStudy;
-import org.mskcc.cbio.portal.model.CanonicalGene;
-import org.mskcc.cbio.portal.model.ClinicalAttribute;
-import org.mskcc.cbio.portal.model.ClinicalData;
-import org.mskcc.cbio.portal.model.CnaEvent;
-import org.mskcc.cbio.portal.model.ExtendedMutation;
-import org.mskcc.cbio.portal.model.GeneticProfile;
-import org.mskcc.cbio.portal.model.GeneticAlterationType;
-import org.mskcc.cbio.portal.model.Patient;
-import org.mskcc.cbio.portal.model.Sample;
-
+import org.mskcc.cbio.portal.dao.*;
+import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.util.ConsoleUtil;
 import org.mskcc.cbio.portal.util.ProgressMonitor;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Pieter Lukasse pieter@thehyve.nl
@@ -145,12 +122,12 @@ public class TestImportProfileData {
         assertNotNull(clinicalAttribute);
 
         // assume a MUTATION_COUNT record has been added for the sample and the
-        // count is 8 there 11 total mutations imported of which 3 germline (
+        // count is 9 there 11 total mutations imported of which 3 germline (
         // not entirely sure why the rest doesn't get imported i see some silent
         // + intron, missing entrez id)
         List<ClinicalData> clinicalData = DaoClinicalData.getSampleData(study.getInternalId(), new ArrayList<String>(Arrays.asList("TCGA-AA-3664-01")), clinicalAttribute);
         assert(clinicalData.size() == 1);
-        assertEquals("8", clinicalData.get(0).getAttrVal());
+        assertEquals("9", clinicalData.get(0).getAttrVal());
 
         // load a second mutation data file
         String[] secondArgs = {
@@ -169,7 +146,7 @@ public class TestImportProfileData {
         // also confirm mutation count for first sample is still correct
         clinicalData = DaoClinicalData.getSampleData(study.getInternalId(), new ArrayList<String>(Arrays.asList("TCGA-AA-3664-01", "TCGA-AA-3665-01")), clinicalAttribute);
         assert(clinicalData.size() == 2);
-        assertEquals("8", clinicalData.get(0).getAttrVal());
+        assertEquals("9", clinicalData.get(0).getAttrVal());
         assertEquals("1", clinicalData.get(1).getAttrVal());
     }
 

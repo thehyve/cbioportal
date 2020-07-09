@@ -649,7 +649,7 @@ The extended MAF format recognized by the portal has:
 23. **Match_Norm_Validation_Allele2<sup>1</sup> (Optional)**: Secondary data from orthogonal technology.
 24. **Verification_Status<sup>1</sup> (Optional)**: Second pass results from independent attempt using same methods as primary data source. "Verified", "Unknown" or "NA".
 25. **Validation_Status (Optional)**: Second pass results from orthogonal technology. "Valid", "Invalid", "Untested", "Inconclusive", "Redacted", "Unknown" or "NA".
-26. **Mutation_Status (Optional)**: "Somatic" or "Germline" are supported by the UI in Mutations tab. "None", "LOH" and "Wildtype" will not be loaded. Other values will be displayed as text.
+26. **Mutation_Status (Optional)**: "Somatic" or "Germline" are supported by the UI in Mutations tab. "None" and "Wildtype" will not be loaded. Other values will be displayed as text.
 27. **Sequencing_Phase<sup>1</sup> (Optional)**: Indicates current sequencing phase.
 28. **Sequence_Source<sup>1</sup> (Optional)**: Molecular assay type used to produce the analytes used for sequencing.
 29. **Validation_Method<sup>1</sup> (Optional)**: The assay platforms used for the validation call.
@@ -706,6 +706,16 @@ Allele specific copy number (ASCN) annotation is also supported and may be added
 47. **ASCN.TOTAL_COPY_NUMBER (Optional)**: Total copy number of the gene.
 48. **ASCN.MINOR_COPY_NUMBER (Optional)**: Copy number of the minor allele.
 49. **ASCN.ASCN_INTEGER_COPY_NUMER (Optional)**: Absolute integer copy-number estimate.
+
+
+### Zygosity status annotations
+Zygosity status for mutations is supported and may be added using namespaces, described [here](#adding-mutation-annotation-columns-through-namespaces). If Zygosity data is present in the MAF:
+- the deployed cBioPortal instance will display additional columns in the mutation table showing Zygosity data.
+- oncoprint will show zygosity status in sample tiles.
+
+**The ZYGOSITY.status column is optional. If `ZYGOSITY` is a defined namespace in `meta_mutations_extended.txt`, then this column is required.**
+
+50. **ZYGOSITY.status (Optional)**: zygosity of mutation. "Homozygous", "Heterozygous", "Unknown", "NA" or empty cell.
 
 ### Example MAF
 An example MAF can be found in the cBioPortal test study [study_es_0](https://github.com/cBioPortal/cbioportal/blob/master/core/src/test/scripts/test_data/study_es_0/data_mutations_extended.maf).

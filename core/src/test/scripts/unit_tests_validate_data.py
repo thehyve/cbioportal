@@ -1763,9 +1763,9 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         record_iterator = iter(record_list)
         record = next(record_iterator)
         self.assertEqual(record.levelno, logging.ERROR)
-        self.assertEqual(record.line_number, 5)
+        self.assertEqual(record.line_number, 8)
         self.assertEqual(record.cause, 'not-allowed-value')
-        self.assertEqual(record.getMessage(), 'Incorrect value in ZYGOSITY.status column (allowed are "homozygous" and "heterozygous")')
+        self.assertEqual(record.getMessage(), 'ZYGOSITY.status value is not supported')
 
     def test_mutation_status_allowed_values(self):
 

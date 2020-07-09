@@ -2179,8 +2179,8 @@ class MutationsExtendedValidator(Validator):
 
     def checkZygosityStatus(self, value):
         """Check values in mutation status column."""
-        if value.lower() not in ['homozygous', 'heterozygous'] and value != '':
-            self.logger.error('Incorrect value in ZYGOSITY.status column (allowed are "homozygous" and "heterozygous")',
+        if value.lower() not in ['homozygous', 'heterozygous', 'none', 'na' , 'unknown'] and value != '':
+            self.logger.error('ZYGOSITY.status value is not supported',
                                 extra={'line_number': self.line_number, 'cause': value})
         return True
 

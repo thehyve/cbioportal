@@ -1841,8 +1841,20 @@ class MutationsExtendedValidator(Validator):
                                                                  norm_allele1, norm_allele2)}
                     self.send_log_message(self.strict_maf_checks, log_message, extra_dict)
 
-            # If for LOH (9C) not implemented, because mutation will not be loaded in cBioPortal
-            # TODO Pim: implement MAF file check for LOH (Check #9C)
+            # When Mutation_Status is LOH and Validation_Status is valid, the Tumor_Validation_Allele columns should be 
+            # equal, the Match_Norm_Validation_Allele columns should not be equal, and the Tumor_Validation_Allele1 
+            # column should be equal to one of the Match_Norm_Validation_Allele columns.
+            elif mutation_status == "loh" and validation_status == "valid":
+                if (tumor_allele1 != tumor_allele2 or norm_allele1 ==  norm_allele2 \
+                    or (tumor_allele1 != norm_allele1 and tumor_allele1 != norm_allele2)):
+                    log_message = "When Validation_Status is valid and Mutation_Status is LOH, the " \
+                                  "Tumor_Validation_Allele columns should be equal, the" \
+                                  "Match_Norm_Validation_Allele columns should not be equal, and the" \
+                                  "Tumor_Validation_Allele1 column should be equal to one of the Match_Norm_Validation_Allele columns."
+                    extra_dict = {'line_number': self.line_number,
+                                  'cause': '(%s, %s, %s, %s)' % (tumor_allele1, tumor_allele2,
+                                                                 norm_allele1, norm_allele2)}
+                    self.send_log_message(self.strict_maf_checks, log_message, extra_dict)
 
         return True
 

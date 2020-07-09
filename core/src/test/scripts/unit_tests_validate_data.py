@@ -1233,7 +1233,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                                     validateData.MutationsExtendedValidator, None, True, True)
 
         # We expect 6 errors
-        self.assertEqual(len(record_list), 6)
+        self.assertEqual(len(record_list), 9)
         record_iterator = iter(record_list)
         # expect error for empty validation allele columns
         record = next(record_iterator)

@@ -1766,6 +1766,21 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.line_number, 8)
         self.assertEqual(record.cause, 'not-allowed-value')
         self.assertEqual(record.getMessage(), 'ZYGOSITY.status value is not supported')
+        
+    def test_zygosity_column_enforced_with_namespace_defined(self):
+
+        """Test error is raised when ZYGOSITY namespace defined, but the ZYGOSITY.status column is not present"""
+        self.logger.setLevel(logging.INFO)
+        record_list = self.validate('mutations/data_mutations_missing_zygosity_status_column.maf',
+                                    validateData.MutationsExtendedValidator,
+                                    extra_meta_fields={'swissprot_identifier': 'name',
+                                                       'namespaces': 'ZYGOSITY'})
+        self.assertEqual(len(record_list), 3)
+        print(record_list)
+        record_iterator = iter(record_list)
+        record = next(record_iterator)
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertEqual(record.getMessage(), 'ZYGOSITY namespace defined but MAF is missing required ZYGOSITY.status column.')
 
     def test_mutation_status_allowed_values(self):
 

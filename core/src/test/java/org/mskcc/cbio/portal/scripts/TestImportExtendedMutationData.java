@@ -32,27 +32,25 @@
 
 package org.mskcc.cbio.portal.scripts;
 
+import io.jsonwebtoken.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
-import org.mskcc.cbio.portal.util.*;
+import org.mskcc.cbio.portal.util.ConsoleUtil;
+import org.mskcc.cbio.portal.util.ProgressMonitor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
+import java.util.*;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Arthur Goldberg goldberg@cbio.mskcc.org
@@ -262,7 +260,7 @@ public class TestImportExtendedMutationData {
    }
 
    private void checkBasicFilteringRules() throws DaoException {
-        rejectSilentLOHIntronWildtype();
+        rejectSilentIntronWildtype();
         acceptValidSomaticMutations();
     }
 
@@ -284,11 +282,10 @@ public class TestImportExtendedMutationData {
         validateMutationAminoAcid (geneticProfileId, sampleId, 51259, "G61G");
     }
 
-    private void rejectSilentLOHIntronWildtype() throws DaoException {
+    private void rejectSilentIntronWildtype() throws DaoException {
         int sampleId = DaoSample.getSampleByCancerStudyAndSampleId(studyId, "TCGA-AA-3664-01").getInternalId();
 
         assertEquals(0, DaoMutation.getMutations(geneticProfileId, sampleId, 114548).size()); // silent
-        assertEquals(0, DaoMutation.getMutations(geneticProfileId, sampleId, 343035).size()); // LOH
         assertEquals(0, DaoMutation.getMutations(geneticProfileId, sampleId, 80114).size()); // Wildtype
         assertEquals(0, DaoMutation.getMutations(geneticProfileId, sampleId, 219736).size()); // Wildtype
         assertEquals(0, DaoMutation.getMutations(geneticProfileId, sampleId, 6609).size()); // Intron

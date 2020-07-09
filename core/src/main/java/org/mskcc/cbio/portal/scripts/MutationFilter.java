@@ -55,7 +55,7 @@ public class MutationFilter {
    private int unknownAccepts=0;
    public int decisions=0;
    private int mutationStatusNoneRejects=0;
-   private int lohOrWildTypeRejects=0;
+   private int wildTypeRejects =0;
    private int emptyAnnotationRejects=0;
    private int missenseGermlineRejects=0;
    private int redactedRejects=0;
@@ -65,7 +65,7 @@ public class MutationFilter {
     * Construct a MutationFilter with no white lists. 
     * This filter will 
     * <br>
-    * REJECT Silent, LOH, Intron and Wildtype mutations, and
+    * REJECT Silent, Intron and Wildtype mutations, and
     * <br>
     * KEEP all other mutations.
     */
@@ -111,10 +111,9 @@ public class MutationFilter {
           return false;
       }
       
-      // Do not accept LOH or Wildtype Mutations
-      if( safeStringTest( mutation.getMutationStatus(), "LOH" ) ||
-               safeStringTest( mutation.getMutationStatus(), "Wildtype" ) ){
-         lohOrWildTypeRejects++;
+      // Do not accept Wildtype Mutations
+      if( safeStringTest( mutation.getMutationStatus(), "Wildtype" ) ){
+         wildTypeRejects++;
          return false;
       }
       
@@ -182,11 +181,11 @@ public class MutationFilter {
     }
 
     /**
-     * Provide number of REJECT decisions for LOH or Wild Type Mutations.
-     * @return number of REJECT decisions for LOH or Wild Type Mutations.
+     * Provide number of REJECT decisions for Wild Type Mutations.
+     * @return number of REJECT decisions for Wild Type Mutations.
      */
-   public int getLohOrWildTypeRejects() {
-       return this.lohOrWildTypeRejects;
+   public int getWildTypeRejects() {
+       return this.wildTypeRejects;
    }
 
     /**
@@ -255,7 +254,7 @@ public class MutationFilter {
       String statistics = "Mutation filter decisions: " + this.getDecisions() +
             "\nRejects: " + this.getRejects() +
             "\nMutation Status 'None' Rejects:  " + this.getMutationStatusNoneRejects() +
-            "\nLOH or Wild Type Rejects:  " + this.getLohOrWildTypeRejects() +
+            "\nWild Type Rejects:  " + this.getWildTypeRejects() +
             "\nEmpty Annotation Rejects:  " + this.getEmptyAnnotationRejects() +
             "\nMissense Germline Rejects:  " + this.getMissenseGermlineRejects();
       

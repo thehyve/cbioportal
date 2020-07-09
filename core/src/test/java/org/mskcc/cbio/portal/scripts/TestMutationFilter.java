@@ -71,7 +71,7 @@ public class TestMutationFilter {
       alwaysRejectTheseMutations( myMutationFilter );
       
       // accept all of these, because a MutationFilter without whitelists
-      // accepts all mutations other than Silent, LOH, Intron and Wildtype mutations
+      // accepts all mutations other than Silent, Intron and Wildtype mutations
       // not valid && somatic
       nowTestAcceptMutation( 
                myMutationFilter,
@@ -150,7 +150,7 @@ public class TestMutationFilter {
    
    private void alwaysRejectTheseMutations(MutationFilter myMutationFilter){
 
-      // REJECT: Silent, LOH, Intron and Wildtype mutations
+      // REJECT: Silent, Intron and Wildtype mutations
       nowTestAcceptMutation( 
                myMutationFilter,
                false, 
@@ -166,14 +166,6 @@ public class TestMutationFilter {
                "Unknown",
                "Unknown",
                "Intron"
-            );
-      nowTestAcceptMutation( 
-               myMutationFilter,
-               false, 
-               1L, 
-               "Unknown",
-               "LOH",
-               "Unknown"
             );
       nowTestAcceptMutation( 
                myMutationFilter,

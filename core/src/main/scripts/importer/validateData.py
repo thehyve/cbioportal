@@ -1842,6 +1842,7 @@ class MutationsExtendedValidator(Validator):
                     self.send_log_message(self.strict_maf_checks, log_message, extra_dict)
 
             # If for LOH (9C) not implemented, because mutation will not be loaded in cBioPortal
+            # TODO Pim: implement MAF file check for LOH (Check #9C)
 
         return True
 

@@ -1266,7 +1266,7 @@ class MutationsSpecialCasesTestCase(PostClinicalDataFileTestCase):
                       ' columns should be equal to the Reference Allele and one of the Tumor_Validation_Allele columns'
                       ' should not be.', record.getMessage())
 
-          # TODO implement data consistency test for lines where Mutation_Status is LOH
+          # TODO Pim: implement data consistency test for lines where Mutation_Status is LOH
 
     def test_warning_for_missing_SWISSPROT(self):
         """If SWISSPROT is missing (or present and empty), user should be warned about it"""

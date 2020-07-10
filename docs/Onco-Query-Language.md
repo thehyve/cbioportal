@@ -13,7 +13,7 @@
 - [Protein](#protein)
 - [Modifiers](#modifiers)
     - [Driver](#driver)
-    - [Germline/Somatic](#germline-somatic)
+    - [Germline/Somatic/LOH](#germline-somatic-loh)
 - [The DATATYPES Command](#the-datatypes-command)
 - [Merged Gene Tracks](#merged-gene-tracks)
 - [Example: RB Pathway Alterations](#example-rb-pathway-alterations)
@@ -55,7 +55,8 @@ Keyword | Applicable Data Type | Explanation
 ------- | -------------------- | -----------
 `DRIVER` | Mutations <br> Fusions <br> Copy Number Alterations | Include only mutations, fusions and copy number alterations which are driver events, as defined in OncoPrint (default: OncoKB and CancerHotspots).
 `GERMLINE` | Mutations | Include only mutations that are defined as germline events by the study.
-`SOMATIC` | Mutations | Include all mutations that are not defined as germline.
+`LOH` | Mutations | Include only mutations that are defined as loss of heterozygosity (LOH) events by the study.
+`SOMATIC` | Mutations | Include all mutations that are not defined as germline or LOH.
 `(a-b)` (protein position range) | Mutations | Include all mutations that overlap with the protein position range `a-b`, where `a` and `b` are integers. If you add a `*` (i.e. `(a-b*)`) then it will only include those mutations that are fully contained inside `a-b`. The open-ended ranges `(a-)` and `(-b)` are also allowed. 
 
 <br>
@@ -218,14 +219,14 @@ When combining `DRIVER` with another OQL term, the order doesn't matter: `MUT_DR
 * `FUSION`
 * `CNA`
 * `AMP` or `GAIN` or `HETLOSS` or `HOMDEL`
-* `GERMLINE` or `SOMATIC` (see below)
+* `GERMLINE`, `LOH` or `SOMATIC` (see below)
 
 
-<a name="germline-somatic"></a>
-### Germline/Somatic
-The `GERMLINE` and `SOMATIC` modifiers only apply to mutations. A mutation can be explicitly defined as germline during the data curation process. Note that very few studies on the public cBioPortal contain germline data.
+<a name="germline-somatic-loh"></a>
+### Germline/Somatic/LOH
+The `GERMLINE`, `LOH` and `SOMATIC` modifiers only apply to mutations. A mutation can be explicitly defined as germline during the data curation process. Note that very few studies on the public cBioPortal contain germline data.
 
-`GERMLINE` or `SOMATIC` can be combined with:
+`GERMLINE`, `LOH` or `SOMATIC` can be combined with:
 * `MUT`
 * `MUT = <mutation type>` or `MUT = <protein change>`
 * `DRIVER`
@@ -247,7 +248,7 @@ Or to see somatic missense mutations:
 BRCA1: MUT = MISSENSE_SOMATIC
 ``` 
 
-`GERMLINE` or `SOMATIC` can also be combined with `DRIVER` and, optionally, a more specific mutation term (e.g. `NONSENSE`):
+`GERMLINE`, `LOH` or `SOMATIC` can also be combined with `DRIVER` and, optionally, a more specific mutation term (e.g. `NONSENSE`):
 ```
 BRCA1: NONSENSE_GERMLINE_DRIVER
 ```

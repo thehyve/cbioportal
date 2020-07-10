@@ -37,11 +37,12 @@ import org.mskcc.cbio.portal.model.ExtendedMutation;
 import org.mskcc.cbio.portal.model.ExtendedMutationMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
 /**
- * Tests the Mutation Counder Class.
+ * Tests the Mutation Counter Class.
  *
  * @author Ethan Cerami.
  */
@@ -74,6 +75,7 @@ public class TestMutationCounter {
         assertEquals (0.5, mutationCounter.getMutationRate(), 0.01);
         assertEquals (0.5, mutationCounter.getSomaticMutationRate(), 0.01);
         assertEquals (0.0, mutationCounter.getGermlineMutationRate(), 0.01);
+        assertEquals (0.0, mutationCounter.getLohMutationRate(), 0.01);
 
         assertEquals ("[Somatic Mutation Rate:  50%]", mutationCounter.getTextSummary());
     }
@@ -100,6 +102,7 @@ public class TestMutationCounter {
         assertEquals (0.5, mutationCounter.getMutationRate(), 0.01);
         assertEquals (0.5, mutationCounter.getSomaticMutationRate(), 0.01);
         assertEquals (0.5, mutationCounter.getGermlineMutationRate(), 0.01);
+        assertEquals (0.0, mutationCounter.getLohMutationRate(), 0.01);
         assertEquals ("[Germline Mutation Rate:  50%, Somatic Mutation Rate:  50%]",
                 mutationCounter.getTextSummary());
     }
@@ -127,15 +130,41 @@ public class TestMutationCounter {
         assertEquals (0.25, mutationCounter.getMutationRate(), 0.01);
         assertEquals (0.25, mutationCounter.getSomaticMutationRate(), 0.01);
         assertEquals (0.0, mutationCounter.getGermlineMutationRate(), 0.01);
+        assertEquals (0.0, mutationCounter.getLohMutationRate(), 0.01);
         assertEquals ("[Somatic Mutation Rate:  25%]", mutationCounter.getTextSummary());
     }
 
+    public void testLoh() {
+        CanonicalGene brca1 = new CanonicalGene(672, BRCA1);
+        CanonicalGene brca2 = new CanonicalGene(675, BRCA2);
+
+        //  Case A will contain a germline and somatic mutation
+        ExtendedMutation mutation1 = createMutation1(brca1, CASE_A);
+        mutation1.setMutationStatus("loh");
+        ExtendedMutation mutation2 = createMutation1(brca1, CASE_A);
+        ExtendedMutation mutation3 = createMutation1(brca2, CASE_A);
+
+        ArrayList<ExtendedMutation> mutationList =
+                createMutationList(mutation1, mutation2, mutation3);
+
+        ArrayList<Integer> sampleList = new ArrayList<Integer>();
+        sampleList.add(CASE_A);
+        sampleList.add(CASE_B);
+
+        ExtendedMutationMap mutationMap = new ExtendedMutationMap(mutationList, sampleList);
+        MutationCounter mutationCounter = new MutationCounter (BRCA1, mutationMap);
+        assertEquals (0.5, mutationCounter.getMutationRate(), 0.01);
+        assertEquals (0.5, mutationCounter.getSomaticMutationRate(), 0.01);
+        assertEquals (0.0, mutationCounter.getGermlineMutationRate(), 0.01);
+        assertEquals (0.5, mutationCounter.getLohMutationRate(), 0.01);
+        assertEquals ("[LOH Mutation Rate:  50%, Somatic Mutation Rate:  50%]",
+                mutationCounter.getTextSummary());
+    }
+    
     private ArrayList<ExtendedMutation> createMutationList(ExtendedMutation
-            mutation1, ExtendedMutation mutation2, ExtendedMutation mutation3) {
+            ... mutations) {
         ArrayList<ExtendedMutation> mutationList = new ArrayList<ExtendedMutation>();
-        mutationList.add(mutation1);
-        mutationList.add(mutation2);
-        mutationList.add(mutation3);
+        mutationList.addAll(Arrays.asList(mutations));
         return mutationList;
     }
 

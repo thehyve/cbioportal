@@ -39,13 +39,14 @@ import java.util.ArrayList;
 import java.text.DecimalFormat;
 
 /**
- * Calculates Somatic and Germline Mutation Frequency.
+ * Calculates Somatic, Germline and LOH Mutation Frequency.
  *
  * @author Ethan Cerami.
  */
 public class MutationCounter {
     private int numSamplesWithSomaticMutation = 0;
     private int numSamplesWithGermlineMutation = 0;
+    private int numSamplesWithLohMutation = 0;
     private int numSamplesWithMutation = 0;
     private ExtendedMutationMap mutationMap;
     private String gene;
@@ -77,6 +78,9 @@ public class MutationCounter {
         summary.append("Somatic Mutation Rate:  ");
         summary.append(percentFormat.format(getSomaticMutationRate()));
         summary.append("]");
+        summary.append("LOH Mutation Rate:  ");
+        summary.append(percentFormat.format(getLohMutationRate()));
+        summary.append("]");
         return summary.toString();
     }
 
@@ -86,6 +90,10 @@ public class MutationCounter {
 
     public double getGermlineMutationRate() {
         return numSamplesWithGermlineMutation / (float) totalNumSamples;
+    }
+    
+    public double getLohMutationRate() {
+        return numSamplesWithLohMutation / (float) totalNumSamples;
     }
 
     public double getMutationRate() {
@@ -98,6 +106,9 @@ public class MutationCounter {
         }
         if (mutationStatus.isSampleSomaticallyMutated()) {
             numSamplesWithSomaticMutation++;
+        }
+        if (mutationStatus.isSampleLohMutated()) {
+            numSamplesWithLohMutation++;
         }
     }
 
@@ -127,6 +138,7 @@ public class MutationCounter {
 class MutationStatus {
     private boolean germlineMutated;
     private boolean somaticMutated;
+    private boolean lohMutated;
 
     public boolean isSampleGermlineMutated() {
         return germlineMutated;
@@ -142,5 +154,13 @@ class MutationStatus {
 
     public void setSomaticMutated(boolean somaticMutated) {
         this.somaticMutated = somaticMutated;
+    }
+    
+    public boolean isSampleLohMutated() {
+        return lohMutated;
+    }
+
+    public void setLohMutated(boolean lohMutated) {
+        this.lohMutated = lohMutated;
     }
 }

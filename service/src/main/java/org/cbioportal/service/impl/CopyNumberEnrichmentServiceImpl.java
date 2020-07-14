@@ -24,45 +24,53 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
     private AlterationEnrichmentUtil<CopyNumberCountByGene> alterationEnrichmentUtil;
 
     @Override
+    public Map<String, List<CopyNumberCountByGene>> getcopyNumberCountByGeneAndGroup(
+        Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
+        List<Integer> alterationTypes,
+        String enrichmentType) {
+        return molecularProfileCaseSets
+        .entrySet()
+        .stream()
+        .collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> { //set value of each group to list of CopyNumberCountByGene
+                    
+                    List<String> molecularProfileIds = new ArrayList<>();
+                    List<String> sampleIds = new ArrayList<>();
+    
+                    entry.getValue().forEach(molecularProfileCase -> {
+                        molecularProfileIds.add(molecularProfileCase.getMolecularProfileId());
+                        sampleIds.add(molecularProfileCase.getCaseId());
+                    });
+                    
+                    if (enrichmentType.equals("SAMPLE")) {
+                        return discreteCopyNumberService
+                                .getSampleCountInMultipleMolecularProfiles(molecularProfileIds,
+                                        sampleIds,
+                                        null,
+                                        alterationTypes,
+                                        true,
+                                        true);
+                    } else {
+                        return discreteCopyNumberService
+                                .getPatientCountInMultipleMolecularProfiles(molecularProfileIds,
+                                        sampleIds,
+                                        null,
+                                        alterationTypes,
+                                        true, 
+                                        true);
+                    }
+                }));
+    }
+    
+    @Override 
     public List<AlterationEnrichment> getCopyNumberEnrichments(
             Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
             List<Integer> alterationTypes,
             String enrichmentType) throws MolecularProfileNotFoundException {
 
-        Map<String, List<CopyNumberCountByGene>> copyNumberCountByGeneAndGroup =
-                molecularProfileCaseSets
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey(),
-                        entry -> { //set value of each group to list of CopyNumberCountByGene
-                            
-                            List<String> molecularProfileIds = new ArrayList<>();
-                            List<String> sampleIds = new ArrayList<>();
-    
-                            entry.getValue().forEach(molecularProfileCase -> {
-                                molecularProfileIds.add(molecularProfileCase.getMolecularProfileId());
-                                sampleIds.add(molecularProfileCase.getCaseId());
-                            });
-                            
-                            if (enrichmentType.equals("SAMPLE")) {
-                                return discreteCopyNumberService
-                                        .getSampleCountInMultipleMolecularProfiles(molecularProfileIds,
-                                                sampleIds,
-                                                null,
-                                                alterationTypes,
-                                                true,
-                                                true);
-                            } else {
-                                return discreteCopyNumberService
-                                        .getPatientCountInMultipleMolecularProfiles(molecularProfileIds,
-                                                sampleIds,
-                                                null,
-                                                alterationTypes,
-                                                true, 
-                                                true);
-                            }
-                        }));
+            Map<String, List<CopyNumberCountByGene>> copyNumberCountByGeneAndGroup = getcopyNumberCountByGeneAndGroup(molecularProfileCaseSets,
+                alterationTypes, enrichmentType);
 
         return alterationEnrichmentUtil
                 .createAlterationEnrichments(

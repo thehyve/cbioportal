@@ -5,27 +5,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.cbioportal.model.AlterationCountByGene;
 import org.cbioportal.model.AlterationEnrichment;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
-import org.cbioportal.model.MutationCountByGene;
-import org.cbioportal.service.MutationEnrichmentService;
-import org.cbioportal.service.MutationService;
+import org.cbioportal.service.AlterationEnrichmentService;
+import org.cbioportal.service.AlterationService;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.service.util.AlterationEnrichmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MutationEnrichmentServiceImpl implements MutationEnrichmentService {
+public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentService {
 
     @Autowired
-    private MutationService mutationService;
+    private AlterationService alterationService;
     @Autowired
-    private AlterationEnrichmentUtil<MutationCountByGene> alterationEnrichmentUtil;
+    private AlterationEnrichmentUtil<AlterationCountByGene> alterationEnrichmentUtil;
 
     @Override
-    public Map<String, List<MutationCountByGene>> getmutationCountsbyEntrezGeneIdAndGroup(
+    public Map<String, List<AlterationCountByGene>> getAlterationCountsbyEntrezGeneIdAndGroup(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
+        List<String> alterationEnrichmentEventType,
         String enrichmentType) {
         return molecularProfileCaseSets
             .entrySet()
@@ -42,33 +43,35 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                         });
 
                         if (enrichmentType.equals("SAMPLE")) {
-                            return mutationService
+                            return alterationService
                                     .getSampleCountInMultipleMolecularProfiles(molecularProfileIds,
                                             sampleIds,
                                             null,
                                             true,
-                                            true);
+                                            true,
+                                            alterationEnrichmentEventType);
                         } else {
-                            return mutationService
+                            return alterationService
                                     .getPatientCountInMultipleMolecularProfiles(molecularProfileIds,
                                             sampleIds,
                                             null,
                                             true,
-                                            true);
+                                            true,
+                                            alterationEnrichmentEventType);
                         }
                     }));
     }
 
     @Override
-    public List<AlterationEnrichment> getMutationEnrichments(
-            Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
+    public List<AlterationEnrichment> getAlterationEnrichments(
+            Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets, List<String> alterationEnrichmentEventType,
             String enrichmentType)
             throws MolecularProfileNotFoundException {
 
-        Map<String, List<MutationCountByGene>> mutationCountsbyEntrezGeneIdAndGroup = getmutationCountsbyEntrezGeneIdAndGroup(
-            molecularProfileCaseSets, enrichmentType);
+        Map<String, List<AlterationCountByGene>> alterationCountsbyEntrezGeneIdAndGroup = getAlterationCountsbyEntrezGeneIdAndGroup(
+            molecularProfileCaseSets, alterationEnrichmentEventType, enrichmentType);
 
-        return alterationEnrichmentUtil.createAlterationEnrichments(mutationCountsbyEntrezGeneIdAndGroup,
+        return alterationEnrichmentUtil.createAlterationEnrichments(alterationCountsbyEntrezGeneIdAndGroup,
                 molecularProfileCaseSets, enrichmentType);
     }
 }

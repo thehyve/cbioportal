@@ -42,6 +42,7 @@
             mutation.DRIVER_FILTER_ANNOTATION as driverFilterAnnotation,
             mutation.DRIVER_TIERS_FILTER as driverTiersFilter,
             mutation.DRIVER_TIERS_FILTER_ANNOTATION as driverTiersFilterAnnotation
+            mutation.ANNOTATION_JSON as annotationJSON
         </if>
         <if test="projection == 'DETAILED'">
             ,

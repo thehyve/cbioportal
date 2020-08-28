@@ -176,24 +176,13 @@ def fetch_oncokb_annotations(row_number_to_feature):
     id_to_rownumber = {}
     for row_number, feature in row_number_to_feature.items():
         id_to_rownumber[feature['id']] = row_number
-
-    request_url = "https://demo.oncokb.org/api/v1/annotate/mutations/byProteinChange"
-    request_headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-    request_payload = create_request_payload(row_number_to_feature)
-    request = requests.post(url=request_url, headers=request_headers, data=request_payload)
+    batch_size = 500
+    payload_list = create_request_payload(row_number_to_feature)
+    annotations = libImportOncokb.fetch_oncokb_annotations(payload_list, batch_size)
     row_number_to_annotation = {}
-    if request.ok:
-        result_json = request.json()
-        id_to_annotation = {annotation['query']['id']: annotation for annotation in result_json}
-        for row_number, feature in row_number_to_feature.items():
-            row_number_to_annotation[row_number] = id_to_annotation[feature['id']]
-    else:
-        if request.status_code == 404:
-            raise ConnectionError(
-                "An error occurred when trying to connect to OncoKB for retrieving of mutation annotations.")
-        else:
-            request.raise_for_status()
-
+    id_to_annotation = {annotation['query']['id']: annotation for annotation in annotations}
+    for row_number, feature in row_number_to_feature.items():
+        row_number_to_annotation[row_number] = id_to_annotation[feature['id']]
     return row_number_to_annotation
 
 
@@ -220,8 +209,7 @@ def create_request_payload(row_number_to_feature):
                             feature['id'])
 
     # normalize for alteration id since same alteration is represented in multiple samples
-    payload = '[' + ', '.join(elements.values()) + ']'
-    return payload
+    return elements.values()
 
 
 def write_annotations_to_file(row_number_to_annotation, mutations_file_path):

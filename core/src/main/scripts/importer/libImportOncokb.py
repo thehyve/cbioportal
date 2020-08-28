@@ -162,3 +162,31 @@ def read_meta_file(metafile_path):
             match = re.findall(r'\s*(\S+)\s*:\s*(\S+)', line)[0]
             fields[match[0]] = match[1]
     return fields
+
+def fetch_oncokb_annotations(payload_list, batch_size):
+    """Submit alterations to OncoKB.org and return OncoKB annotations."""
+    annotations = []
+    request_url = "https://demo.oncokb.org/api/v1/annotate/copyNumberAlterations"
+    request_headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    payload_batches = partition_list(payload_list, batch_size)
+    for payload_batch in payload_batches:
+        payload = '['+ ', '.join(payload_batch) + ']'
+        request = requests.post(url=request_url, headers=request_headers, data=payload)
+        if request.ok:
+            # Parse transcripts and exons from JSON
+            result_json = request.json()
+            annotations = annotations + result_json
+        else:
+            if request.status_code == 404:
+                print(
+                    Color.RED + 'An error occurred when trying to connect to OncoKB for retrieving of mutation annotations' + Color.END,
+                    file=sys.stderr)
+                sys.exit(1)
+            else:
+                request.raise_for_status()
+    return annotations
+
+def partition_list(list, n):
+    """Yield successive n-sized chunks from list."""
+    for i in range(0, len(list), n):
+        yield list[i:i + n]

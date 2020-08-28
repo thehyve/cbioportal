@@ -193,25 +193,13 @@ def get_features(cna_file_path):
 
 def fetch_oncokb_annotations(features):
     """Submit CNA events to OncoKB.org and return OncoKB annotations."""
-    request_url = "https://demo.oncokb.org/api/v1/annotate/copyNumberAlterations"
-    request_headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-    request_payload = create_request_payload(features)
-    request = requests.post(url=request_url, headers=request_headers, data=request_payload)
     id_to_annotation = {}
-    if request.ok:
-        # Parse transcripts and exons from JSON
-        result_json = request.json()
-        for annotation in result_json:
-            id = annotation['query']['id']
-            id_to_annotation[id] = annotation
-    else:
-        if request.status_code == 404:
-            print(
-                Color.RED + 'An error occurred when trying to connect to OncoKB for retrieving of mutation annotations' + Color.END,
-                file=sys.stderr)
-            sys.exit(1)
-        else:
-            request.raise_for_status()
+    batch_size = 500
+    payload_list = create_request_payload(features)
+    annotations = libImportOncokb.fetch_oncokb_annotations(payload_list, batch_size)
+    for annotation in annotations:
+        id = annotation['query']['id']
+        id_to_annotation[id] = annotation
     return id_to_annotation
 
 

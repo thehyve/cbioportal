@@ -2845,5 +2845,58 @@ class CNADiscretePDAAnnotationsValidatorTestCase(PostClinicalDataFileTestCase):
         self.assertEqual(record.levelno, logging.ERROR)
         self.assertIn('This line has no value for cbp_driver_tiers and a value for cbp_driver_tiers_annotation. Please, fill the cbp_driver_tiers column.', record.getMessage())
 
+
+class CNADiscretePDAAnnotationsValidatorTestCase(PostClinicalDataFileTestCase):
+
+    def test_required_gene_columns(self):
+
+        self.logger.setLevel(logging.ERROR)
+        record_list = self.validate('data_pd_annotation_missing_col_gene_ids.txt',
+                                    validateData.CNADiscretePDAAnnotationsValidator)
+
+        self.assertEqual(len(record_list), 2)
+        record = record_list[0]
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertIn('Hugo_Symbol or Entrez_Gene_Id column needs to be present in the file.', record.getMessage())
+
+    def test_required_sample_columns(self):
+
+        self.logger.setLevel(logging.ERROR)
+        record_list = self.validate('data_pd_annotation_missing_col_sampleid.txt',
+                                    validateData.CNADiscretePDAAnnotationsValidator)
+
+        self.assertEqual(len(record_list), 2)
+        record = record_list[0]
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertIn('Missing column: SAMPLE_ID', record.getMessage())
+
+    def test_required_driver_columns(self):
+
+        self.logger.setLevel(logging.ERROR)
+        record_list = self.validate('data_pd_annotation_missing_col_driver.txt',
+                                    validateData.CNADiscretePDAAnnotationsValidator)
+
+        self.assertEqual(len(record_list), 2)
+        record = record_list[0]
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertIn('Column cbp_driver_annotation found without any cbp_driver column.', record.getMessage())
+
+    def test_required_field_permutations(self):
+
+        self.logger.setLevel(logging.ERROR)
+        record_list = self.validate('data_pd_annotation_missing_fields.txt',
+                                    validateData.CNADiscretePDAAnnotationsValidator)
+
+        self.assertEqual(len(record_list), 3)
+        record = record_list[0]
+        self.assertIn('Only "Putative_Passenger", "Putative_Driver", "NA", "Unknown" and "" (empty) are allowed.', record.getMessage())
+        self.assertEqual(record.levelno, logging.ERROR)
+        record = record_list[1]
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertIn('No Entrez gene id or gene symbol provided for gene.', record.getMessage())
+        record = record_list[2]
+        self.assertEqual(record.levelno, logging.ERROR)
+        self.assertIn('This line has no value for cbp_driver_tiers and a value for cbp_driver_tiers_annotation. Please, fill the cbp_driver_tiers column.', record.getMessage())
+
 if __name__ == '__main__':
     unittest.main(buffer=True)

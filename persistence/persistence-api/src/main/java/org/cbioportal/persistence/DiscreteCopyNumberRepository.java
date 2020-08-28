@@ -46,16 +46,4 @@ public interface DiscreteCopyNumberRepository {
                                                                               List<String> sampleIds,
                                                                               List<Integer> entrezGeneIds,
                                                                               List<Integer> alterations);
-
-    @Cacheable(cacheNames = "GeneralRepositoryCache", condition = "@cacheEnabledConfig.getEnabled()")
-    List<CopyNumberCountByGene> getSampleCountInMultipleMolecularProfiles(List<String> molecularProfileIds,
-                                                                          List<String> sampleIds, 
-                                                                          List<Integer> entrezGeneIds, 
-                                                                          List<Integer> alterations);
-
-    @Cacheable(cacheNames = "GeneralRepositoryCache", condition = "@cacheEnabledConfig.getEnabled()")
-    List<CopyNumberCountByGene> getPatientCountInMultipleMolecularProfiles(List<String> molecularProfileIds,
-                                                                                List<String> patientIds,
-                                                                                List<Integer> entrezGeneIds,
-                                                                                List<Integer> alterations);
 }

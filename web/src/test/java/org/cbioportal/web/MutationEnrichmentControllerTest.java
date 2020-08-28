@@ -30,6 +30,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.mockito.ArgumentMatchers.*;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/applicationContext-web-test.xml")
@@ -68,7 +70,6 @@ public class MutationEnrichmentControllerTest {
 
     @Before
     public void setUp() throws Exception {
-
         Mockito.reset(mutationEnrichmentService);
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
@@ -106,9 +107,12 @@ public class MutationEnrichmentControllerTest {
         alterationEnrichments.add(alterationEnrichment2);
 
         Mockito.when(mutationEnrichmentService.getMutationEnrichments(
-                Mockito.anyMap(),
-                Mockito.anyString()))
-        .thenReturn(alterationEnrichments);
+            anyMap(),
+            any(),
+            anyBoolean(),
+            anyList(),
+            anyBoolean()))
+            .thenReturn(alterationEnrichments);
 
         MolecularProfileCaseIdentifier entity1 = new MolecularProfileCaseIdentifier();
         entity1.setCaseId("test_sample_id_1");

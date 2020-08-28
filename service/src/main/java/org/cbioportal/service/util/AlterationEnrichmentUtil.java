@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.cbioportal.model.*;
 import org.cbioportal.service.*;
@@ -27,8 +28,7 @@ public class AlterationEnrichmentUtil<T extends AlterationCountByGene> {
 
     public List<AlterationEnrichment> createAlterationEnrichments(
             Map<String, List<T>> mutationCountsbyGroup,
-            Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-            String enrichmentType) {
+            Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets) {
         
         Map<String, Map<Integer, AlterationCountByGene>> mutationCountsbyEntrezGeneIdAndGroup = mutationCountsbyGroup
                     .entrySet()
@@ -144,6 +144,24 @@ public class AlterationEnrichmentUtil<T extends AlterationCountByGene> {
         profiledCasesCounter.calculate(molecularProfileIds, sampleIds, alterationCountByGenes, false, includeMissingAlterationsFromGenePanel);
         
     }
+
+    public void includeFrequencyForSamples(
+        List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
+        List<T> alterationCountByGenes,
+        boolean includeMissingAlterationsFromGenePanel) {
+        
+        // Collect profile id and sample id arrays.
+        // These are arrays of equal length, where every index
+        // represents a sample id / profile id-combination
+        List<String> sampleIds = new ArrayList<>();
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileCaseIdentifiers.forEach(pair -> {
+            sampleIds.add(pair.getCaseId());
+            molecularProfileIds.add(pair.getMolecularProfileId());
+        });
+
+        includeFrequencyForSamples(molecularProfileIds, sampleIds, alterationCountByGenes, includeMissingAlterationsFromGenePanel);
+    }
     
     public void includeFrequencyForPatients(List<String> molecularProfileIds,
             List<String> patientIds,
@@ -180,6 +198,24 @@ public class AlterationEnrichmentUtil<T extends AlterationCountByGene> {
                 .collect(Collectors.toList());
 
         profiledCasesCounter.calculate(molecularProfileIdsofSampleIds, sampleIds, alterationCountByGenes, true, includeMissingAlterationsFromGenePanel);
+    }
+
+    public void includeFrequencyForPatients(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
+                                            List<T> alterationCountByGenes,
+                                            boolean includeMissingAlterationsFromGenePanel) {
+
+        // Collect profile id and patient id arrays.
+        // These are arrays of equal length, where every index
+        // represents a patient id / profile id-combination
+        List<String> patientIds = new ArrayList<>();
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileCaseIdentifiers.forEach(pair -> {
+            patientIds.add(pair.getCaseId());
+            molecularProfileIds.add(pair.getMolecularProfileId());
+        });
+
+        includeFrequencyForPatients(molecularProfileIds, patientIds, alterationCountByGenes, includeMissingAlterationsFromGenePanel);
+
     }
 
 }

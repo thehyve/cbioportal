@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.cbioportal.persistence.mybatis.AlterationCountsMapper">
+
+    <select id="getSampleAlterationCounts" resultType="org.cbioportal.model.AlterationCountByGene">
+        SELECT ENTREZ_GENE_ID AS entrezGeneId, HUGO_GENE_SYMBOL AS hugoGeneSymbol, COUNT(*) AS numberOfAlterations,
+        COUNT(DISTINCT(SAMPLE_ID)) AS numberOfAlteredCases
+        FROM
+        (
+        <if test="mutationTypes != null and !mutationTypes.isEmpty()">
+            SELECT MUTATION.SAMPLE_ID, mutation.ENTREZ_GENE_ID, gene.HUGO_GENE_SYMBOL, mutation.GENETIC_PROFILE_ID,
+            mutation_event.MUTATION_TYPE
+            FROM MUTATION_EVENT
+            INNER JOIN mutation ON MUTATION_EVENT.MUTATION_EVENT_ID = mutation.MUTATION_EVENT_ID
+            INNER JOIN gene ON MUTATION_EVENT.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            <include refid="fromExcludeVusAlterationsMutation"/>
+            <where>
+                LOWER(mutation_event.MUTATION_TYPE) IN
+                <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
+                    LOWER(#{type})
+                </foreach>
+                <include refid="whereSearchFusions"/>
+                <include refid="whereExcludeGermlineAlterations"/>
+                <include refid="whereExcludeVusAlterations"/>
+            </where>
+        </if>
+        <if test="mutationTypes != null and !mutationTypes.isEmpty() and cnaTypes != null and !cnaTypes.isEmpty()">
+            UNION
+        </if>
+        <if test="cnaTypes != null and !cnaTypes.isEmpty()">
+            SELECT sample_cna_event.SAMPLE_ID, cna_event.ENTREZ_GENE_ID, gene.HUGO_GENE_SYMBOL,
+            sample_cna_event.GENETIC_PROFILE_ID, CAST(CNA_EVENT.ALTERATION AS VARCHAR)
+            FROM cna_event
+            INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
+            INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            <include refid="fromExcludeVusAlterationsCna"/>
+            <where>
+                cna_event.ALTERATION IN
+                <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+                <include refid="whereExcludeVusAlterations"/>
+            </where>
+        </if>
+        ) as JoinedTable
+        <where>
+            <include refid="whereSamples"/>
+            <include refid="whereGene"/>
+        </where>
+        GROUP BY ENTREZ_GENE_ID;
+    </select>
+
+    <select id="getPatientAlterationCounts" resultType="org.cbioportal.model.AlterationCountByGene">
+        SELECT ENTREZ_GENE_ID AS entrezGeneId, HUGO_GENE_SYMBOL AS hugoGeneSymbol, COUNT(*) AS numberOfAlterations,
+        COUNT(DISTINCT(PATIENT_ID)) AS numberOfAlteredCases
+        FROM
+        (
+        <if test="mutationTypes != null and !mutationTypes.isEmpty()">
+            SELECT patient.STABLE_ID as PATIENT_ID, mutation.ENTREZ_GENE_ID, gene.HUGO_GENE_SYMBOL,
+            mutation_event.MUTATION_TYPE as alteration, genetic_profile.STABLE_ID as GENETIC_PROFILE_STABLE_ID
+            FROM mutation_event
+            INNER JOIN mutation ON mutation_event.MUTATION_EVENT_ID = mutation.MUTATION_EVENT_ID
+            INNER JOIN gene ON mutation_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            INNER JOIN sample_profile ON sample_profile.SAMPLE_ID = mutation.SAMPLE_ID
+            AND sample_profile.GENETIC_PROFILE_ID = mutation.GENETIC_PROFILE_ID
+            INNER JOIN genetic_profile on sample_profile.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
+            INNER JOIN sample ON sample_profile.SAMPLE_ID = sample.INTERNAL_ID
+            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+            <include refid="fromExcludeVusAlterationsMutation"/>
+            <where>
+                LOWER(mutation_event.MUTATION_TYPE) IN
+                <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
+                    LOWER(#{type})
+                </foreach>
+                <include refid="whereSearchFusions"/>
+                <include refid="whereExcludeGermlineAlterations"/>
+                <include refid="whereExcludeVusAlterations"/>
+            </where>
+        </if>
+        <if test="mutationTypes != null and !mutationTypes.isEmpty() and cnaTypes != null and !cnaTypes.isEmpty()">
+            UNION
+        </if>
+        <if test="cnaTypes != null and !cnaTypes.isEmpty()">
+            SELECT patient.STABLE_ID as PATIENT_ID, cna_event.ENTREZ_GENE_ID , gene.HUGO_GENE_SYMBOL,
+            CAST(CNA_EVENT.ALTERATION AS VARCHAR), genetic_profile.STABLE_ID as GENETIC_PROFILE_STABLE_ID
+            FROM cna_event
+            INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
+            INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            INNER JOIN genetic_profile on SAMPLE_CNA_EVENT.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
+            INNER JOIN sample ON SAMPLE_CNA_EVENT.SAMPLE_ID = sample.INTERNAL_ID
+            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+            <include refid="fromExcludeVusAlterationsCna"/>
+            <where>
+                cna_event.ALTERATION IN
+                <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+                <include refid="whereExcludeVusAlterations"/>
+            </where>
+        </if>
+        ) as JoinedTable
+        <where>
+            <include refid="wherePatients"/>
+            <include refid="whereGene"/>
+        </where>
+        GROUP BY ENTREZ_GENE_ID;
+    </select>
+
+    <select id="getSampleCnaCounts" resultType="org.cbioportal.model.CopyNumberCountByGene">
+        SELECT
+        cna_event.ENTREZ_GENE_ID AS entrezGeneId,
+        gene.HUGO_GENE_SYMBOL AS hugoGeneSymbol,
+        reference_genome_gene.CYTOBAND as cytoband,
+        cna_event.ALTERATION AS alteration,
+        COUNT(DISTINCT(sample_cna_event.SAMPLE_ID)) AS numberOfAlteredCases
+        FROM cna_event
+        INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
+        <include refid="fromExcludeVusAlterationsCna"/>
+        INNER JOIN genetic_profile ON sample_cna_event.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
+        INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+        INNER JOIN cancer_study ON cancer_study.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
+        INNER JOIN reference_genome_gene ON reference_genome_gene.ENTREZ_GENE_ID = cna_event.ENTREZ_GENE_ID
+        AND reference_genome_gene.reference_genome_id = cancer_study.reference_genome_id
+        WHERE
+        <if test="sampleIds != null and !sampleIds.isEmpty()">
+            sample_cna_event.SAMPLE_ID IN (
+            SELECT sample.INTERNAL_ID from sample
+            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+            INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
+            WHERE
+            <if test="molecularProfileIds.stream().distinct().count() == 1">
+                genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
+                sample.STABLE_ID IN
+                <foreach item="item" collection="sampleIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="molecularProfileIds.stream().distinct().count() > 1">
+                (sample.STABLE_ID, genetic_profile.STABLE_ID) IN
+                <foreach index="i" collection="sampleIds" open="(" separator="," close=")">
+                    (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
+                </foreach>
+            </if>
+            AND sample.INTERNAL_ID = sample_cna_event.SAMPLE_ID
+            AND genetic_profile.GENETIC_PROFILE_ID = sample_cna_event.GENETIC_PROFILE_ID)
+        </if>
+        <if test="entrezGeneIds != null and cnaTypes != null">
+            AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
+            <foreach index="i" collection="entrezGeneIds" open="(" separator="," close=")">
+                (#{entrezGeneIds[${i}]}, #{cnaTypes[${i}]})
+            </foreach>
+        </if>
+        <if test="entrezGeneIds != null and cnaTypes == null">
+            AND cna_event.ENTREZ_GENE_ID IN
+            <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
+                #{entrezGeneId}
+            </foreach>
+        </if>
+        <if test="entrezGeneIds == null and cnaTypes != null">
+            AND cna_event.ALTERATION IN
+            <foreach item="cnaType" collection="cnaTypes" open="(" separator="," close=")">
+                #{cnaType}
+            </foreach>
+        </if>
+        <include refid="whereExcludeVusAlterations"/>
+        GROUP BY cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION, reference_genome_gene.CYTOBAND
+    </select>
+
+    <select id="getPatientCnaCounts" resultType="org.cbioportal.model.CopyNumberCountByGene">
+        SELECT
+        cna_event.ENTREZ_GENE_ID AS entrezGeneId,
+        gene.HUGO_GENE_SYMBOL AS hugoGeneSymbol,
+        cna_event.ALTERATION AS alteration,
+        COUNT(DISTINCT(patient.INTERNAL_ID)) AS numberOfAlteredCases
+        FROM cna_event
+        <include refid="org.cbioportal.persistence.mybatis.AlterationCountsMapper.fromExcludeVusAlterationsCna"/>
+        INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
+        INNER JOIN genetic_profile ON sample_cna_event.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
+        INNER JOIN sample ON sample_cna_event.SAMPLE_ID = sample.INTERNAL_ID
+        INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+        INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+        WHERE
+        <if test="patientIds != null and !patientIds.isEmpty()">
+            <if test="molecularProfileIds.stream().distinct().count() == 1">
+                genetic_profile.STABLE_ID = #{molecularProfileIds[0]}
+                AND patient.STABLE_ID IN
+                <foreach item="item" collection="patientIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="molecularProfileIds.stream().distinct().count() > 1">
+                (patient.STABLE_ID, genetic_profile.STABLE_ID) IN
+                <foreach index="i" collection="patientIds" open="(" separator="," close=")">
+                    (#{patientIds[${i}]}, #{molecularProfileIds[${i}]})
+                </foreach>
+                AND genetic_profile.STABLE_ID IN
+                <foreach item="item" collection="molecularProfileIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </if>
+        <if test="patientIds == null">
+            genetic_profile.STABLE_ID IN
+            <foreach item="item" collection="molecularProfileIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="entrezGeneIds != null and cnaTypes != null">
+            AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
+            <foreach index="i" collection="entrezGeneIds" open="(" separator="," close=")">
+                (#{entrezGeneIds[${i}]}, #{cnaTypes[${i}]})
+            </foreach>
+        </if>
+        <if test="entrezGeneIds != null and cnaTypes == null">
+            AND cna_event.ENTREZ_GENE_ID IN
+            <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
+                #{entrezGeneId}
+            </foreach>
+        </if>
+        <if test="entrezGeneIds == null and cnaTypes != null">
+            AND cna_event.ALTERATION IN
+            <foreach item="cnaType" collection="cnaTypes" open="(" separator="," close=")">
+                #{cnaType}
+            </foreach>
+        </if>
+        <include refid="whereExcludeVusAlterations"/>
+        GROUP BY cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION
+    </select>
+
+    <sql id="fromExcludeVusAlterationsMutation">
+        <if test="excludeVUS">
+            LEFT JOIN alteration_driver_annotation ON
+            mutation.MUTATION_EVENT_ID = alteration_driver_annotation.ALTERATION_EVENT_ID
+            AND mutation.GENETIC_PROFILE_ID = alteration_driver_annotation.GENETIC_PROFILE_ID
+            AND mutation.SAMPLE_ID = alteration_driver_annotation.SAMPLE_ID
+        </if>
+    </sql>
+
+    <sql id="fromExcludeVusAlterationsCna">
+        <if test="excludeVUS">
+            LEFT JOIN alteration_driver_annotation ON
+            sample_cna_event.CNA_EVENT_ID = alteration_driver_annotation.ALTERATION_EVENT_ID
+            AND sample_cna_event.GENETIC_PROFILE_ID = alteration_driver_annotation.GENETIC_PROFILE_ID
+            AND sample_cna_event.SAMPLE_ID = alteration_driver_annotation.SAMPLE_ID
+        </if>
+    </sql>
+
+    <sql id="whereExcludeVusAlterations">
+        <if test="excludeVUS">
+            AND
+            alteration_driver_annotation.DRIVER_FILTER = 'Putative_Driver'
+            <if test="selectedTiers != null and !selectedTiers.isEmpty()">
+                OR
+                alteration_driver_annotation.DRIVER_TIERS_FILTER IN
+                <foreach item="item" collection="selectedTiers" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </if>
+    </sql>
+
+    <sql id="whereExcludeGermlineAlterations">
+        <if test="excludeGermline">
+            AND
+            mutation.MUTATION_STATUS != 'Germline'
+        </if>
+    </sql>
+
+    <sql id="whereSearchFusions">
+        <if test="searchFusions">
+            AND
+            mutation_event.MUTATION_TYPE = 'Fusion'
+        </if>
+        <if test="!searchFusions">
+            AND
+            mutation_event.MUTATION_TYPE != 'Fusion'
+        </if>
+    </sql>
+
+    <sql id="whereGene">
+        <if test="entrezGeneIds != null and !entrezGeneIds.isEmpty()">
+            AND JoinedTable.ENTREZ_GENE_ID IN
+            <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
+                #{entrezGeneId}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="whereSamples">
+        <if test="sampleIds != null and !sampleIds.isEmpty()">
+            AND
+            JoinedTable.SAMPLE_ID IN (
+            SELECT sample.INTERNAL_ID from sample
+            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+            INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
+            <where>
+                <if test="molecularProfileIds.stream().distinct().count() == 1">
+                    genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
+                    sample.STABLE_ID IN
+                    <foreach item="item" collection="sampleIds" open="(" separator="," close=")">
+                        -#{item}-
+                    </foreach>
+                </if>
+                <if test="molecularProfileIds.stream().distinct().count() > 1">
+                    (sample.STABLE_ID, genetic_profile.STABLE_ID) IN
+                    <foreach index="i" collection="sampleIds" open="(" separator="," close=")">
+                        (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
+                    </foreach>
+                </if>
+            </where>
+            )
+        </if>
+    </sql>
+
+    <sql id="wherePatients">
+        <if test="patientIds != null and !patientIds.isEmpty()">
+            AND
+            <if test="molecularProfileIds.stream().distinct().count() == 1">
+                JoinedTable.GENETIC_PROFILE_STABLE_ID = #{molecularProfileIds[0]}
+                AND PATIENT_ID IN
+                <foreach item="item" collection="patientIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="molecularProfileIds.stream().distinct().count() > 1">
+                (JoinedTable.PATIENT_ID, JoinedTable.GENETIC_PROFILE_STABLE_ID) IN
+                <foreach index="i" collection="patientIds" open="(" separator="," close=")">
+                    (#{patientIds[${i}]}, #{molecularProfileIds[${i}]})
+                </foreach>
+            </if>
+        </if>
+    </sql>
+
+</mapper>

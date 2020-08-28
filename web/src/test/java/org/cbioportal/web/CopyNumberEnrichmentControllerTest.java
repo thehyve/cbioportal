@@ -30,6 +30,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.mockito.ArgumentMatchers.*;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration("/applicationContext-web-test.xml")
@@ -111,9 +113,11 @@ public class CopyNumberEnrichmentControllerTest {
         alterationEnrichments.add(alterationEnrichment2);
 
         Mockito.when(copyNumberEnrichmentService.getCopyNumberEnrichments(
-                Mockito.anyMap(),
-                Mockito.anyList(),
-                Mockito.anyString()))
+            anyMap(),
+            any(),
+            any(),
+            anyBoolean(),
+            anyList()))
         .thenReturn(alterationEnrichments);
 
         MolecularProfileCaseIdentifier entity1 = new MolecularProfileCaseIdentifier();

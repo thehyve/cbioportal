@@ -42,29 +42,8 @@ import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.model.MolecularProfile;
 import org.cbioportal.model.SampleList;
 import org.cbioportal.persistence.mybatis.util.CacheMapUtil;
-import org.cbioportal.web.parameter.AlterationEnrichmentEventType;
-import org.cbioportal.web.parameter.ClinicalAttributeCountFilter;
-import org.cbioportal.web.parameter.ClinicalDataBinCountFilter;
-import org.cbioportal.web.parameter.ClinicalDataCountFilter;
-import org.cbioportal.web.parameter.ClinicalDataIdentifier;
-import org.cbioportal.web.parameter.ClinicalDataMultiStudyFilter;
-import org.cbioportal.web.parameter.GenericAssayDataBinCountFilter;
-import org.cbioportal.web.parameter.GenomicDataBinCountFilter;
-import org.cbioportal.web.parameter.GroupFilter;
-import org.cbioportal.web.parameter.GenericAssayDataMultipleStudyFilter;
-import org.cbioportal.web.parameter.GenericAssayMetaFilter;
-import org.cbioportal.web.parameter.MolecularDataMultipleStudyFilter;
-import org.cbioportal.web.parameter.MolecularProfileCasesGroupAndAlterationTypeFilter;
-import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
-import org.cbioportal.web.parameter.MolecularProfileFilter;
-import org.cbioportal.web.parameter.MutationMultipleStudyFilter;
-import org.cbioportal.web.parameter.PatientFilter;
-import org.cbioportal.web.parameter.PatientIdentifier;
-import org.cbioportal.web.parameter.SampleFilter;
-import org.cbioportal.web.parameter.SampleIdentifier;
-import org.cbioportal.web.parameter.SampleMolecularIdentifier;
-import org.cbioportal.web.parameter.StructuralVariantFilter;
-import org.cbioportal.web.parameter.StudyViewFilter;
+import org.cbioportal.model.MutationEventType;
+import org.cbioportal.web.parameter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,10 +137,10 @@ public class InvolvedCancerStudyExtractorInterceptor extends HandlerInterceptorA
         } else if (requestPathInfo.equals(MUTATION_ENRICHMENT_FETCH_PATH) ||
         		requestPathInfo.equals(COPY_NUMBER_ENRICHMENT_FETCH_PATH) ||
         		requestPathInfo.equals(EXPRESSION_ENRICHMENT_FETCH_PATH) ||
-        		requestPathInfo.equals(GENERIC_ASSAY_ENRICHMENT_FETCH_PATH)) {
+        		requestPathInfo.equals(GENERIC_ASSAY_ENRICHMENT_FETCH_PATH))  {
             return extractAttributesFromMolecularProfileCasesGroups(request);
         } else if (requestPathInfo.equals(ALTERATION_ENRICHMENT_FETCH_PATH)) {
-                return extractAttributesFromMolecularProfileCasesGroupsAndAlterationTypes(request);
+            return extractAttributesFromMolecularProfileCasesGroupsAndAlterationTypes(request);
         } else if (requestPathInfo.equals(STRUCTURAL_VARIANT_FETCH_PATH)) {
             return extractAttributesFromStructuralVariantFilter(request);
         } else if (requestPathInfo.equals(GENERIC_ASSAY_DATA_MULTIPLE_STUDY_FETCH_PATH)) {
@@ -620,10 +599,12 @@ public class InvolvedCancerStudyExtractorInterceptor extends HandlerInterceptorA
             LOG.debug("extracted molecularProfileCasesGroupFilters: " + molecularProfileCasesGroupFilters.toString());
             LOG.debug("setting interceptedMolecularProfileCasesGroupFilters to " + molecularProfileCasesGroupFilters);
             request.setAttribute("interceptedMolecularProfileCasesGroupFilters", molecularProfileCasesGroupFilters);
-            List<AlterationEnrichmentEventType> alterationEnrichmentEventTypes = molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationEnrichmentEventTypes();
-            LOG.debug("extracted alterationEnrichmentEventTypes: " + alterationEnrichmentEventTypes.toString());
-            LOG.debug("setting alterationEnrichmentEventTypes to " + alterationEnrichmentEventTypes);
-            request.setAttribute("alterationEnrichmentEventTypes", alterationEnrichmentEventTypes);
+            if (molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationEventTypes() != null) {
+                AlterationEventTypeFilter alterationEnrichmentEventTypes = molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationEventTypes();
+                LOG.debug("extracted alterationEventTypes: " + alterationEnrichmentEventTypes.toString());
+                LOG.debug("setting alterationEventTypes to " + alterationEnrichmentEventTypes);
+                request.setAttribute("alterationEventTypes", alterationEnrichmentEventTypes);
+            }
             if (cacheMapUtil.hasCacheEnabled()) {
                 Collection<String> cancerStudyIdCollection = extractCancerStudyIdsFromMolecularProfileCasesGroups(
                         molecularProfileCasesGroupFilters);

@@ -44,11 +44,9 @@ public class StudyViewController {
     @Autowired
     private ClinicalDataService clinicalDataService;
     @Autowired
-    private MutationService mutationService;
-    @Autowired
     private MolecularProfileService molecularProfileService;
     @Autowired
-    private DiscreteCopyNumberService discreteCopyNumberService;
+    private AlterationCountService alterationCountService;
     @Autowired
     private SampleService sampleService;
     @Autowired
@@ -267,22 +265,38 @@ public class StudyViewController {
     @RequestMapping(value = "/mutated-genes/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch mutated genes by study view filter")
-    public ResponseEntity<List<MutationCountByGene>> fetchMutatedGenes(
+    public ResponseEntity<List<AlterationCountByGene>> fetchMutatedGenes(
         @ApiParam(required = true, value = "Study view filter")
         @Valid @RequestBody(required = false) StudyViewFilter studyViewFilter,
+        @RequestParam(defaultValue = "false") boolean excludeVUS,
+        @RequestParam(defaultValue = "false") boolean excludeGermline,
+        @RequestParam(defaultValue = "") List<String> selectedTiers,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface
         @RequestAttribute(required = false, value = "involvedCancerStudies") Collection<String> involvedCancerStudies,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
-        List<MutationCountByGene> result = new ArrayList<>();
+        List<AlterationCountByGene> result = new ArrayList<>();
         if (!filteredSampleIdentifiers.isEmpty()) {
             List<String> studyIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
             studyViewFilterUtil.extractStudyAndSampleIds(filteredSampleIdentifiers, studyIds, sampleIds);
-            result = mutationService.getSampleCountInMultipleMolecularProfiles(molecularProfileService
-                .getFirstMutationProfileIds(studyIds, sampleIds), sampleIds, null, true, false);
+            List<String> profileIdPerSample = molecularProfileService.getFirstDiscreteCNAProfileIds(studyIds, sampleIds);
+            List<MolecularProfileCaseIdentifier> caseIdentifiers = new ArrayList<>();
+            for (int i = 0; i < profileIdPerSample.size(); i++) {
+                caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
+            }
+            List<MutationEventType> searchAllTypes = new ArrayList<>();
+            result = alterationCountService.getSampleMutationCounts(
+                caseIdentifiers, 
+                null, 
+                true, 
+                false,
+                searchAllTypes,
+                excludeVUS,
+                selectedTiers,
+                excludeGermline);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -304,21 +318,37 @@ public class StudyViewController {
     @RequestMapping(value = "/fusion-genes/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch fusion genes by study view filter")
-    public ResponseEntity<List<MutationCountByGene>> fetchFusionGenes(
+    public ResponseEntity<List<AlterationCountByGene>> fetchFusionGenes(
         @ApiParam(required = true, value = "Study view filter")
         @Valid @RequestBody(required = false) StudyViewFilter studyViewFilter,
+        @RequestParam(defaultValue = "false") boolean excludeVUS,
+        @RequestParam(defaultValue = "false") boolean excludeGermline,
+        @RequestParam(defaultValue = "") List<String> selectedTiers,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. This attribute is needed for the @PreAuthorize tag above.
         @RequestAttribute(required = false, value = "involvedCancerStudies") Collection<String> involvedCancerStudies,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
-        List<MutationCountByGene> result = new ArrayList<>();
+        List<AlterationCountByGene> result = new ArrayList<>();
         if (!filteredSampleIdentifiers.isEmpty()) {
             List<String> studyIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
             studyViewFilterUtil.extractStudyAndSampleIds(filteredSampleIdentifiers, studyIds, sampleIds);
-            result = mutationService.getSampleCountInMultipleMolecularProfilesForFusions(molecularProfileService
-                .getFirstMutationProfileIds(studyIds, sampleIds), sampleIds, null, true, false);
+            List<String> profileIdPerSample = molecularProfileService.getFirstDiscreteCNAProfileIds(studyIds, sampleIds);
+            List<MolecularProfileCaseIdentifier> caseIdentifiers = new ArrayList<>();
+            for (int i = 0; i < profileIdPerSample.size(); i++) {
+                caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
+            }
+            List<MutationEventType> searchAllTypes = new ArrayList<>();
+            result = alterationCountService.getSampleFusionCounts(
+                caseIdentifiers,
+                null,
+                true,
+                false,
+                searchAllTypes,
+                excludeVUS,
+                selectedTiers,
+                excludeGermline);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -344,19 +374,34 @@ public class StudyViewController {
     public ResponseEntity<List<CopyNumberCountByGene>> fetchCNAGenes(
         @ApiParam(required = true, value = "Study view filter")
         @Valid @RequestBody(required = false) StudyViewFilter studyViewFilter,
+        @RequestParam(defaultValue = "false") boolean excludeVUS,
+        @RequestParam(defaultValue = "") List<String> selectedTiers,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface
         @RequestAttribute(required = false, value = "involvedCancerStudies") Collection<String> involvedCancerStudies,
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
+        // TODO refactor resolution of sampleids to List<MolecularProfileCaseIdentifier> and share between methods
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<CopyNumberCountByGene> result = new ArrayList<>();
         if (!filteredSampleIdentifiers.isEmpty()) {
             List<String> studyIds = new ArrayList<>();
             List<String> sampleIds = new ArrayList<>();
             studyViewFilterUtil.extractStudyAndSampleIds(filteredSampleIdentifiers, studyIds, sampleIds);
-            result = discreteCopyNumberService.getSampleCountInMultipleMolecularProfiles(molecularProfileService
-                .getFirstDiscreteCNAProfileIds(studyIds, sampleIds), sampleIds, null, Arrays.asList(-2, 2), true, false);
+            List<String> profileIdPerSample = molecularProfileService.getFirstDiscreteCNAProfileIds(studyIds, sampleIds);
+            List<MolecularProfileCaseIdentifier> caseIdentifiers = new ArrayList<>();
+            for (int i = 0; i < profileIdPerSample.size(); i++) {
+                caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
+            }
+            List<CopyNumberAlterationEventType> cnaTypes = Arrays.asList(CopyNumberAlterationEventType.AMP, CopyNumberAlterationEventType.HOMDEL);
+            result = alterationCountService.getSampleCnaCounts(
+                caseIdentifiers, 
+                null,
+                true,
+                false,
+                cnaTypes,
+                excludeVUS,
+                selectedTiers);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {

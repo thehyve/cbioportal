@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.cbioportal.model.AlterationEnrichment;
-import org.cbioportal.model.CountSummary;
-import org.cbioportal.model.MolecularProfileCaseIdentifier;
+import org.cbioportal.model.*;
 import org.cbioportal.service.AlterationEnrichmentService;
+import org.cbioportal.service.impl.AlterationEnrichmentServiceImpl;
+import org.cbioportal.web.parameter.AlterationEventTypeFilter;
+import org.cbioportal.web.parameter.MolecularProfileCasesGroupAndAlterationTypeFilter;
 import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -29,6 +30,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -60,23 +64,21 @@ public class AlterationEnrichmentControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private MockMvc mockMvc;
+    private ArrayList<AlterationEnrichment> alterationEnrichments;
+    private AlterationEventTypeFilter eventTypes;
 
     @Bean
     public AlterationEnrichmentService alterationEnrichmentService() {
         return Mockito.mock(AlterationEnrichmentService.class);
     }
 
+    private MolecularProfileCasesGroupAndAlterationTypeFilter filter;
+        
     @Before
     public void setUp() throws Exception {
-
         Mockito.reset(alterationEnrichmentService);
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
 
-    @Test
-    public void fetchMutationEnrichments() throws Exception {
-
-        List<AlterationEnrichment> alterationEnrichments = new ArrayList<>();
+        alterationEnrichments = new ArrayList<>();
         AlterationEnrichment alterationEnrichment1 = new AlterationEnrichment();
         CountSummary alterationEnrichment1Set1Count = new CountSummary();
         CountSummary alterationEnrichment1Set2Count = new CountSummary();
@@ -105,12 +107,6 @@ public class AlterationEnrichmentControllerTest {
         alterationEnrichment2.setCounts(Arrays.asList(alterationEnrichment2Set1Count,alterationEnrichment2Set2Count));
         alterationEnrichments.add(alterationEnrichment2);
 
-        Mockito.when(alterationEnrichmentService.getAlterationEnrichments(
-                Mockito.anyMap(),
-                Mockito.anyList(),
-                Mockito.anyString()))
-        .thenReturn(alterationEnrichments);
-
         MolecularProfileCaseIdentifier entity1 = new MolecularProfileCaseIdentifier();
         entity1.setCaseId("test_sample_id_1");
         entity1.setMolecularProfileId("test_1_mutations");
@@ -126,11 +122,164 @@ public class AlterationEnrichmentControllerTest {
         casesGroup2.setName("unaltered group");
         casesGroup2.setMolecularProfileCaseIdentifiers(Arrays.asList(entity2));
 
+        filter = new MolecularProfileCasesGroupAndAlterationTypeFilter();
+        filter.setMolecularProfileCasesGroupFilter(Arrays.asList(casesGroup1,casesGroup2));
+
+        eventTypes = new AlterationEventTypeFilter();
+        eventTypes.setMutationEventTypes(Arrays.asList(MutationEventType.missense_mutation));
+        eventTypes.setCopyNumberAlterationEventTypes(Arrays.asList(CopyNumberAlterationEventType.AMP));
+        filter.setAlterationEventTypes(eventTypes);
+        
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        
+    }
+
+    @Test
+    public void fetchAlterationEnrichments() throws Exception {
+
+        when(alterationEnrichmentService.getAlterationEnrichments(
+            anyMap(),
+            anyList(), // <-- !
+            anyList(), // <-- !
+            any(),
+            anyBoolean(),
+            anyBoolean(),
+            anyList(),
+            anyBoolean()))
+            .thenReturn(alterationEnrichments);
+        
         mockMvc.perform(MockMvcRequestBuilders.post(
-            "/mutation-enrichments/fetch")
+            "/alteration-enrichments/fetch")
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(Arrays.asList(casesGroup1,casesGroup2))))
+            .content(objectMapper.writeValueAsString(filter)))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(TEST_ENTREZ_GENE_ID_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].cytoband").value(TEST_CYTOBAND_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].pValue").value(TEST_P_VALUE_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].entrezGeneId").value(TEST_ENTREZ_GENE_ID_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].cytoband").value(TEST_CYTOBAND_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].pValue").value(TEST_P_VALUE_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2));
+    }
+
+    @Test
+    public void fetchAlterationEnrichmentsNullTypes() throws Exception {
+
+        when(alterationEnrichmentService.getAlterationEnrichments(
+            anyMap(),
+            isNull(), // <-- !
+            isNull(), // <-- !
+            any(),
+            anyBoolean(),
+            anyBoolean(),
+            anyList(),
+            anyBoolean()))
+            .thenReturn(alterationEnrichments);
+        
+        filter.getAlterationEventTypes().setMutationEventTypes(null);
+        filter.getAlterationEventTypes().setCopyNumberAlterationEventTypes(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+            "/alteration-enrichments/fetch")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(filter)))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(TEST_ENTREZ_GENE_ID_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].cytoband").value(TEST_CYTOBAND_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].pValue").value(TEST_P_VALUE_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].entrezGeneId").value(TEST_ENTREZ_GENE_ID_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].cytoband").value(TEST_CYTOBAND_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].pValue").value(TEST_P_VALUE_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2));
+    }
+
+    @Test
+    public void fetchAlterationEnrichmentsNullMutationTypes() throws Exception {
+
+        when(alterationEnrichmentService.getAlterationEnrichments(
+            anyMap(),
+            isNull(), // <-- !
+            anyList(), // <-- !
+            any(),
+            anyBoolean(),
+            anyBoolean(),
+            anyList(),
+            anyBoolean()))
+            .thenReturn(alterationEnrichments);
+
+        filter.getAlterationEventTypes().setMutationEventTypes(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+            "/alteration-enrichments/fetch")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(filter)))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].entrezGeneId").value(TEST_ENTREZ_GENE_ID_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].cytoband").value(TEST_CYTOBAND_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].pValue").value(TEST_P_VALUE_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].entrezGeneId").value(TEST_ENTREZ_GENE_ID_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].hugoGeneSymbol").value(TEST_HUGO_GENE_SYMBOL_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].cytoband").value(TEST_CYTOBAND_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].alteredCount").value(TEST_NUMBER_OF_SAMPLES_ALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].alteredCount").value(TEST_NUMBER_OF_SAMPLES_UNALTERED_IN_SET_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].pValue").value(TEST_P_VALUE_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[0].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].profiledCount").value(TEST_NUMBER_OF_SAMPLES_PROFILED_IN_SET_2));
+    }
+
+    @Test
+    public void fetchAlterationEnrichmentsNullCnaTypes() throws Exception {
+
+        when(alterationEnrichmentService.getAlterationEnrichments(
+            anyMap(),
+            anyList(), // <-- !
+            isNull(), // <-- !
+            any(),
+            anyBoolean(),
+            anyBoolean(),
+            anyList(),
+            anyBoolean()))
+            .thenReturn(alterationEnrichments);
+
+        filter.getAlterationEventTypes().setCopyNumberAlterationEventTypes(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+            "/alteration-enrichments/fetch")
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(filter)))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)))

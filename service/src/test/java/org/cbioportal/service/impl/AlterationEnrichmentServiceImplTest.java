@@ -5,12 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cbioportal.model.AlterationCountByGene;
-import org.cbioportal.model.AlterationEnrichment;
-import org.cbioportal.model.MolecularProfileCaseIdentifier;
-import org.cbioportal.model.MutationCountByGene;
-import org.cbioportal.service.AlterationService;
-import org.cbioportal.service.MutationService;
+import org.cbioportal.model.*;
+import org.cbioportal.service.AlterationCountService;
 import org.cbioportal.service.util.AlterationEnrichmentUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,9 +21,8 @@ public class AlterationEnrichmentServiceImplTest extends BaseServiceImplTest {
 
     @InjectMocks
     private AlterationEnrichmentServiceImpl alterationEnrichmentService;
-
     @Mock
-    private AlterationService alterationService;
+    private AlterationCountService alterationCountService;
     @Mock
     private AlterationEnrichmentUtil alterationEnrichmentUtil;
 
@@ -59,29 +54,33 @@ public class AlterationEnrichmentServiceImplTest extends BaseServiceImplTest {
         groupMolecularProfileCaseSets.put("unaltered group", molecularProfileCaseSet2);
 
         List<AlterationCountByGene> alterationSampleCountByGeneList = new ArrayList<>();
+        List<MutationEventType> mutationTypes = new ArrayList<>();
+        List<CopyNumberAlterationEventType> cnaTypes = new ArrayList<>();
 
+        //  return counts for each of the two groups 
         for (String molecularProfileId : groupMolecularProfileCaseSets.keySet()) {
-
-            List<String> molecularProfileIds = new ArrayList<>();
-            List<String> sampleIds = new ArrayList<>();
-            List<String> alterations = new ArrayList<>();
-
-            groupMolecularProfileCaseSets.getOrDefault(molecularProfileId, new ArrayList<>())
-                    .forEach(molecularProfileCase -> {
-                        molecularProfileIds.add(molecularProfileCase.getMolecularProfileId());
-                        sampleIds.add(molecularProfileCase.getCaseId());
-                    });
-
-            Mockito.when(alterationService.getSampleCountInMultipleMolecularProfiles(new ArrayList<>(molecularProfileIds),
-                    new ArrayList<>(sampleIds), null, false, true, new ArrayList<>(alterations))).thenReturn(alterationSampleCountByGeneList);
+            Mockito.when(alterationCountService.getSampleAlterationCounts(
+                groupMolecularProfileCaseSets.get(molecularProfileId),
+                null, false, true,
+                mutationTypes, cnaTypes,
+                false, false, null, false)
+            ).thenReturn(alterationSampleCountByGeneList);
         }
 
         List<AlterationEnrichment> expectedAlterationEnrichments = new ArrayList<>();
         Mockito.when(alterationEnrichmentUtil.createAlterationEnrichments(new HashMap<>(),
-                groupMolecularProfileCaseSets, "SAMPLE")).thenReturn(expectedAlterationEnrichments);
+                groupMolecularProfileCaseSets)).thenReturn(expectedAlterationEnrichments);
 
         List<AlterationEnrichment> result = alterationEnrichmentService
-                .getAlterationEnrichments(groupMolecularProfileCaseSets, new ArrayList<>(), "SAMPLE");
+            .getAlterationEnrichments(
+                groupMolecularProfileCaseSets,
+                mutationTypes,
+                cnaTypes,
+                EnrichmentScope.SAMPLE,
+                false,
+                false,
+                null,
+                false);
         Assert.assertEquals(result, expectedAlterationEnrichments);
     }
 }

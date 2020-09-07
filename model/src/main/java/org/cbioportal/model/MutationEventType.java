@@ -1,5 +1,7 @@
 package org.cbioportal.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,14 +57,15 @@ public enum MutationEventType {
     any("any"),
     other("other");
 
-    private String alterationType;
+    private List<String> mutationTypes;
 
-    MutationEventType(String alterationType) {
-        this.alterationType = alterationType;
+    MutationEventType(String... mutationTypes) {
+
+        this.mutationTypes = Arrays.asList(mutationTypes);
     }
 
-    @Override
-    public String toString() {
-        return alterationType;
+    public List<String> getMutationTypes() {
+        return mutationTypes;
     }
+
 }

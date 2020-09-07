@@ -142,7 +142,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
     private List<String> createMutationTypeList(List<MutationEventType> mutationEventTypes) {
         return mutationEventTypes != null ?
-            mutationEventTypes.stream().map(c -> c.toString()).collect(Collectors.toList())
+            mutationEventTypes.stream().flatMap(m -> m.getMutationTypes().stream()).collect(Collectors.toList())
             : null;
     }
     

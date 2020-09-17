@@ -24,7 +24,7 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
         
         Set<String> tiers = rows.stream()
             .filter(d -> d.getDriverTiersFilter() != null)
-            .map(d -> d.getDriverTiersFilter())
+            .map(AlterationDriverAnnotation::getDriverTiersFilter)
             .collect(Collectors.toSet());
         boolean hasBinary = !tiers.isEmpty() || rows.stream()
             .anyMatch(d -> "Putative_Driver".equals(d.getDriverFilter()) ||

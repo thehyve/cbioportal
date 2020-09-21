@@ -53,15 +53,16 @@ public class AlterationDriverAnnotationServiceImplTest {
     
     @Test
     public void getCustomDriverAnnotationPropsNoFilter() {
-
+        alterationDriverAnnotation1.setDriverFilter("Filter1");
         alterationDriverAnnotation1.setDriverTiersFilter("Class1");
+        alterationDriverAnnotation2.setDriverFilter("Filter2");
         alterationDriverAnnotation2.setDriverTiersFilter("Class2");
         List<AlterationDriverAnnotation> annotationList = Arrays.asList(alterationDriverAnnotation1, alterationDriverAnnotation2);
         when(alterationDriverAnnotationRepository.getAlterationDriverAnnotations(isNull())).thenReturn(annotationList);
 
         CustomDriverAnnotationReport props = alterationDriverAnnotationService.getCustomDriverAnnotationProps(null);
 
-        Assert.assertTrue(props.getHasBinary());
+        Assert.assertFalse(props.getHasBinary());
         Assert.assertTrue(props.getTiers().containsAll(Arrays.asList("Class1", "Class2")));
         
     }

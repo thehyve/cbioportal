@@ -30,8 +30,8 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
             .filter(d -> !NO_DATA_TIERS.contains(d.getDriverTiersFilter()))
             .map(AlterationDriverAnnotation::getDriverTiersFilter)
             .collect(Collectors.toSet());
-        boolean hasBinary = !tiers.isEmpty() || rows.stream()
-            .anyMatch(d -> "Putative_Driver".equals(d.getDriverFilter()) ||
+        boolean hasBinary = rows.stream().anyMatch(d ->
+            "Putative_Driver".equals(d.getDriverFilter()) ||
                 "Putative_Passenger".equals(d.getDriverFilter()));
         
         return new CustomDriverAnnotationReport(hasBinary, tiers);

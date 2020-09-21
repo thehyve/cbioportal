@@ -7,10 +7,7 @@ import org.cbioportal.service.AlterationDriverAnnotationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +25,7 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
         Set<String> tiers = rows.stream()
             .filter(d -> !NO_DATA_TIERS.contains(d.getDriverTiersFilter()))
             .map(AlterationDriverAnnotation::getDriverTiersFilter)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new));
         boolean hasBinary = rows.stream().anyMatch(d ->
             "Putative_Driver".equals(d.getDriverFilter()) ||
                 "Putative_Passenger".equals(d.getDriverFilter()));

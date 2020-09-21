@@ -18,7 +18,7 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
     
     @Autowired
     private AlterationDriverAnnotationRepository alterationDriverAnnotationRepository;
-    private final Set<String> NO_DATA_TIERS = new HashSet<>(Arrays.asList("", "NA"));
+    private final Set<String> NO_DATA_TIERS = new HashSet<>(Arrays.asList(null, "", "NA"));
     
     public CustomDriverAnnotationReport getCustomDriverAnnotationProps(List<String> molecularProfileIds) {
         
@@ -26,7 +26,6 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
             .getAlterationDriverAnnotations(molecularProfileIds);
         
         Set<String> tiers = rows.stream()
-            .filter(d -> d.getDriverTiersFilter() != null)
             .filter(d -> !NO_DATA_TIERS.contains(d.getDriverTiersFilter()))
             .map(AlterationDriverAnnotation::getDriverTiersFilter)
             .collect(Collectors.toSet());

@@ -13,6 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
@@ -106,5 +107,34 @@ public class AlterationDriverAnnotationServiceImplTest {
         Assert.assertEquals(0, props.getTiers().size());
         
     }
-    
+
+    @Test
+    public void getCustomDriverAnnotationPropsWithoutNATiers() {
+        AlterationDriverAnnotation naTierAnnotation = new AlterationDriverAnnotation();
+        naTierAnnotation.setDriverTiersFilter("NA");
+        List<String> molecularProfileIds = Arrays.asList("test_1", "test_2");
+        List<AlterationDriverAnnotation> annotationList = Arrays.asList(alterationDriverAnnotation1, naTierAnnotation);
+        when(alterationDriverAnnotationRepository.getAlterationDriverAnnotations(molecularProfileIds))
+            .thenReturn(annotationList);
+
+        CustomDriverAnnotationReport props = alterationDriverAnnotationService
+            .getCustomDriverAnnotationProps(molecularProfileIds);
+
+        Assert.assertFalse("NA has to be removed from the set of tiers", props.getTiers().contains("NA"));
+    }
+
+    @Test
+    public void getCustomDriverAnnotationPropsWithoutEmptyTiers() {
+        AlterationDriverAnnotation emptyTierAnnotation = new AlterationDriverAnnotation();
+        emptyTierAnnotation.setDriverTiersFilter("");
+        List<String> molecularProfileIds = Arrays.asList("test_1", "test_2");
+        List<AlterationDriverAnnotation> annotationList = Arrays.asList(alterationDriverAnnotation1, emptyTierAnnotation);
+        when(alterationDriverAnnotationRepository.getAlterationDriverAnnotations(molecularProfileIds))
+            .thenReturn(annotationList);
+
+        CustomDriverAnnotationReport props = alterationDriverAnnotationService
+            .getCustomDriverAnnotationProps(molecularProfileIds);
+
+        Assert.assertFalse("Empty string tier has to be removed from the set", props.getTiers().contains(""));
+    }
 }

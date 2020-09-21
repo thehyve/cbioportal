@@ -7,6 +7,8 @@ import org.cbioportal.service.AlterationDriverAnnotationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
     
     @Autowired
     private AlterationDriverAnnotationRepository alterationDriverAnnotationRepository;
+    private final Set<String> NO_DATA_TIERS = new HashSet<>(Arrays.asList("", "NA"));
     
     public CustomDriverAnnotationReport getCustomDriverAnnotationProps(List<String> molecularProfileIds) {
         
@@ -24,6 +27,7 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
         
         Set<String> tiers = rows.stream()
             .filter(d -> d.getDriverTiersFilter() != null)
+            .filter(d -> !NO_DATA_TIERS.contains(d.getDriverTiersFilter()))
             .map(AlterationDriverAnnotation::getDriverTiersFilter)
             .collect(Collectors.toSet());
         boolean hasBinary = !tiers.isEmpty() || rows.stream()

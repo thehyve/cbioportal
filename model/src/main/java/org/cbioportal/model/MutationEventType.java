@@ -1,10 +1,5 @@
 package org.cbioportal.model;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-import java.util.List;
-
 public enum MutationEventType {
 
     missense_mutation("missense_mutation"),
@@ -57,15 +52,14 @@ public enum MutationEventType {
     any("any"),
     other("other");
 
-    private List<String> mutationTypes;
+    private final String mutationType;
 
-    MutationEventType(String... mutationTypes) {
-
-        this.mutationTypes = Arrays.asList(mutationTypes);
+    MutationEventType(String mutationType) {
+        this.mutationType = mutationType;
     }
 
-    public List<String> getMutationTypes() {
-        return mutationTypes;
+    public String getMutationType() {
+        return mutationType;
     }
 
 }

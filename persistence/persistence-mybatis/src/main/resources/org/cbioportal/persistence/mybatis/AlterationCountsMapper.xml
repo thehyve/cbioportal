@@ -22,14 +22,16 @@
             INNER JOIN gene ON mutation_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
             <include refid="fromExcludeVusAlterationsMutation"/>
             <where>
-                <if test="mutationTypes != null">
-                    <if test="mutationTypes.isEmpty()">NULL</if>
-                    <if test="!mutationTypes.isEmpty()">
-                        LOWER(mutation_event.MUTATION_TYPE) IN
-                        <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
-                            LOWER(#{type})
-                        </foreach>
-                    </if>
+                <if test="!mutationTypes.hasAll()">
+                    <choose>
+                        <when test="mutationTypes.hasNone()">NULL</when>
+                        <otherwise>
+                            LOWER(mutation_event.MUTATION_TYPE) IN
+                            <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
+                                LOWER(#{type})
+                            </foreach>
+                        </otherwise>
+                    </choose>
                 </if>
                 <include refid="whereSearchFusions"/>
                 <include refid="whereExcludeGermlineAlterations"/>
@@ -47,14 +49,16 @@
             INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
             <include refid="fromExcludeVusAlterationsCna"/>
             <where>
-                <if test="cnaTypes != null">
-                    <if test="cnaTypes.isEmpty()">NULL</if>
-                    <if test="!cnaTypes.isEmpty()">
-                        cna_event.ALTERATION IN
-                        <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
-                            #{type}
-                        </foreach>
-                    </if>
+                <if test="!cnaTypes.hasAll()">
+                    <choose>
+                        <when test="cnaTypes.hasNone()">NULL</when>
+                        <otherwise>
+                            cna_event.ALTERATION IN
+                            <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
+                                #{type}
+                            </foreach>
+                        </otherwise>
+                    </choose>
                 </if>
                 <include refid="whereExcludeVusAlterations"/>
             </where>
@@ -90,14 +94,16 @@
             INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
             <include refid="fromExcludeVusAlterationsMutation"/>
             <where>
-                <if test="mutationTypes != null">
-                    <if test="mutationTypes.isEmpty()">NULL</if>
-                    <if test="!mutationTypes.isEmpty()">
-                        LOWER(mutation_event.MUTATION_TYPE) IN
-                        <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
-                            LOWER(#{type})
-                        </foreach>
-                    </if>
+                <if test="!mutationTypes.hasAll()">
+                    <choose>
+                        <when test="mutationTypes.hasNone()">NULL</when>
+                        <otherwise>
+                            LOWER(mutation_event.MUTATION_TYPE) IN
+                            <foreach item="type" collection="mutationTypes" open="(" separator="," close=")">
+                                LOWER(#{type})
+                            </foreach>
+                        </otherwise>
+                    </choose>
                 </if>
                 <include refid="whereSearchFusions"/>
                 <include refid="whereExcludeGermlineAlterations"/>
@@ -117,14 +123,16 @@
             INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
             <include refid="fromExcludeVusAlterationsCna"/>
             <where>
-                <if test="cnaTypes != null">
-                    <if test="cnaTypes.isEmpty()">NULL</if>
-                    <if test="!cnaTypes.isEmpty()">
-                        cna_event.ALTERATION IN
-                        <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
-                            #{type}
-                        </foreach>
-                    </if>
+                <if test="!cnaTypes.hasAll()">
+                    <choose>
+                        <when test="cnaTypes.hasNone()">NULL</when>
+                        <otherwise>
+                            cna_event.ALTERATION IN
+                            <foreach item="type" collection="cnaTypes" open="(" separator="," close=")">
+                                #{type}
+                            </foreach>
+                        </otherwise>
+                    </choose>
                 </if>
                 <include refid="whereExcludeVusAlterations"/>
             </where>
@@ -174,19 +182,20 @@
             AND sample.INTERNAL_ID = sample_cna_event.SAMPLE_ID
             AND genetic_profile.GENETIC_PROFILE_ID = sample_cna_event.GENETIC_PROFILE_ID)
         </if>
-        <if test="entrezGeneIds != null and cnaTypes != null">
+        <if test="entrezGeneIds != null and cnaTypes.hasValues()">
             AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
             <foreach index="i" collection="entrezGeneIds" open="(" separator="," close=")">
                 (#{entrezGeneIds[${i}]}, #{cnaTypes[${i}]})
             </foreach>
         </if>
-        <if test="entrezGeneIds != null and cnaTypes == null">
+        <!--TODO If cnaTypes.hasNone() we need to force to produce empty set despite entrezGeneIds is specified?-->
+        <if test="entrezGeneIds != null and !cnaTypes.hasValues()">
             AND cna_event.ENTREZ_GENE_ID IN
             <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
                 #{entrezGeneId}
             </foreach>
         </if>
-        <if test="entrezGeneIds == null and cnaTypes != null">
+        <if test="entrezGeneIds == null and cnaTypes.hasValues()">
             AND cna_event.ALTERATION IN
             <foreach item="cnaType" collection="cnaTypes" open="(" separator="," close=")">
                 #{cnaType}
@@ -235,19 +244,20 @@
                 #{item}
             </foreach>
         </if>
-        <if test="entrezGeneIds != null and cnaTypes != null and !cnaTypes.isEmpty()">
+        <if test="entrezGeneIds != null and cnaTypes.hasValues()">
             AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
             <foreach index="i" collection="entrezGeneIds" open="(" separator="," close=")">
                 (#{entrezGeneIds[${i}]}, #{cnaTypes[${i}]})
             </foreach>
         </if>
-        <if test="entrezGeneIds != null and (cnaTypes == null or cnaTypes.isEmpty())">
+        <!--TODO If cnaTypes.hasNone() we need to force to produce empty set despite entrezGeneIds is specified?-->
+        <if test="entrezGeneIds != null and !cnaTypes.hasValues()">
             AND cna_event.ENTREZ_GENE_ID IN
             <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
                 #{entrezGeneId}
             </foreach>
         </if>
-        <if test="entrezGeneIds == null and cnaTypes != null and !cnaTypes.isEmpty()">
+        <if test="entrezGeneIds == null and cnaTypes.hasValues()">
             AND cna_event.ALTERATION IN
             <foreach item="cnaType" collection="cnaTypes" open="(" separator="," close=")">
                 #{cnaType}

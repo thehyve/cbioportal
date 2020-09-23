@@ -2,6 +2,7 @@ package org.cbioportal.persistence.mybatis;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.persistence.AlterationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class AlterationMyBatisRepository implements AlterationRepository {
@@ -20,15 +20,14 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     @Override
     public List<AlterationCountByGene> getSampleAlterationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                                  List<Integer> entrezGeneIds,
-                                                                 List<MutationEventType> mutationEventTypes,
-                                                                 List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                                 final Select<MutationEventType> mutationEventTypes,
+                                                                 final Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                                  boolean searchFusions,
                                                                  boolean excludeVUS,
                                                                  List<String> selectedTiers,
                                                                  boolean excludeGermline) {
 
-        if ((mutationEventTypes != null && mutationEventTypes.isEmpty())
-            && (cnaEventTypes != null && cnaEventTypes.isEmpty())) {
+        if (mutationEventTypes.hasNone() && cnaEventTypes.hasNone()) {
             return Collections.emptyList();
         }
 
@@ -49,16 +48,16 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     @Override
     public List<AlterationCountByGene> getPatientAlterationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                                   List<Integer> entrezGeneIds,
-                                                                  List<MutationEventType> mutationEventTypes,
-                                                                  List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                                  Select<MutationEventType> mutationEventTypes,
+                                                                  Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                                   boolean searchFusions,
                                                                   boolean excludeVUS,
                                                                   List<String> selectedTiers,
                                                                   boolean excludeGermline) {
 
-        if ((mutationEventTypes == null || mutationEventTypes.isEmpty())
-            && (cnaEventTypes == null || cnaEventTypes.isEmpty()))
-            return new ArrayList<>();
+        if (mutationEventTypes.hasNone() && cnaEventTypes.hasNone()) {
+            return Collections.emptyList();
+        }
 
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
 
@@ -77,15 +76,15 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     @Override
     public List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                           List<Integer> entrezGeneIds,
-                                                          List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                          Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                           boolean excludeVUS,
                                                           List<String> selectedTiers) {
 
 
-        if (cnaEventTypes == null || cnaEventTypes.isEmpty()) {
-            return new ArrayList<>();
+        if (cnaEventTypes.hasNone()) {
+            return Collections.emptyList();
         }
-        
+
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
 
         return alterationCountsMapper.getSampleCnaCounts(
@@ -100,12 +99,12 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     @Override
     public List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                            List<Integer> entrezGeneIds,
-                                                           List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                           Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                            boolean excludeVUS,
                                                            List<String> selectedTiers) {
 
-        if (cnaEventTypes == null || cnaEventTypes.isEmpty()) {
-            return new ArrayList<>();
+        if (cnaEventTypes.hasNone()) {
+            return Collections.emptyList();
         }
 
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
@@ -122,9 +121,10 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
     /**
      * Collect profile id and sample id arrays.
-     * @param  ids List of MolecularProfileCaseIdentifiers
+     *
+     * @param ids List of MolecularProfileCaseIdentifiers
      * @return Pair of profile id/sample id arrays where every index
-     *         represents a profile id/sample id-combination
+     * represents a profile id/sample id-combination
      */
     private Pair<List<String>, List<String>> createCaseIdToProfileIdArrays(List<MolecularProfileCaseIdentifier> ids) {
         List<String> caseIds = new ArrayList<>();
@@ -135,17 +135,13 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         });
         return Pair.of(profileIds, caseIds);
     }
-    
-    private List<Integer> createCnaTypeList(List<CopyNumberAlterationEventType> cnaEventTypes) {
-        return cnaEventTypes != null ?
-            cnaEventTypes.stream().map(c -> c.getAlterationType()).collect(Collectors.toList())
-            : null;
+
+    private Select<Integer> createCnaTypeList(final Select<CopyNumberAlterationEventType> cnaEventTypes) {
+        return cnaEventTypes.map(CopyNumberAlterationEventType::getAlterationType);
     }
 
-    private List<String> createMutationTypeList(List<MutationEventType> mutationEventTypes) {
-        return mutationEventTypes != null ?
-            mutationEventTypes.stream().flatMap(m -> m.getMutationTypes().stream()).collect(Collectors.toList())
-            : null;
+    private Select<String> createMutationTypeList(final Select<MutationEventType> mutationEventTypes) {
+        return mutationEventTypes.map(MutationEventType::getMutationType);
     }
-    
+
 }

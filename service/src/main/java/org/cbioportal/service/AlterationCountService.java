@@ -1,6 +1,7 @@
 package org.cbioportal.service;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 
 import java.util.List;
 
@@ -10,8 +11,8 @@ public interface AlterationCountService {
                                                           List<Integer> entrezGeneIds,
                                                           boolean includeFrequency,
                                                           boolean includeMissingAlterationsFromGenePanel,
-                                                          List<MutationEventType> mutationEventTypes,
-                                                          List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                          Select<MutationEventType> mutationEventTypes,
+                                                          Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                           boolean searchFusions,
                                                           boolean excludeVUS,
                                                           List<String> selectedTiers,
@@ -21,8 +22,8 @@ public interface AlterationCountService {
                                                            List<Integer> entrezGeneIds,
                                                            boolean includeFrequency,
                                                            boolean includeMissingAlterationsFromGenePanel,
-                                                           List<MutationEventType> mutationEventTypes,
-                                                           List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                           Select<MutationEventType> mutationEventTypes,
+                                                           Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                            boolean searchFusions,
                                                            boolean excludeVUS,
                                                            List<String> selectedTiers,
@@ -32,7 +33,7 @@ public interface AlterationCountService {
                                                         List<Integer> entrezGeneIds,
                                                         boolean includeFrequency,
                                                         boolean includeMissingAlterationsFromGenePanel,
-                                                        List<MutationEventType> mutationEventTypes,
+                                                        Select<MutationEventType> mutationEventTypes,
                                                         boolean excludeVUS,
                                                         List<String> selectedTiers,
                                                         boolean excludeGermline);
@@ -41,7 +42,7 @@ public interface AlterationCountService {
                                                          List<Integer> entrezGeneIds,
                                                          boolean includeFrequency,
                                                          boolean includeMissingAlterationsFromGenePanel,
-                                                         List<MutationEventType> mutationEventTypes,
+                                                         Select<MutationEventType> mutationEventTypes,
                                                          boolean excludeVUS,
                                                          List<String> selectedTiers,
                                                          boolean excludeGermline);
@@ -50,7 +51,7 @@ public interface AlterationCountService {
                                                       List<Integer> entrezGeneIds,
                                                       boolean includeFrequency,
                                                       boolean includeMissingAlterationsFromGenePanel,
-                                                      List<MutationEventType> mutationEventTypes,
+                                                      Select<MutationEventType> mutationEventTypes,
                                                       boolean excludeVUS,
                                                       List<String> selectedTiers,
                                                       boolean excludeGermline);
@@ -59,7 +60,7 @@ public interface AlterationCountService {
                                                        List<Integer> entrezGeneIds,
                                                        boolean includeFrequency,
                                                        boolean includeMissingAlterationsFromGenePanel,
-                                                       List<MutationEventType> mutationEventTypes,
+                                                       Select<MutationEventType> mutationEventTypes,
                                                        boolean excludeVUS,
                                                        List<String> selectedTiers,
                                                        boolean excludeGermline);
@@ -86,7 +87,7 @@ public interface AlterationCountService {
                                                    List<Integer> entrezGeneIds,
                                                    boolean includeFrequency,
                                                    boolean includeMissingAlterationsFromGenePanel,
-                                                   List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                   Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                    boolean excludeVUS,
                                                    List<String> selectedTiers);
 
@@ -94,7 +95,7 @@ public interface AlterationCountService {
                                                     List<Integer> entrezGeneIds,
                                                     boolean includeFrequency,
                                                     boolean includeMissingAlterationsFromGenePanel,
-                                                    List<CopyNumberAlterationEventType> cnaEventTypes,
+                                                    Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                     boolean excludeVUS,
                                                     List<String> selectedTiers);
     

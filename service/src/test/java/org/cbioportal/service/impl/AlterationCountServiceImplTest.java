@@ -1,6 +1,7 @@
 package org.cbioportal.service.impl;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.persistence.AlterationRepository;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.service.util.AlterationEnrichmentUtil;
@@ -30,8 +31,8 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
     private AlterationEnrichmentUtil<CopyNumberCountByGene> alterationEnrichmentUtilCna;
 
     List<MolecularProfileCaseIdentifier> caseIdentifiers = Arrays.asList(new MolecularProfileCaseIdentifier("A", MOLECULAR_PROFILE_ID));
-    List<MutationEventType> mutationEventTypes = Arrays.asList(MutationEventType.missense_mutation);
-    List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList(CopyNumberAlterationEventType.AMP);
+    Select<MutationEventType> mutationEventTypes = Select.byValues(Arrays.asList(MutationEventType.missense_mutation));
+    Select<CopyNumberAlterationEventType> cnaEventTypes = Select.byValues(Arrays.asList(CopyNumberAlterationEventType.AMP));
     List<String> tiers = Arrays.asList();
     boolean searchFusions = false;
     boolean excludeVUS = false;
@@ -117,7 +118,7 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
             caseIdentifiers,
             entrezGeneIds,
             mutationEventTypes,
-            null,
+            Select.none(),
             searchFusions,
             excludeVUS,
             tiers,
@@ -141,14 +142,12 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
     @Test
     public void getPatientMutationCounts() throws MolecularProfileNotFoundException {
 
-        List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList();
-
         // this mock tests correct argument types
         when(alterationRepository.getPatientAlterationCounts(
             caseIdentifiers,
             entrezGeneIds,
             mutationEventTypes,
-            cnaEventTypes,
+            Select.none(),
             searchFusions,
             excludeVUS,
             tiers,
@@ -171,8 +170,7 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
 
     @Test
     public void getSampleFusionCounts() {
-
-        List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList();
+        
         boolean searchFusions = true;
 
         // this mock tests correct argument types
@@ -180,7 +178,7 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
             caseIdentifiers,
             entrezGeneIds,
             mutationEventTypes,
-            cnaEventTypes,
+            Select.none(),
             searchFusions,
             excludeVUS,
             tiers,
@@ -202,8 +200,7 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
 
     @Test
     public void getPatientFusionCounts() {
-
-        List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList();
+        
         boolean searchFusions = true;
 
         // this mock tests correct argument types
@@ -211,7 +208,7 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
             caseIdentifiers,
             entrezGeneIds,
             mutationEventTypes,
-            cnaEventTypes,
+            Select.none(),
             searchFusions,
             excludeVUS,
             tiers,

@@ -2,6 +2,7 @@ package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.AlterationCountByGene;
 import org.cbioportal.model.CopyNumberCountByGene;
+import org.cbioportal.model.util.Select;
 
 import java.util.List;
 
@@ -23,8 +24,8 @@ public interface AlterationCountsMapper {
     List<AlterationCountByGene> getSampleAlterationCounts(List<String> molecularProfileIds,
                                                           List<String> sampleIds,
                                                           List<Integer> entrezGeneIds,
-                                                          List<String> mutationTypes,
-                                                          List<Integer> cnaTypes,
+                                                          Select<String> mutationTypes,
+                                                          Select<Integer> cnaTypes,
                                                           boolean searchFusions,
                                                           boolean excludeVUS,
                                                           List<String> selectedTiers,
@@ -45,8 +46,8 @@ public interface AlterationCountsMapper {
     List<AlterationCountByGene> getPatientAlterationCounts(List<String> molecularProfileIds,
                                                            List<String> patientIds,
                                                            List<Integer> entrezGeneIds,
-                                                           List<String> mutationTypes,
-                                                           List<Integer> cnaTypes,
+                                                           Select<String> mutationTypes,
+                                                           Select<Integer> cnaTypes,
                                                            boolean searchFusions,
                                                            boolean excludeVUS,
                                                            List<String> selectedTiers,
@@ -56,7 +57,7 @@ public interface AlterationCountsMapper {
     List<CopyNumberCountByGene> getSampleCnaCounts(List<String> molecularProfileIds,
                                                           List<String> sampleIds,
                                                           List<Integer> entrezGeneIds,
-                                                          List<Integer> cnaTypes,
+                                                          Select<Integer> cnaTypes,
                                                           boolean excludeVUS,
                                                           List<String> selectedTiers);
 
@@ -64,7 +65,7 @@ public interface AlterationCountsMapper {
     List<CopyNumberCountByGene> getPatientCnaCounts(List<String> molecularProfileIds,
                                                            List<String> patientIds,
                                                            List<Integer> entrezGeneIds,
-                                                           List<Integer> cnaTypes,
+                                                           Select<Integer> cnaTypes,
                                                            boolean excludeVUS,
                                                            List<String> selectedTiers);
 }

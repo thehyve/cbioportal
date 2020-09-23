@@ -3,6 +3,7 @@ package org.cbioportal.web;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.cbioportal.model.util.Select;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.math.BigDecimal;
@@ -292,7 +293,7 @@ public class StudyViewController {
                 null, 
                 true, 
                 false,
-                null,
+                Select.all(),
                 excludeVUS,
                 selectedTiers,
                 excludeGermline);
@@ -343,7 +344,7 @@ public class StudyViewController {
                 null,
                 true,
                 false,
-                null,
+                Select.all(),
                 excludeVUS,
                 selectedTiers,
                 excludeGermline);
@@ -391,7 +392,7 @@ public class StudyViewController {
             for (int i = 0; i < profileIdPerSample.size(); i++) {
                 caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
             }
-            List<CopyNumberAlterationEventType> cnaTypes = Arrays.asList(CopyNumberAlterationEventType.AMP, CopyNumberAlterationEventType.HOMDEL);
+            Select<CopyNumberAlterationEventType> cnaTypes = Select.byValues(Arrays.asList(CopyNumberAlterationEventType.AMP, CopyNumberAlterationEventType.HOMDEL));
             result = alterationCountService.getSampleCnaCounts(
                 caseIdentifiers, 
                 null,

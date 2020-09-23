@@ -1,6 +1,7 @@
 package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,15 +38,15 @@ public class AlterationMyBatisRepositoryTest {
     @Autowired
     private AlterationMyBatisRepository alterationMyBatisRepository;
 
-    List<MutationEventType> mutationEventTypes = Arrays.asList(
+    Select<MutationEventType> mutationEventTypes = Select.byValues(Arrays.asList(
         MutationEventType.splice_site,
         MutationEventType.nonsense_mutation,
         MutationEventType.missense_mutation
-    );
-    List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList(
+    ));
+    Select<CopyNumberAlterationEventType> cnaEventTypes = Select.byValues(Arrays.asList(
         CopyNumberAlterationEventType.AMP,
         CopyNumberAlterationEventType.HOMDEL
-    );
+    ));
     List<MolecularProfileCaseIdentifier> sampleIdToProfileId = new ArrayList<>();
     List<MolecularProfileCaseIdentifier> patientIdToProfileId = new ArrayList<>();
     List<Integer> entrezGeneIds = new ArrayList<>();
@@ -85,7 +86,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 
@@ -107,7 +108,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        mutationEventTypes = Collections.emptyList();
+        mutationEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 
@@ -147,7 +148,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = true;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
         // all mutations in testSql.sql are Germline mutations
@@ -162,7 +163,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
         // there are no fusion mutations in the test db
@@ -217,7 +218,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 
@@ -241,7 +242,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        mutationEventTypes = Collections.emptyList();
+        mutationEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 
@@ -286,7 +287,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = true;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
         // all mutations in testSql.sql are Germline mutations
@@ -301,7 +302,7 @@ public class AlterationMyBatisRepositoryTest {
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        cnaEventTypes = Collections.emptyList();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
         // there are no fusion mutations in the test db
@@ -390,13 +391,13 @@ public class AlterationMyBatisRepositoryTest {
     }
 
     @Test
-    public void getSampleAlterationCountsReturnsZeroForEmptyEventTypesList() {
+    public void getSampleAlterationCountsReturnsZeroForMutationsAndCnaSelectorsInNone() {
 
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = Collections.emptyList();
-        mutationEventTypes = Collections.emptyList();
-        cnaEventTypes = Collections.emptyList();
+        mutationEventTypes = Select.none();
+        cnaEventTypes = Select.none();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 
@@ -404,13 +405,13 @@ public class AlterationMyBatisRepositoryTest {
     }
 
     @Test
-    public void getSampleAlterationCountsReturnsAllForNullEventTypesList() {
+    public void getSampleAlterationCountsReturnsAllForMutationsAndCnaSelectorsInAll() {
 
         boolean excludeVUS = false;
         boolean excludeGermline = false;
         List<String> tiers = Collections.emptyList();
-        mutationEventTypes = null;
-        cnaEventTypes = null;
+        mutationEventTypes = Select.all();
+        cnaEventTypes = Select.all();
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, searchFusions, excludeVUS, tiers, excludeGermline);
 

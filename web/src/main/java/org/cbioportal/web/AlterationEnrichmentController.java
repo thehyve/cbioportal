@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationEnrichmentService;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.web.config.annotation.InternalApi;
@@ -61,14 +62,12 @@ public class AlterationEnrichmentController {
                 MolecularProfileCasesGroupFilter::getMolecularProfileCaseIdentifiers));
 
         // Extract optional alteration types
-        List<MutationEventType> mutationEventTypes = alterationEventTypes != null ?
-            alterationEventTypes.getMutationEventTypes()
-            :
-            null;
-        List<CopyNumberAlterationEventType> cnaEventTypes = alterationEventTypes != null ?
-            alterationEventTypes.getCopyNumberAlterationEventTypes()
-            :
-            null;
+        Select<MutationEventType> mutationEventTypes = alterationEventTypes != null ?
+            Select.byValues(alterationEventTypes.getMutationEventTypes())
+            : Select.all();
+        Select<CopyNumberAlterationEventType> cnaEventTypes = alterationEventTypes != null ?
+            Select.byValues(alterationEventTypes.getCopyNumberAlterationEventTypes())
+            : Select.all();
 
         List<AlterationEnrichment> alterationEnrichments = alterationEnrichmentService.getAlterationEnrichments(
             groupCaseIdentifierSet,

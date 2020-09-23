@@ -1,6 +1,7 @@
 package org.cbioportal.service.impl;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationCountService;
 import org.cbioportal.service.CopyNumberEnrichmentService;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
@@ -64,7 +65,7 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
                         sampleIds.add(molecularProfileCase.getCaseId());
                     });
 
-                    List<CopyNumberAlterationEventType> cnaTypes = Arrays.asList(copyNumberEventType);
+                    Select<CopyNumberAlterationEventType> cnaTypes = Select.byValues(Arrays.asList(copyNumberEventType));
 
                     if (enrichmentScope.name().equals("SAMPLE")) {
                         return alterationCountService.getSampleCnaCounts(

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.persistence.AlterationRepository;
 import org.cbioportal.service.*;
 import org.cbioportal.service.impl.AlterationCountServiceImpl;
@@ -290,7 +291,7 @@ public class StudyViewControllerTest {
             isNull(),
             anyBoolean(),
             anyBoolean(),
-            anyList(),
+            any(Select.class),
             anyBoolean(),
             anyList(),
             anyBoolean())).thenReturn(mutationCounts);
@@ -347,7 +348,7 @@ public class StudyViewControllerTest {
             isNull(),
             anyBoolean(),
             anyBoolean(),
-            anyList(),
+            any(Select.class),
             anyBoolean(),
             anyList(),
             anyBoolean())).thenReturn(fusionCounts);
@@ -407,7 +408,7 @@ public class StudyViewControllerTest {
             isNull(),
             anyBoolean(),
             anyBoolean(),
-            anyList(),
+            any(Select.class),
             anyBoolean(),
             anyList())).thenReturn(cnaCounts);
 

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationEnrichmentService;
 import org.cbioportal.service.impl.AlterationEnrichmentServiceImpl;
 import org.cbioportal.web.parameter.AlterationEventTypeFilter;
@@ -139,8 +140,8 @@ public class AlterationEnrichmentControllerTest {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             anyMap(),
-            anyList(), // <-- !
-            anyList(), // <-- !
+            any(Select.class), // <-- !
+            any(Select.class), // <-- !
             any(),
             anyBoolean(),
             anyBoolean(),
@@ -223,7 +224,7 @@ public class AlterationEnrichmentControllerTest {
         when(alterationEnrichmentService.getAlterationEnrichments(
             anyMap(),
             isNull(), // <-- !
-            anyList(), // <-- !
+            any(Select.class), // <-- !
             any(),
             anyBoolean(),
             anyBoolean(),
@@ -264,7 +265,7 @@ public class AlterationEnrichmentControllerTest {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             anyMap(),
-            anyList(), // <-- !
+            any(Select.class), // <-- !
             isNull(), // <-- !
             any(),
             anyBoolean(),

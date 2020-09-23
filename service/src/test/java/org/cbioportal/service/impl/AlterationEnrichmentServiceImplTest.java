@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationCountService;
 import org.cbioportal.service.util.AlterationEnrichmentUtil;
 import org.junit.Assert;
@@ -54,8 +55,8 @@ public class AlterationEnrichmentServiceImplTest extends BaseServiceImplTest {
         groupMolecularProfileCaseSets.put("unaltered group", molecularProfileCaseSet2);
 
         List<AlterationCountByGene> alterationSampleCountByGeneList = new ArrayList<>();
-        List<MutationEventType> mutationTypes = new ArrayList<>();
-        List<CopyNumberAlterationEventType> cnaTypes = new ArrayList<>();
+        Select<MutationEventType> mutationTypes = Select.none();
+        Select<CopyNumberAlterationEventType> cnaTypes = Select.none();
 
         //  return counts for each of the two groups 
         for (String molecularProfileId : groupMolecularProfileCaseSets.keySet()) {

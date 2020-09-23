@@ -1,6 +1,7 @@
 package org.cbioportal.service.impl;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationEnrichmentService;
 import org.cbioportal.service.AlterationCountService;
 import org.cbioportal.service.util.AlterationEnrichmentUtil;
@@ -21,8 +22,8 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
 
     @Override
     public List<AlterationEnrichment> getAlterationEnrichments(
-        Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets, List<MutationEventType> mutationEventTypes,
-        List<CopyNumberAlterationEventType> cnaEventTypes, EnrichmentScope enrichmentScope, boolean searchFusions, boolean excludeVUS, List<String> selectedTiers, boolean excludeGermline) {
+        Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets, final Select<MutationEventType> mutationEventTypes,
+        final Select<CopyNumberAlterationEventType> cnaEventTypes, EnrichmentScope enrichmentScope, boolean searchFusions, boolean excludeVUS, List<String> selectedTiers, boolean excludeGermline) {
 
         Map<String, List<AlterationCountByGene>> alterationCountsbyEntrezGeneIdAndGroup = getAlterationCountsbyEntrezGeneIdAndGroup(
             molecularProfileCaseSets, mutationEventTypes, cnaEventTypes, enrichmentScope, searchFusions, excludeVUS, selectedTiers, excludeGermline);
@@ -33,8 +34,8 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
 
     public Map<String, List<AlterationCountByGene>> getAlterationCountsbyEntrezGeneIdAndGroup(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-        List<MutationEventType> mutationEventTypes,
-        List<CopyNumberAlterationEventType> cnaEventTypes,
+        Select<MutationEventType> mutationEventTypes,
+        Select<CopyNumberAlterationEventType> cnaEventTypes,
         EnrichmentScope enrichmentType,
         boolean searchFusions,
         boolean exludeVUS,

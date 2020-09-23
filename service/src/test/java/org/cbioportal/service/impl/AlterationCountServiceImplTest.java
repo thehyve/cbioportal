@@ -112,15 +112,12 @@ public class AlterationCountServiceImplTest extends BaseServiceImplTest {
 
     @Test
     public void getSampleMutationCounts() {
-
-        List<CopyNumberAlterationEventType> cnaEventTypes = Arrays.asList();
-
         // this mock tests correct argument types
         when(alterationRepository.getSampleAlterationCounts(
             caseIdentifiers,
             entrezGeneIds,
             mutationEventTypes,
-            cnaEventTypes,
+            null,
             searchFusions,
             excludeVUS,
             tiers,

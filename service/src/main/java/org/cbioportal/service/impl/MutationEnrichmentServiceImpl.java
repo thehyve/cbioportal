@@ -55,15 +55,13 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                         sampleIds.add(molecularProfileCase.getCaseId());
                     });
 
-                    ArrayList<MutationEventType> searchAllTypes = new ArrayList<>();
-
                     if (enrichmentScope.name().equals("SAMPLE")) {
                         return alterationCountService.getSampleMutationCounts(
                             entry.getValue(),
                             null,
                             true,
                             true,
-                            searchAllTypes,
+                            null,
                             exludeVUS,
                             selectedTiers,
                             excludeGermline);
@@ -74,7 +72,7 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                                 null,
                                 true,
                                 true,
-                                searchAllTypes,
+                                null,
                                 exludeVUS,
                                 selectedTiers,
                                 excludeGermline);

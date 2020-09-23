@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,9 +27,10 @@ public class AlterationMyBatisRepository implements AlterationRepository {
                                                                  List<String> selectedTiers,
                                                                  boolean excludeGermline) {
 
-        if ((mutationEventTypes == null || mutationEventTypes.isEmpty())
-            && (cnaEventTypes == null || cnaEventTypes.isEmpty()))
-            return new ArrayList<>();
+        if ((mutationEventTypes != null && mutationEventTypes.isEmpty())
+            && (cnaEventTypes != null && cnaEventTypes.isEmpty())) {
+            return Collections.emptyList();
+        }
 
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
 

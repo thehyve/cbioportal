@@ -287,13 +287,12 @@ public class StudyViewController {
             for (int i = 0; i < profileIdPerSample.size(); i++) {
                 caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
             }
-            List<MutationEventType> searchAllTypes = new ArrayList<>();
             result = alterationCountService.getSampleMutationCounts(
                 caseIdentifiers, 
                 null, 
                 true, 
                 false,
-                searchAllTypes,
+                null,
                 excludeVUS,
                 selectedTiers,
                 excludeGermline);
@@ -339,13 +338,12 @@ public class StudyViewController {
             for (int i = 0; i < profileIdPerSample.size(); i++) {
                 caseIdentifiers.add(new MolecularProfileCaseIdentifier(sampleIds.get(i), profileIdPerSample.get(i)));
             }
-            List<MutationEventType> searchAllTypes = new ArrayList<>();
             result = alterationCountService.getSampleFusionCounts(
                 caseIdentifiers,
                 null,
                 true,
                 false,
-                searchAllTypes,
+                null,
                 excludeVUS,
                 selectedTiers,
                 excludeGermline);

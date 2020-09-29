@@ -1,7 +1,6 @@
 package org.cbioportal.web.parameter;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.cbioportal.model.MutationEventType;
 
 import java.util.List;
 
@@ -13,20 +12,20 @@ public class MolecularProfileCasesGroupAndAlterationTypeFilter {
     private AlterationEventTypeFilter alterationEventTypes;
     @Size(min = 1, max = PagingConstants.MAX_PAGE_SIZE)
     @ApiModelProperty(required = true)
-    private List<MolecularProfileCasesGroupFilter> MolecularProfileCasesGroupFilter;
+    private List<MolecularProfileCasesGroupFilter> molecularProfileCasesGroupFilter;
  
 
     public List<MolecularProfileCasesGroupFilter> getMolecularProfileCasesGroupFilter() {
-        return MolecularProfileCasesGroupFilter;
+        return this.molecularProfileCasesGroupFilter;
     }
 
     public void setMolecularProfileCasesGroupFilter(
             List<MolecularProfileCasesGroupFilter> molecularProfileCasesGroupFilter) {
-                MolecularProfileCasesGroupFilter = molecularProfileCasesGroupFilter;
+                this.molecularProfileCasesGroupFilter = molecularProfileCasesGroupFilter;
     }
 
     public AlterationEventTypeFilter getAlterationEventTypes() {
-        return alterationEventTypes;
+        return this.alterationEventTypes;
     }
 
     public void setAlterationEventTypes(AlterationEventTypeFilter alterationEventTypes) {

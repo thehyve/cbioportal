@@ -48,7 +48,7 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                 entry -> entry.getKey(), // group name
                 entry -> {               // group counts
 
-                    if (enrichmentType.equals("SAMPLE")) {
+                    if (enrichmentType.equals(EnrichmentScope.SAMPLE)) {
                         return alterationCountService
                             .getSampleAlterationCounts(
                                 entry.getValue(),

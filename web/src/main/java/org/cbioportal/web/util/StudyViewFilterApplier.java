@@ -273,6 +273,11 @@ public class StudyViewFilterApplier {
             Map<String, MolecularProfile> molecularProfileMap, MolecularAlterationType molecularAlterationFilterType,
             List<SampleIdentifier> sampleIdentifiers) {
 
+        // CONCLUSION: update:
+        // - getFusionsInMultipleMolecularProfiles
+        // - getMutationsInMultipleMolecularProfiles
+        // - getDiscreteCopyNumbersInMultipleMolecularProfiles
+        // to accept VUS, germline and tiers arguments
         for (GeneFilter genefilter : mutatedGenefilters) {
 
             List<MolecularProfile> filteredMolecularProfiles = genefilter.getMolecularProfileIds().stream()
@@ -282,13 +287,14 @@ public class StudyViewFilterApplier {
             Map<String, List<MolecularProfile>> mapByStudyId = filteredMolecularProfiles.stream()
                     .collect(Collectors.groupingBy(MolecularProfile::getCancerStudyIdentifier));
 
-            for (List<SingleGeneQuery> geneQueries : genefilter.getSingleGeneQueries()) {
+            for (List<SingleGeneQuery> geneQueries : genefilter.getGeneQueries()) {
                 List<String> studyIds = new ArrayList<>();
                 List<String> sampleIds = new ArrayList<>();
 
+               
                 List<String> hugoGeneSymbols = geneQueries.stream().map(SingleGeneQuery::getHugoGeneSymbol)
                         .collect(Collectors.toList());
-
+                
                 List<Integer> entrezGeneIds = geneService
                         .fetchGenes(hugoGeneSymbols, GeneIdType.HUGO_GENE_SYMBOL.name(), Projection.SUMMARY.name())
                         .stream().map(gene -> gene.getEntrezGeneId()).collect(Collectors.toList());
@@ -320,7 +326,7 @@ public class StudyViewFilterApplier {
                     mutations = mutationService.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
                             entrezGeneIds, Projection.ID.name(), null, null, null, null);
                 }
-
+                
                 sampleIdentifiers = mutations.stream().map(m -> {
                     SampleIdentifier sampleIdentifier = new SampleIdentifier();
                     sampleIdentifier.setSampleId(m.getSampleId());
@@ -342,7 +348,7 @@ public class StudyViewFilterApplier {
                     .map(molecularProfileId -> molecularProfileMap.get(molecularProfileId))
                     .collect(Collectors.toList());
 
-            for (List<SingleGeneQuery> geneQueries : geneFilter.getSingleGeneQueries()) {
+            for (List<SingleGeneQuery> geneQueries : geneFilter.getGeneQueries()) {
 
                 List<String> studyIds = new ArrayList<>();
                 List<String> sampleIds = new ArrayList<>();
@@ -366,7 +372,7 @@ public class StudyViewFilterApplier {
                         .getAlterationTypes().stream().flatMap(alterationType -> {
 
                             List<SingleGeneQuery> filteredGeneQueries = geneQueries.stream()
-                                    .filter(geneQuery -> geneQuery.getAlterations().stream()
+                                    .filter(geneQuery -> Arrays.stream(geneQuery.getCnaTypes())                                        
                                             .filter(alteration -> alteration.getCode() == alterationType)
                                             .count() > 0)
                                     .collect(Collectors.toList());

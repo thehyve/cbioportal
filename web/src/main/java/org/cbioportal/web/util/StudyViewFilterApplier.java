@@ -12,7 +12,6 @@ import org.cbioportal.model.MolecularProfile.MolecularAlterationType;
 import org.cbioportal.service.*;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.web.parameter.*;
-import org.cbioportal.web.parameter.GeneFilter.SingleGeneQuery;
 import org.cbioportal.web.util.appliers.PatientTreatmentFilterApplier;
 import org.cbioportal.web.util.appliers.SampleTreatmentFilterApplier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,11 +272,6 @@ public class StudyViewFilterApplier {
             Map<String, MolecularProfile> molecularProfileMap, MolecularAlterationType molecularAlterationFilterType,
             List<SampleIdentifier> sampleIdentifiers) {
 
-        // CONCLUSION: update:
-        // - getFusionsInMultipleMolecularProfiles
-        // - getMutationsInMultipleMolecularProfiles
-        // - getDiscreteCopyNumbersInMultipleMolecularProfiles
-        // to accept VUS, germline and tiers arguments
         for (GeneFilter genefilter : mutatedGenefilters) {
 
             List<MolecularProfile> filteredMolecularProfiles = genefilter.getMolecularProfileIds().stream()
@@ -307,8 +301,17 @@ public class StudyViewFilterApplier {
                 if (molecularAlterationFilterType.equals(MolecularAlterationType.FUSION)) {
 
                     mutations = mutationService.getFusionsInMultipleMolecularProfiles(
-                            molecularProfileService.getFirstMutationProfileIds(studyIds, sampleIds), sampleIds,
-                            entrezGeneIds, Projection.ID.name(), null, null, null, null);
+                        molecularProfileService.getFirstMutationProfileIds(studyIds, sampleIds),
+                        sampleIds,
+                        entrezGeneIds,
+                        genefilter.getExcludeVUS(),
+                        genefilter.getSelectedTiers(),
+                        genefilter.getExcludeGermline(),
+                        Projection.ID.name(),
+                        null,
+                        null,
+                        null,
+                        null);
                 } else {
 
                     List<String> molecularProfileIds = new ArrayList<>();
@@ -323,8 +326,18 @@ public class StudyViewFilterApplier {
                         }
                     }
 
-                    mutations = mutationService.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
-                            entrezGeneIds, Projection.ID.name(), null, null, null, null);
+                    mutations = mutationService.getMutationsInMultipleMolecularProfiles(
+                        molecularProfileIds,
+                        sampleIds,
+                        entrezGeneIds,
+                        genefilter.getExcludeVUS(),
+                        genefilter.getSelectedTiers(),
+                        genefilter.getExcludeGermline(),
+                        Projection.ID.name(),
+                        null,
+                        null,
+                        null,
+                        null);
                 }
                 
                 sampleIdentifiers = mutations.stream().map(m -> {
@@ -372,7 +385,7 @@ public class StudyViewFilterApplier {
                         .getAlterationTypes().stream().flatMap(alterationType -> {
 
                             List<SingleGeneQuery> filteredGeneQueries = geneQueries.stream()
-                                    .filter(geneQuery -> Arrays.stream(geneQuery.getCnaTypes())                                        
+                                    .filter(geneQuery -> geneQuery.getCnaTypes().stream()                              
                                             .filter(alteration -> alteration.getCode() == alterationType)
                                             .count() > 0)
                                     .collect(Collectors.toList());

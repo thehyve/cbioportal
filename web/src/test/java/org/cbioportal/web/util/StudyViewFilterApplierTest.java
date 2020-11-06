@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.mockito.ArgumentMatchers.*;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class StudyViewFilterApplierTest {
 
@@ -35,7 +37,7 @@ public class StudyViewFilterApplierTest {
     public static final String HUGO_GENE_SYMBOL_2 = "HUGO_GENE_SYMBOL_2";
     public static final String MOLECULAR_PROFILE_ID_1 = "molecular_profile_id1";
     public static final String MOLECULAR_PROFILE_ID_2 = "molecular_profile_id2";
-
+        
     @InjectMocks
     private StudyViewFilterApplier studyViewFilterApplier;
 
@@ -144,12 +146,22 @@ public class StudyViewFilterApplierTest {
         studyViewFilter.setClinicalDataFilters(clinicalDataEqualityFilters);
         List<GeneFilter> geneFilters = new ArrayList<>();
         GeneFilter mutationGeneFilter = new GeneFilter();
-        mutationGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(HUGO_GENE_SYMBOL_1)));
+
+        SingleGeneQuery mutationGeneQuery = new SingleGeneQuery();
+        mutationGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_1);
+        mutationGeneQuery.setAlterationType(AlterationType.MUTATION);
+        
+        SingleGeneQuery cnaGeneQuery = new SingleGeneQuery();
+        cnaGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_2);
+        cnaGeneQuery.setAlterationType(AlterationType.COPY_NUMBER_ALTERATION);
+        cnaGeneQuery.setCnaTypes(Arrays.asList(new CNA[]{CNA.HOMDEL}));
+        
+        mutationGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(cnaGeneQuery)));
         mutationGeneFilter.setMolecularProfileIds(new HashSet<>(Arrays.asList(MOLECULAR_PROFILE_ID_1)));
         geneFilters.add(mutationGeneFilter);
 
         GeneFilter copyNumberGeneFilter = new GeneFilter();
-        copyNumberGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(HUGO_GENE_SYMBOL_2 + ":HOMDEL")));
+        copyNumberGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(cnaGeneQuery)));
         copyNumberGeneFilter.setMolecularProfileIds(new HashSet<>(Arrays.asList(MOLECULAR_PROFILE_ID_2)));
         geneFilters.add(copyNumberGeneFilter);
         studyViewFilter.setGeneFilters(geneFilters);
@@ -344,10 +356,8 @@ public class StudyViewFilterApplierTest {
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_1), GeneIdType.HUGO_GENE_SYMBOL.name(),
                 Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene1));
 
-        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(
-                Arrays.asList(MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1,
-                        MOLECULAR_PROFILE_ID_1),
-                updatedSampleIds, Arrays.asList(ENTREZ_GENE_ID_1), "ID", null, null, null, null)).thenReturn(mutations);
+        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(anyList(), anyList(), anyList(), anyBoolean(),
+            isNull(), anyBoolean(), eq("ID"), isNull(), isNull(), isNull(), isNull())).thenReturn(mutations);
 
         updatedSampleIds = new ArrayList<>();
         updatedSampleIds.add(SAMPLE_ID1);

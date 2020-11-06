@@ -1,77 +1,18 @@
 package org.cbioportal.web.parameter;
 
-import java.io.Serializable;
-import java.util.*;
 import javax.validation.constraints.NotNull;
-
-import org.cbioportal.model.AlterationType;
-import org.cbioportal.model.CNA;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 public class GeneFilter implements Serializable {
 
     @NotNull
     private Set<String> molecularProfileIds;
     private List<List<SingleGeneQuery>> geneQueries;
-
-    public class SingleGeneQuery implements Serializable {
-
-        @NotNull
-        private String hugoGeneSymbol;
-        @NotNull
-        private AlterationType alterationType;
-        private CNA[] cnaTypes;
-        private boolean excludeVUS;
-        private boolean excludeGermline;
-        private String[] selectedTiers;
-
-        public String getHugoGeneSymbol() {
-            return hugoGeneSymbol;
-        }
-
-        public void setHugoGeneSymbol(String hugoGeneSymbol) {
-            this.hugoGeneSymbol = hugoGeneSymbol;
-        }
-
-        public AlterationType getAlterationType() {
-            return alterationType;
-        }
-
-        public void setAlterationType(AlterationType alterationType) {
-            this.alterationType = alterationType;
-        }
-
-        public boolean isExcludeVUS() {
-            return excludeVUS;
-        }
-
-        public void setExcludeVUS(boolean excludeVUS) {
-            this.excludeVUS = excludeVUS;
-        }
-
-        public boolean isExcludeGermline() {
-            return excludeGermline;
-        }
-
-        public void setExcludeGermline(boolean excludeGermline) {
-            this.excludeGermline = excludeGermline;
-        }
-
-        public String[] getSelectedTiers() {
-            return selectedTiers;
-        }
-
-        public void setSelectedTiers(String[] selectedTiers) {
-            this.selectedTiers = selectedTiers;
-        }
-
-        public CNA[] getCnaTypes() {
-            return cnaTypes;
-        }
-
-        public void setCnaTypes(CNA[] cnaTypes) {
-            this.cnaTypes = cnaTypes;
-        }
-    }
+    private boolean excludeVUS;
+    private boolean excludeGermline;
+    private List<String> selectedTiers;
 
     public Set<String> getMolecularProfileIds() {
         return molecularProfileIds;
@@ -88,4 +29,29 @@ public class GeneFilter implements Serializable {
     public void setGeneQueries(List<List<SingleGeneQuery>> geneQueries) {
         this.geneQueries = geneQueries;
     }
+
+    public boolean getExcludeVUS() {
+        return excludeVUS;
+    }
+
+    public void setExcludeVUS(boolean excludeVUS) {
+        this.excludeVUS = excludeVUS;
+    }
+
+    public boolean getExcludeGermline() {
+        return excludeGermline;
+    }
+
+    public void setExcludeGermline(boolean excludeGermline) {
+        this.excludeGermline = excludeGermline;
+    }
+
+    public List<String> getSelectedTiers() {
+        return selectedTiers;
+    }
+
+    public void setSelectedTiers(List<String> selectedTiers) {
+        this.selectedTiers = selectedTiers;
+    }
+    
 }

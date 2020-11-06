@@ -92,23 +92,34 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
                                                                                           List<Integer> entrezGeneIds,
                                                                                           List<Integer> alterationTypes, 
                                                                                           String projection) {
-        
+        return getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds, alterationTypes,
+            false, null, projection);        
+	}
+
+    @Override
+    public List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds,
+                                                                                          List<String> sampleIds,
+                                                                                          List<Integer> entrezGeneIds,
+                                                                                          List<Integer> alterationTypes,
+                                                                                          boolean excludeVUS,
+                                                                                          List<String> selectedTiers,
+                                                                                          String projection) {
+
         if (isHomdelOrAmpOnly(alterationTypes)) {
-            return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds,
-                sampleIds, entrezGeneIds, alterationTypes, projection);
+            return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
+                molecularProfileIds, sampleIds, entrezGeneIds, alterationTypes, excludeVUS, selectedTiers, projection);
         }
-        
+
         return molecularDataService.getMolecularDataInMultipleMolecularProfiles(
-                molecularProfileIds,
-                sampleIds,
-                entrezGeneIds,
-                projection)
+            molecularProfileIds,
+            sampleIds,
+            entrezGeneIds,
+            projection)
             .stream()
             .filter(g -> isValidAlteration(alterationTypes, g))
             .map(this::convert)
             .collect(Collectors.toList());
-        
-	}
+    }
 
     @Override
     public BaseMeta fetchMetaDiscreteCopyNumbersInMolecularProfile(String molecularProfileId,

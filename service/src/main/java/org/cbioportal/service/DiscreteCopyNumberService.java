@@ -32,6 +32,14 @@ public interface DiscreteCopyNumberService {
                                                                                    List<Integer> entrezGeneIds,
                                                                                    List<Integer> alterationTypes, 
                                                                                    String projection);
+    
+    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds, 
+                                                                                   List<String> sampleIds,
+                                                                                   List<Integer> entrezGeneIds,
+                                                                                   List<Integer> alterationTypes, 
+                                                                                   boolean excludeVUS,
+                                                                                   List<String> selectedTiers,
+                                                                                   String projection);
 
     BaseMeta fetchMetaDiscreteCopyNumbersInMolecularProfile(String molecularProfileId, List<String> sampleIds,
                                                             List<Integer> entrezGeneIds, List<Integer> alterationTypes)

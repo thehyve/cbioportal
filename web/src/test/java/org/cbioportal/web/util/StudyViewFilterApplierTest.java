@@ -149,11 +149,9 @@ public class StudyViewFilterApplierTest {
 
         SingleGeneQuery mutationGeneQuery = new SingleGeneQuery();
         mutationGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_1);
-        mutationGeneQuery.setAlterationType(AlterationType.MUTATION);
         
         SingleGeneQuery cnaGeneQuery = new SingleGeneQuery();
         cnaGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_2);
-        cnaGeneQuery.setAlterationType(AlterationType.COPY_NUMBER_ALTERATION);
         cnaGeneQuery.setCnaTypes(Arrays.asList(new CNA[]{CNA.HOMDEL}));
         
         mutationGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(cnaGeneQuery)));

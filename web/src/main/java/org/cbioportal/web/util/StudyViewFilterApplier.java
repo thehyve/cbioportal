@@ -401,9 +401,14 @@ public class StudyViewFilterApplier {
                             List<DiscreteCopyNumberData> copyNumberDatas = new ArrayList<>();
                             if (!entrezGeneIds.isEmpty()) {
                                 copyNumberDatas = discreteCopyNumberService
-                                        .getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds,
-                                                sampleIds, entrezGeneIds, Arrays.asList(alterationType),
-                                                Projection.ID.name());
+                                    .getDiscreteCopyNumbersInMultipleMolecularProfiles(
+                                        molecularProfileIds,
+                                        sampleIds,
+                                        entrezGeneIds,
+                                        Arrays.asList(alterationType),
+                                        geneFilter.getExcludeVUS(),
+                                        geneFilter.getSelectedTiers(),
+                                        Projection.ID.name());
 
                             }
                             return copyNumberDatas.stream();

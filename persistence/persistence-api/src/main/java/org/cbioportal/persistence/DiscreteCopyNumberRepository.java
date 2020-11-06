@@ -34,7 +34,9 @@ public interface DiscreteCopyNumberRepository {
     List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds, 
                                                                                    List<String> sampleIds,
                                                                                    List<Integer> entrezGeneIds,
-                                                                                   List<Integer> alterationTypes, 
+                                                                                   List<Integer> alterationTypes,
+                                                                                   boolean excludeVUS,
+                                                                                   List<String> selectedTiers,
                                                                                    String projection);
 
     @Cacheable(cacheNames = "GeneralRepositoryCache", condition = "@cacheEnabledConfig.getEnabled()")

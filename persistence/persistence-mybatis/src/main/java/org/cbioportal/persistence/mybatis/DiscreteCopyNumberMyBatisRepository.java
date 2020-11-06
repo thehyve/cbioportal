@@ -53,10 +53,12 @@ public class DiscreteCopyNumberMyBatisRepository implements DiscreteCopyNumberRe
                                                                                            List<String> sampleIds,
                                                                                            List<Integer> entrezGeneIds,
                                                                                            List<Integer> alterationTypes,
+                                                                                           boolean excludeVUS,
+                                                                                           List<String> selectedTiers,
                                                                                            String projection) {
 
         return discreteCopyNumberMapper.getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds, 
-            sampleIds, entrezGeneIds, alterationTypes, projection);
+            sampleIds, entrezGeneIds, alterationTypes, excludeVUS, selectedTiers, projection);
     }
 
     @Override

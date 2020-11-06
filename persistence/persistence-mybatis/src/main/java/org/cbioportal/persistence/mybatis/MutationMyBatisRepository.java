@@ -2,7 +2,6 @@ package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.Mutation;
 import org.cbioportal.model.MutationCountByPosition;
-import org.cbioportal.model.MutationCountByGene;
 import org.cbioportal.model.meta.MutationMeta;
 import org.cbioportal.persistence.MutationRepository;
 import org.cbioportal.persistence.mybatis.util.OffsetCalculator;
@@ -38,13 +37,15 @@ public class MutationMyBatisRepository implements MutationRepository {
     }
 
     @Override
-    public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, 
-                                                                  List<String> sampleIds, List<Integer> entrezGeneIds, 
-                                                                  String projection, Integer pageSize, 
+    public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds,
+                                                                  List<String> sampleIds, List<Integer> entrezGeneIds,
+                                                                  boolean excludeVUS, List<String> selectedTiers,
+                                                                  boolean excludeGermline,  String projection, Integer pageSize,
                                                                   Integer pageNumber, String sortBy, String direction) {
-
+        boolean searchFusions = false;
         return mutationMapper.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds, 
-            null, projection, pageSize, offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction);
+            null, searchFusions, excludeVUS, selectedTiers, excludeGermline, projection, pageSize,
+            offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction);
     }
 
     @Override
@@ -83,11 +84,14 @@ public class MutationMyBatisRepository implements MutationRepository {
     // TODO: cleanup once fusion/structural data is fixed in database
     @Override
     public List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds,
-            List<String> sampleIds, List<Integer> entrezGeneIds, String projection, Integer pageSize,
-            Integer pageNumber, String sortBy, String direction) {
-
-        return mutationMapper.getFusionsInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds,
-                null, projection, pageSize, offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction);
+                                                                List<String> sampleIds, List<Integer> entrezGeneIds,
+                                                                boolean excludeVUS, List<String> selectedTiers, boolean excludeGermline,
+                                                                String projection, Integer pageSize, Integer pageNumber,
+                                                                String sortBy, String direction) {
+        boolean searchFusions = true;
+        return mutationMapper.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds,
+                null, searchFusions, excludeVUS, selectedTiers, excludeGermline, projection, pageSize, 
+                offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction);
     }
     // TODO: cleanup once fusion/structural data is fixed in database
 

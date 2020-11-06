@@ -50,15 +50,24 @@ public class MutationServiceImpl implements MutationService {
     }
 
     @Override
-    public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, 
-                                                                  List<String> sampleIds, List<Integer> entrezGeneIds, 
-                                                                  String projection, Integer pageSize, 
-                                                                  Integer pageNumber, String sortBy, String direction) {
+    public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                                  List<Integer> entrezGeneIds, boolean excludeVUS,
+                                                                  List<String> selectedTiers, boolean excludeGermline,
+                                                                  String projection, Integer pageSize, Integer pageNumber,
+                                                                  String sortBy, String direction) {
 
-        List<Mutation> mutationList = mutationRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
-            sampleIds, entrezGeneIds, projection, pageSize, pageNumber, sortBy, direction);
-        
+        List<Mutation> mutationList = mutationRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
+            entrezGeneIds, excludeVUS, selectedTiers, excludeGermline, projection, pageSize, pageNumber, sortBy, direction);
+
         return mutationList;
+    }
+
+    @Override
+    public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                                  List<Integer> entrezGeneIds, String projection, Integer pageSize,
+                                                                  Integer pageNumber, String sortBy, String direction) {
+        return getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
+            entrezGeneIds, false, null, false, projection, pageSize, pageNumber, sortBy, direction);
     }
 
     @Override
@@ -127,14 +136,25 @@ public class MutationServiceImpl implements MutationService {
 
     // TODO: cleanup once fusion/structural data is fixed in database
     @Override
-    public List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds,
-            List<String> sampleIds, List<Integer> entrezGeneIds, String projection, Integer pageSize,
-            Integer pageNumber, String sortBy, String direction) {
+    public List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                                List<Integer> entrezGeneIds, boolean excludeVUS,
+                                                                List<String> selectedTiers, boolean excludeGermline,
+                                                                String projection, Integer pageSize, Integer pageNumber,
+                                                                String sortBy, String direction) {
 
-        List<Mutation> mutationList = mutationRepository.getFusionsInMultipleMolecularProfiles(molecularProfileIds,
-                sampleIds, entrezGeneIds, projection, pageSize, pageNumber, sortBy, direction);
+        List<Mutation> mutationList = mutationRepository.getFusionsInMultipleMolecularProfiles(molecularProfileIds, sampleIds, 
+            entrezGeneIds, excludeVUS, selectedTiers, excludeGermline, projection, pageSize, pageNumber, sortBy, direction);
 
         return mutationList;
+    }
+
+    @Override
+    public List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                                List<Integer> entrezGeneIds, String projection, 
+                                                                Integer pageSize, Integer pageNumber, String sortBy, String direction) {
+
+        return getFusionsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
+            entrezGeneIds, false, null, false, projection, pageSize, pageNumber, sortBy, direction);
     }
     // TODO: cleanup once fusion/structural data is fixed in database
 }

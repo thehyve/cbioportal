@@ -19,6 +19,11 @@ public interface MutationService {
         throws MolecularProfileNotFoundException;
 
     List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                           List<Integer> entrezGeneIds, boolean excludeVUS, List<String> selectedTiers,
+                                                           boolean excludeGermline, String projection, Integer pageSize,
+                                                           Integer pageNumber, String sortBy, String direction);
+
+    List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
                                                            List<Integer> entrezGeneIds, String projection,
                                                            Integer pageSize, Integer pageNumber,
                                                            String sortBy, String direction);
@@ -42,7 +47,12 @@ public interface MutationService {
 
     // TODO: cleanup once fusion/structural data is fixed in database
     List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
-                                                         List<Integer> entrezGeneIds, String projection, Integer pageSize, Integer pageNumber, String sortBy,
-                                                         String direction);
+                                                         List<Integer> entrezGeneIds, boolean excludeVUS,
+                                                         List<String> selectedTiers, boolean excludeGermline, String projection,
+                                                         Integer pageSize, Integer pageNumber, String sortBy, String direction);
+
+    List<Mutation> getFusionsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
+                                                         List<Integer> entrezGeneIds, String projection,
+                                                         Integer pageSize, Integer pageNumber, String sortBy, String direction);
     // TODO: cleanup once fusion/structural data is fixed in database
 }

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.*;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class MutationServiceImplTest extends BaseServiceImplTest {
 
@@ -100,13 +102,13 @@ public class MutationServiceImplTest extends BaseServiceImplTest {
         mutation.setChr("19");
         expectedMutationList.add(mutation);
 
-        Mockito.when(mutationRepository.getMutationsInMultipleMolecularProfiles(Arrays.asList(MOLECULAR_PROFILE_ID), 
-            Arrays.asList(SAMPLE_ID1), Arrays.asList(ENTREZ_GENE_ID_1), PROJECTION, PAGE_SIZE, PAGE_NUMBER, SORT, 
-            DIRECTION)).thenReturn(expectedMutationList);
+        Mockito.when(mutationRepository.getMutationsInMultipleMolecularProfiles(anyList(),
+            anyList(), anyList(), anyBoolean(), anyList(), anyBoolean(), eq(PROJECTION), eq(PAGE_SIZE), eq(PAGE_NUMBER), eq(SORT),
+            eq(DIRECTION))).thenReturn(expectedMutationList);
         
         List<Mutation> result = mutationService.getMutationsInMultipleMolecularProfiles(
-            Arrays.asList(MOLECULAR_PROFILE_ID), Arrays.asList(SAMPLE_ID1), Arrays.asList(ENTREZ_GENE_ID_1), PROJECTION, 
-            PAGE_SIZE, PAGE_NUMBER, SORT, DIRECTION);
+            Arrays.asList(MOLECULAR_PROFILE_ID), Arrays.asList(SAMPLE_ID1), Arrays.asList(ENTREZ_GENE_ID_1), false ,
+            new ArrayList<String>(), false, PROJECTION, PAGE_SIZE, PAGE_NUMBER, SORT, DIRECTION);
 
         Assert.assertEquals(expectedMutationList, result);
         Assert.assertEquals("19", result.get(0).getChr());

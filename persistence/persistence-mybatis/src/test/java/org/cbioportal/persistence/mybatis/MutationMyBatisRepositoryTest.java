@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -226,8 +225,11 @@ public class MutationMyBatisRepositoryTest {
         sampleIds.add("TCGA-A1-B0SO-01");
         sampleIds.add("TCGA-A1-A0SH-01");
 
+        boolean excludeVUS = false;
+        boolean excludeGermline = false;
+        List<String> tiers = new ArrayList<>();
         List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
-            sampleIds, null, "SUMMARY", null, null, null, null);
+            sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
 
         Assert.assertEquals(3, result.size());
         Mutation mutation1 = result.get(0);
@@ -239,6 +241,46 @@ public class MutationMyBatisRepositoryTest {
         Mutation mutation3 = result.get(2);
         Assert.assertEquals("acc_tcga_mutations", mutation3.getMolecularProfileId());
         Assert.assertEquals("TCGA-A1-B0SO-01", mutation3.getSampleId());
+    }
+
+    @Test
+    public void getMutationsInMultipleMolecularProfilesFilterGermline() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("acc_tcga_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SH-01");
+
+        boolean excludeVUS = false;
+        boolean excludeGermline = true;
+        List<String> tiers = new ArrayList<>();
+        List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
+            sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
+
+        Assert.assertEquals(0, result.size());
+    }
+
+    @Test
+    public void getMutationsInMultipleMolecularProfilesFilterVUS() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("acc_tcga_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SH-01");
+
+        boolean excludeVUS = true;
+        boolean excludeGermline = false;
+        List<String> tiers = new ArrayList<>();
+        List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
+            sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
+
+        Assert.assertEquals(2, result.size());
     }
 
     @Test

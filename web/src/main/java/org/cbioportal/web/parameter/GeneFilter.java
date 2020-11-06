@@ -1,5 +1,7 @@
 package org.cbioportal.web.parameter;
 
+import org.cbioportal.model.AlterationType;
+
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;

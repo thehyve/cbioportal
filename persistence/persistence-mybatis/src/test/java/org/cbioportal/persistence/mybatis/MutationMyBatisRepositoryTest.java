@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -264,7 +265,7 @@ public class MutationMyBatisRepositoryTest {
     }
 
     @Test
-    public void getMutationsInMultipleMolecularProfilesFilterVUS() throws Exception {
+    public void getMutationsInMultipleMolecularProfilesFilterVus() throws Exception {
 
         List<String> molecularProfileIds = new ArrayList<>();
         molecularProfileIds.add("acc_tcga_mutations");
@@ -281,6 +282,26 @@ public class MutationMyBatisRepositoryTest {
             sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
 
         Assert.assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getMutationsInMultipleMolecularProfilesFilterTiers() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("acc_tcga_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SH-01");
+
+        boolean excludeVUS = true;
+        boolean excludeGermline = false;
+        List<String> tiers = Arrays.asList("Tier 2");
+        List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
+            sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
+
+        Assert.assertEquals(5, result.size());
     }
 
     @Test

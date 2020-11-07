@@ -47,11 +47,15 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
         List<String> samples = Arrays.asList("sample1", "sample2");
         List<Integer> geneIds = Arrays.asList(0, 1);
         List<Integer> alterationTypes = Arrays.asList(-2, 2);
+        boolean excludeVUS = false;
+        List<String> selectedTiers = new ArrayList<>();
         Mockito.when(discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
                 profiles,
                 samples,
                 geneIds,
                 alterationTypes,
+                excludeVUS,
+                selectedTiers,
                 PROJECTION
             ))
             .thenReturn(
@@ -59,7 +63,7 @@ public class DiscreteCopyNumberServiceImplTest extends BaseServiceImplTest {
             );
 
         List<DiscreteCopyNumberData> actual = discreteCopyNumberService.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-            profiles, samples, geneIds, alterationTypes, PROJECTION
+            profiles, samples, geneIds, alterationTypes, excludeVUS, selectedTiers, PROJECTION
         );
         
         Assert.assertEquals(toStrings(returned), toStrings(actual));

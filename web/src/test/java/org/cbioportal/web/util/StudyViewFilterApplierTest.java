@@ -386,9 +386,8 @@ public class StudyViewFilterApplierTest {
                 Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene2));
 
         Mockito.when(discreteCopyNumberService.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-                Arrays.asList(MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2), updatedSampleIds,
-                Arrays.asList(ENTREZ_GENE_ID_2), Arrays.asList(-2), "ID")).thenReturn(discreteCopyNumberDataList);
-
+            anyList(), anyList(), anyList(), anyList(), anyBoolean(), isNull(), eq("ID"))).thenReturn(discreteCopyNumberDataList);
+        
         List<ClinicalAttribute> clinicalAttributeList = new ArrayList<>();
         ClinicalAttribute clinicalAttribute1 = new ClinicalAttribute();
         clinicalAttribute1.setAttrId(CLINICAL_ATTRIBUTE_ID_1);

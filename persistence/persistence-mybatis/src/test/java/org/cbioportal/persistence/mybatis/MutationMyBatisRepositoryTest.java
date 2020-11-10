@@ -285,6 +285,28 @@ public class MutationMyBatisRepositoryTest {
     }
 
     @Test
+    public void getFusionsInMultipleMolecularProfiles() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("acc_tcga_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SH-01");
+
+        boolean excludeVUS = false;
+        boolean excludeGermline = false;
+        List<String> tiers = new ArrayList<>();
+        List<Mutation> result = mutationMyBatisRepository.getFusionsInMultipleMolecularProfiles(molecularProfileIds,
+            sampleIds, null, excludeVUS, tiers, excludeGermline, "SUMMARY", null, null, null, null);
+
+        // TODO: cleanup once fusion/structural data is fixed in database
+        // This test should correctly return entries from the structural_variant table (7 records)
+        Assert.assertEquals(0, result.size());
+    }
+
+    @Test
     public void getMutationsInMultipleMolecularProfilesFilterTiers() throws Exception {
 
         List<String> molecularProfileIds = new ArrayList<>();

@@ -1,7 +1,5 @@
 package org.cbioportal.web.util;
 
-import java.math.BigDecimal;
-import java.util.*;
 import org.cbioportal.model.*;
 import org.cbioportal.model.MolecularProfile.MolecularAlterationType;
 import org.cbioportal.service.*;
@@ -13,7 +11,8 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.ArgumentMatchers.*;
+import java.math.BigDecimal;
+import java.util.*;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class StudyViewFilterApplierTest {
@@ -144,23 +143,25 @@ public class StudyViewFilterApplierTest {
         clinicalDataEqualityFilter2.setValues(Arrays.asList(filterValue1, filterValue2));
         clinicalDataEqualityFilters.add(clinicalDataEqualityFilter2);
         studyViewFilter.setClinicalDataFilters(clinicalDataEqualityFilters);
+        
+        boolean excludeVUS = false;
+        List<String> selectedTiers = new ArrayList<>();
+        boolean excludeGermline = false;
         List<GeneFilter> geneFilters = new ArrayList<>();
         GeneFilter mutationGeneFilter = new GeneFilter();
-
-        SingleGeneQuery mutationGeneQuery = new SingleGeneQuery();
-        mutationGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_1);
-        
-        SingleGeneQuery cnaGeneQuery = new SingleGeneQuery();
-        cnaGeneQuery.setHugoGeneSymbol(HUGO_GENE_SYMBOL_2);
-        cnaGeneQuery.setCnaTypes(Arrays.asList(new CNA[]{CNA.HOMDEL}));
-        
-        mutationGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(cnaGeneQuery)));
         mutationGeneFilter.setMolecularProfileIds(new HashSet<>(Arrays.asList(MOLECULAR_PROFILE_ID_1)));
+        mutationGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(HUGO_GENE_SYMBOL_1)));
+        mutationGeneFilter.setExcludeVUS(excludeVUS);
+        mutationGeneFilter.setExcludeGermline(excludeGermline);
+        mutationGeneFilter.setSelectedTiers(selectedTiers);
         geneFilters.add(mutationGeneFilter);
 
         GeneFilter copyNumberGeneFilter = new GeneFilter();
-        copyNumberGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(cnaGeneQuery)));
+        copyNumberGeneFilter.setGeneQueries(Arrays.asList(Arrays.asList(HUGO_GENE_SYMBOL_2 + ":HOMDEL")));
         copyNumberGeneFilter.setMolecularProfileIds(new HashSet<>(Arrays.asList(MOLECULAR_PROFILE_ID_2)));
+        copyNumberGeneFilter.setExcludeVUS(excludeVUS);
+        copyNumberGeneFilter.setExcludeGermline(excludeGermline);
+        copyNumberGeneFilter.setSelectedTiers(selectedTiers);
         geneFilters.add(copyNumberGeneFilter);
         studyViewFilter.setGeneFilters(geneFilters);
 
@@ -353,9 +354,11 @@ public class StudyViewFilterApplierTest {
         gene1.setEntrezGeneId(ENTREZ_GENE_ID_1);
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_1), GeneIdType.HUGO_GENE_SYMBOL.name(),
                 Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene1));
-
-        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(anyList(), anyList(), anyList(), anyBoolean(),
-            isNull(), anyBoolean(), eq("ID"), isNull(), isNull(), isNull(), isNull())).thenReturn(mutations);
+        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(
+            Arrays.asList(MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1,
+                MOLECULAR_PROFILE_ID_1),
+            updatedSampleIds, Arrays.asList(ENTREZ_GENE_ID_1), excludeVUS, selectedTiers, excludeGermline,
+            "ID", null, null, null, null)).thenReturn(mutations);
 
         updatedSampleIds = new ArrayList<>();
         updatedSampleIds.add(SAMPLE_ID1);
@@ -363,8 +366,8 @@ public class StudyViewFilterApplierTest {
         updatedSampleIds.add(SAMPLE_ID4);
 
         Mockito.when(molecularProfileService.getFirstDiscreteCNAProfileIds(Arrays.asList(STUDY_ID, STUDY_ID, STUDY_ID),
-                updatedSampleIds))
-                .thenReturn(Arrays.asList(MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2));
+            updatedSampleIds))
+            .thenReturn(Arrays.asList(MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2));
 
         List<DiscreteCopyNumberData> discreteCopyNumberDataList = new ArrayList<>();
         DiscreteCopyNumberData discreteCopyNumberData1 = new DiscreteCopyNumberData();
@@ -383,11 +386,13 @@ public class StudyViewFilterApplierTest {
         Gene gene2 = new Gene();
         gene2.setEntrezGeneId(ENTREZ_GENE_ID_2);
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_2), GeneIdType.HUGO_GENE_SYMBOL.name(),
-                Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene2));
+            Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene2));
 
         Mockito.when(discreteCopyNumberService.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-            anyList(), anyList(), anyList(), anyList(), anyBoolean(), isNull(), eq("ID"))).thenReturn(discreteCopyNumberDataList);
-        
+            Arrays.asList(MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2, MOLECULAR_PROFILE_ID_2), updatedSampleIds,
+            Arrays.asList(ENTREZ_GENE_ID_2), Arrays.asList(-2), excludeVUS, selectedTiers,
+            "ID")).thenReturn(discreteCopyNumberDataList);
+
         List<ClinicalAttribute> clinicalAttributeList = new ArrayList<>();
         ClinicalAttribute clinicalAttribute1 = new ClinicalAttribute();
         clinicalAttribute1.setAttrId(CLINICAL_ATTRIBUTE_ID_1);

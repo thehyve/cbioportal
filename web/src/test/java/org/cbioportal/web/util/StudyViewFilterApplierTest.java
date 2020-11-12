@@ -354,7 +354,7 @@ public class StudyViewFilterApplierTest {
         gene1.setEntrezGeneId(ENTREZ_GENE_ID_1);
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_1), GeneIdType.HUGO_GENE_SYMBOL.name(),
                 Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene1));
-        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(
+        Mockito.when(mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(
             Arrays.asList(MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1, MOLECULAR_PROFILE_ID_1,
                 MOLECULAR_PROFILE_ID_1),
             updatedSampleIds, Arrays.asList(ENTREZ_GENE_ID_1), excludeVUS, selectedTiers, excludeGermline,

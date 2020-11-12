@@ -1,6 +1,7 @@
 package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.meta.BaseMeta;
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,6 +12,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
+
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/testContextDatabase.xml")
@@ -222,10 +225,8 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
 
         List<Integer> alterationTypes = Arrays.asList(new Integer[]{2, -2});
 
-        boolean excludeVUS = false;
-        List<String> tiers = new ArrayList<>();
         List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-            molecularProfileIds, sampleIds, null, alterationTypes, excludeVUS, tiers, "SUMMARY");
+            molecularProfileIds, sampleIds, null, alterationTypes, "SUMMARY");
 
         Assert.assertEquals(3, result.size());
         DiscreteCopyNumberData cna1 = result.get(0);
@@ -240,7 +241,7 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
     }
     
     @Test
-    public void getDiscreteCopyNumbersInMultipleMolecularProfilesFilterVus() throws Exception {
+    public void getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries() throws Exception {
 
         List<String> molecularProfileIds = new ArrayList<>();
         molecularProfileIds.add("study_tcga_pub_gistic");
@@ -249,12 +250,17 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
         sampleIds.add("TCGA-A1-A0SB-01");
         sampleIds.add("TCGA-A1-A0SD-01");
 
-        List<Integer> alterationTypes = Arrays.asList(new Integer[]{2, -2});
-
-        boolean excludeVUS = true;
+        boolean excludeVUS = false;
+        boolean excludeGermline = false;
         List<String> tiers = new ArrayList<>();
-        List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-            molecularProfileIds, sampleIds, null, alterationTypes, excludeVUS, tiers, "SUMMARY");
+        List<CNA> cnas = Arrays.asList(CNA.AMP, CNA.HETLOSS);
+
+        SingleGeneQuery geneQuery1 = new SingleGeneQuery("AKT1", cnas, excludeVUS, excludeGermline, tiers);
+        SingleGeneQuery geneQuery2 = new SingleGeneQuery("AKT2", cnas, excludeVUS, excludeGermline, tiers);
+        List<SingleGeneQuery> geneQueries =  Arrays.asList(geneQuery1, geneQuery2);
+        
+        List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(
+            molecularProfileIds, sampleIds, geneQueries,"SUMMARY");
 
         Assert.assertEquals(1, result.size());
         DiscreteCopyNumberData cna1 = result.get(0);
@@ -264,7 +270,7 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
     }
     
     @Test
-    public void getDiscreteCopyNumbersInMultipleMolecularProfilesFilterTiers() throws Exception {
+    public void getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueriesFilterVus() throws Exception {
 
         List<String> molecularProfileIds = new ArrayList<>();
         molecularProfileIds.add("study_tcga_pub_gistic");
@@ -272,21 +278,49 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
         List<String> sampleIds = new ArrayList<>();
         sampleIds.add("TCGA-A1-A0SB-01");
         sampleIds.add("TCGA-A1-A0SD-01");
+        
+        boolean excludeVUS = true;
+        List<String> tiers = new ArrayList<>();
+        List<CNA> cnas = Arrays.asList(CNA.AMP, CNA.HETLOSS);
 
-        List<Integer> alterationTypes = Arrays.asList(new Integer[]{2, -2});
+        SingleGeneQuery geneQuery1 = new SingleGeneQuery("AKT1", cnas, excludeVUS, false, tiers);
+        SingleGeneQuery geneQuery2 = new SingleGeneQuery("AKT2", cnas, excludeVUS, false, tiers);
+        List<SingleGeneQuery> geneQueries =  Arrays.asList(geneQuery1, geneQuery2);
 
+        List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(
+            molecularProfileIds, sampleIds, geneQueries,"SUMMARY");
+
+        Assert.assertEquals(1, result.size());
+        DiscreteCopyNumberData cna1 = result.get(0);
+        Assert.assertEquals("study_tcga_pub_gistic", cna1.getMolecularProfileId());
+        Assert.assertEquals("TCGA-A1-A0SB-01", cna1.getSampleId());
+    }
+    
+    @Test
+    public void getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueriesFilterTiers() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("study_tcga_pub_gistic");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-A0SB-01");
+        sampleIds.add("TCGA-A1-A0SD-01");
+        
         boolean excludeVUS = true;
         List<String> tiers = Arrays.asList("Tier 2");
-        List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-            molecularProfileIds, sampleIds, null, alterationTypes, excludeVUS, tiers, "SUMMARY");
+        List<CNA> cnas = Arrays.asList(CNA.AMP, CNA.HETLOSS);
+
+        SingleGeneQuery geneQuery1 = new SingleGeneQuery("AKT1", cnas, excludeVUS, false, tiers);
+        SingleGeneQuery geneQuery2 = new SingleGeneQuery("AKT2", cnas, excludeVUS, false, tiers);
+        List<SingleGeneQuery> geneQueries =  Arrays.asList(geneQuery1, geneQuery2);
+
+        List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(
+            molecularProfileIds, sampleIds, geneQueries,"SUMMARY");
 
         Assert.assertEquals(2, result.size());
         DiscreteCopyNumberData cna1 = result.get(0);
         Assert.assertEquals("study_tcga_pub_gistic", cna1.getMolecularProfileId());
         Assert.assertEquals("TCGA-A1-A0SB-01", cna1.getSampleId());
-        DiscreteCopyNumberData cna2 = result.get(1);
-        Assert.assertEquals("study_tcga_pub_gistic", cna2.getMolecularProfileId());
-        Assert.assertEquals("TCGA-A1-A0SD-01", cna2.getSampleId());
 
     }
 

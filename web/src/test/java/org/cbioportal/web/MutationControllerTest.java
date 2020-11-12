@@ -5,7 +5,6 @@ import org.cbioportal.model.AlleleSpecificCopyNumber;
 import org.cbioportal.model.Gene;
 import org.cbioportal.model.Mutation;
 import org.cbioportal.model.MutationCountByPosition;
-import org.cbioportal.model.ReferenceGenomeGene;
 import org.cbioportal.model.meta.MutationMeta;
 import org.cbioportal.service.MutationService;
 import org.cbioportal.web.parameter.HeaderKeyConstants;
@@ -375,7 +374,7 @@ public class MutationControllerTest {
 
         List<Mutation> mutationList = createExampleMutations();
 
-        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(Mockito.any(),
+        Mockito.when(mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(mutationList);
 

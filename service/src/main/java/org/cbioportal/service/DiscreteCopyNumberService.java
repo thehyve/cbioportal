@@ -1,6 +1,7 @@
 package org.cbioportal.service;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 
@@ -32,14 +33,11 @@ public interface DiscreteCopyNumberService {
                                                                                    List<Integer> entrezGeneIds,
                                                                                    List<Integer> alterationTypes, 
                                                                                    String projection);
-    
-    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds, 
-                                                                                   List<String> sampleIds,
-                                                                                   List<Integer> entrezGeneIds,
-                                                                                   List<Integer> alterationTypes, 
-                                                                                   boolean excludeVUS,
-                                                                                   List<String> selectedTiers,
-                                                                                   String projection);
+
+    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds,
+                                                                                                List<String> sampleIds,
+                                                                                                List<SingleGeneQuery> geneQueries,
+                                                                                                String projection);
 
     BaseMeta fetchMetaDiscreteCopyNumbersInMolecularProfile(String molecularProfileId, List<String> sampleIds,
                                                             List<Integer> entrezGeneIds, List<Integer> alterationTypes)

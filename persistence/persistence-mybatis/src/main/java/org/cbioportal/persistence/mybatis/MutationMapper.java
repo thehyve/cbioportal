@@ -1,8 +1,8 @@
 package org.cbioportal.persistence.mybatis;
 
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.Mutation;
 import org.cbioportal.model.MutationCountByPosition;
-import org.cbioportal.model.MutationCountByGene;
 import org.cbioportal.model.meta.MutationMeta;
 
 import java.util.List;
@@ -17,11 +17,17 @@ public interface MutationMapper {
                                                 List<Integer> entrezGeneIds, Boolean snpOnly);
 
     // TODO: cleanup searchFusions param once fusion/structural data is fixed in database
+    List<Mutation> getMutationsInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds, List<String> sampleIds,
+                                                                        List<SingleGeneQuery> geneQueries, Boolean snpOnly,
+                                                                        boolean searchFusions, String projection, Integer limit,
+                                                                        Integer offset, String sortBy, String direction, 
+                                                                        boolean anyExcludeVUS, boolean anyExcludeGermline, boolean anySelectedTiers);
+    
+    // TODO: cleanup searchFusions param once fusion/structural data is fixed in database
     List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
-                                                           List<Integer> entrezGeneIds, Boolean snpOnly,
-                                                           boolean searchFusions, boolean excludeVUS, List<String> selectedTiers,
-                                                           boolean excludeGermline, String projection, Integer limit,
-                                                           Integer offset, String sortBy, String direction);
+                                                                        List<Integer> entrezGeneIds, Boolean snpOnly,
+                                                                        boolean searchFusions, String projection, Integer limit,
+                                                                        Integer offset, String sortBy, String direction);
 
     MutationMeta getMetaMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
                                                              List<Integer> entrezGeneIds, Boolean snpOnly);

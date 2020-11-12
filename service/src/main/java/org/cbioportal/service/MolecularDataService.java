@@ -1,5 +1,8 @@
 package org.cbioportal.service;
 
+import org.cbioportal.model.DiscreteCopyNumberData;
+import org.cbioportal.model.GeneFilter;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.GeneMolecularAlteration;
 import org.cbioportal.model.GeneMolecularData;
 import org.cbioportal.model.meta.BaseMeta;
@@ -32,6 +35,11 @@ public interface MolecularDataService {
                                                                         List<String> sampleIds, List<Integer> entrezGeneIds,
                                                                         String projection);
 
+    List<GeneMolecularData> getMolecularDataInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds,
+                                                                                     List<String> sampleIds, List<SingleGeneQuery> geneQueries,
+                                                                                     String projection);
+
 	BaseMeta getMetaMolecularDataInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
 		                                                     List<Integer> entrezGeneIds);
+
 }

@@ -2,6 +2,8 @@ package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.CopyNumberCountByGene;
 import org.cbioportal.model.DiscreteCopyNumberData;
+import org.cbioportal.model.GeneFilter;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.meta.BaseMeta;
 
 import java.util.List;
@@ -19,12 +21,15 @@ public interface DiscreteCopyNumberMapper {
                                                                    List<Integer> entrezGeneIds,
                                                                    List<Integer> alterationTypes, String projection);
 
-    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds, 
+    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds,
                                                                                    List<String> sampleIds,
                                                                                    List<Integer> entrezGeneIds,
                                                                                    List<Integer> alterationTypes,
-                                                                                   boolean excludeVUS,
-                                                                                   List<String> selectedTiers,
+                                                                                   String projection);
+    
+    List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds, 
+                                                                                   List<String> sampleIds,
+                                                                                   List<SingleGeneQuery> geneQueries,
                                                                                    String projection);
 
     BaseMeta getMetaDiscreteCopyNumbersBySampleIds(String molecularProfileId, List<String> sampleIds,

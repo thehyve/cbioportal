@@ -1,6 +1,7 @@
 package org.cbioportal.service.impl;
 
 import org.cbioportal.model.*;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.DiscreteCopyNumberRepository;
 import org.cbioportal.service.DiscreteCopyNumberService;
@@ -87,36 +88,24 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
     }
 
     @Override
-    public List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds, 
-                                                                                          List<String> sampleIds, 
-                                                                                          List<Integer> entrezGeneIds,
-                                                                                          List<Integer> alterationTypes, 
-                                                                                          String projection) {
-        return getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds, alterationTypes,
-            false, null, projection);        
-	}
-
-    @Override
     public List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfiles(List<String> molecularProfileIds,
                                                                                           List<String> sampleIds,
                                                                                           List<Integer> entrezGeneIds,
                                                                                           List<Integer> alterationTypes,
-                                                                                          boolean excludeVUS,
-                                                                                          List<String> selectedTiers,
                                                                                           String projection) {
 
-        if (isHomdelOrAmpOnly(alterationTypes)) {
-            return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(
-                molecularProfileIds, sampleIds, entrezGeneIds, alterationTypes, excludeVUS, selectedTiers, projection);
-        }
+        return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds,
+            sampleIds, entrezGeneIds, alterationTypes, projection);
+    }
 
-        return molecularDataService.getMolecularDataInMultipleMolecularProfiles(
-            molecularProfileIds,
-            sampleIds,
-            entrezGeneIds,
-            projection)
-            .stream()
-            .filter(g -> isValidAlteration(alterationTypes, g))
+    @Override
+    public List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds,
+                                                                                                       List<String> sampleIds,
+                                                                                                       List<SingleGeneQuery> geneQueries,
+                                                                                                       String projection) {
+
+        return molecularDataService.getMolecularDataInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, sampleIds,
+            geneQueries, projection).stream()
             .map(this::convert)
             .collect(Collectors.toList());
     }

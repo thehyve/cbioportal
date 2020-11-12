@@ -65,7 +65,6 @@
                 mutation.GENETIC_PROFILE_ID = alteration_driver_annotation.GENETIC_PROFILE_ID
             and mutation.SAMPLE_ID = alteration_driver_annotation.SAMPLE_ID
             and mutation.MUTATION_EVENT_ID = alteration_driver_annotation.ALTERATION_EVENT_ID
-
     </sql>
 
     <sql id="where">
@@ -146,12 +145,45 @@
                 #{item}
             </foreach>
         </if>
-        <if test="entrezGeneIds != null and !entrezGeneIds.isEmpty()">
+        <if test="_parameter.containsKey('entrezGeneIds') and entrezGeneIds != null and !entrezGeneIds.isEmpty()">
             AND mutation.ENTREZ_GENE_ID IN
             <foreach item="item" collection="entrezGeneIds" open="(" separator="," close=")">
                 #{item}
             </foreach>
         </if>
+        <if test="_parameter.containsKey('geneQueries') and geneQueries != null and !geneQueries.isEmpty()">
+            --   exclude germline mutations
+            <if test="anyExcludeGermline">
+                AND NOT (mutation.ENTREZ_GENE_ID, mutation.MUTATION_STATUS) IN
+                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
+                    <if test="geneQuery.getExcludeGermline()">
+                       (#{entrezGeneId}, 'Germline')
+                    </if>
+                </foreach>
+            </if>
+            --   include only driver mutations (exclude VUS)
+            <if test="anyExcludeVUS">
+                AND (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
+                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
+                    <if test="geneQuery.getExcludeVUS()">
+                        (#{entrezGeneId}, 'Putative_Driver')
+                    </if>
+                </foreach>
+            </if>
+        -- include mutations based on driver tiers
+            <if test="anySelectedTiers">
+                AND (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
+                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                    <bind name="selectedTiers" value="geneQuery.getSelectedTiers()"/>
+                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
+                    <foreach item="tier" collection="selectedTiers" open="(" separator="," close=")">
+                        #{entrezGeneId}, #{tier}
+                    </foreach>
+                </foreach>
+            </if>
+        </if>            
         <if test="snpOnly != null and snpOnly == true">
             AND mutation_event.REFERENCE_ALLELE IN ('A','T','C','G')
             AND mutation_event.TUMOR_SEQ_ALLELE IN ('A','T','C','G')
@@ -179,9 +211,6 @@
         SELECT
         <include refid="select"/>
         <include refid="from"/>
-        <if test="projection == 'SUMMARY' || projection == 'DETAILED'">
-            INNER JOIN mutation_event ON mutation.MUTATION_EVENT_ID = mutation_event.MUTATION_EVENT_ID
-        </if>
         <if test="projection == 'DETAILED'">
             INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
             <include refid="includeAlleleSpecificCopyNumber"/>
@@ -217,8 +246,29 @@
         <where>
             <include refid="whereInMultipleMolecularProfiles"/>
             <include refid="whereSearchFusions"/>
-            <include refid="whereExcludeGermlineAlterations"/>
-            <include refid="whereExcludeVusAlterations"/>
+        </where>
+        <if test="sortBy != null and projection != 'ID'">
+            ORDER BY ${sortBy} ${direction}
+        </if>
+        <if test="projection == 'ID'">
+            ORDER BY genetic_profile.STABLE_ID ASC, sample.STABLE_ID ASC, mutation.ENTREZ_GENE_ID ASC
+        </if>
+        <if test="limit != null and limit != 0">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+    
+    <select id="getMutationsInMultipleMolecularProfilesByGeneQueries" resultType="org.cbioportal.model.Mutation">
+        SELECT
+        <include refid="select"/>
+        <include refid="from"/>
+        <if test="projection == 'DETAILED'">
+            INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+            <include refid="includeAlleleSpecificCopyNumber"/>
+        </if>
+        <where>
+            <include refid="whereInMultipleMolecularProfiles"/>
+            <include refid="whereSearchFusions"/>
         </where>
         <if test="sortBy != null and projection != 'ID'">
             ORDER BY ${sortBy} ${direction}
@@ -245,9 +295,6 @@
         SELECT
         <include refid="select"/>
         <include refid="from"/>
-        <if test="projection == 'SUMMARY' || projection == 'DETAILED'">
-            INNER JOIN mutation_event ON mutation.MUTATION_EVENT_ID = mutation_event.MUTATION_EVENT_ID
-        </if>
         <if test="projection == 'DETAILED'">
             INNER JOIN gene ON mutation.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
             <include refid="includeAlleleSpecificCopyNumber"/>
@@ -304,27 +351,6 @@
         AND mutation_event.ONCOTATOR_PROTEIN_POS_START >= #{proteinPosStart}
         AND mutation_event.ONCOTATOR_PROTEIN_POS_END <![CDATA[ <= ]]> #{proteinPosEnd}
     </select>
-
-    <sql id="whereExcludeVusAlterations">
-        <if test="excludeVUS">
-            AND
-            alteration_driver_annotation.DRIVER_FILTER = 'Putative_Driver'
-            <if test="selectedTiers != null and !selectedTiers.isEmpty()">
-                OR
-                alteration_driver_annotation.DRIVER_TIERS_FILTER IN
-                <foreach item="item" collection="selectedTiers" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-        </if>
-    </sql>
-
-    <sql id="whereExcludeGermlineAlterations">
-        <if test="excludeGermline">
-            AND
-            mutation.MUTATION_STATUS != 'Germline'
-        </if>
-    </sql>
 
     <sql id="whereSearchFusions">
         <if test="searchFusions">

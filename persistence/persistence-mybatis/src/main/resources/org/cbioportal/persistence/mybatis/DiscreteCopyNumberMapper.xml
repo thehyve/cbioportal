@@ -106,19 +106,28 @@
                 #{item}
             </foreach>
         </if>
-    </sql>
-
-    <sql id="whereExcludeVusAlterations">
-        <if test="excludeVUS">
-            AND
-            alteration_driver_annotation.DRIVER_FILTER = 'Putative_Driver'
-            <if test="selectedTiers != null and !selectedTiers.isEmpty()">
-                OR
-                alteration_driver_annotation.DRIVER_TIERS_FILTER IN
-                <foreach item="item" collection="selectedTiers" open="(" separator="," close=")">
-                    #{item}
+        <if test="geneQueries != null and !geneQueries.isEmpty()">
+            --  include only CNA's of specified type (AMP, HOMDEL, ... )
+            AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
+            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                <foreach  item="cna" collection="geneQuery.getAlterations()" open="(" separator="," close=")">
+                    (#{geneQuery.getEntrezGeneId()}, #{cna.getCode()})
                 </foreach>
-            </if>
+            </foreach>
+            --   include only driver events (exclude VUS)
+            AND (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
+            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                <if test="qeneQuery.getExcludeVUS()">
+                    (#{geneQuery.getEntrezGeneId()}, 'Putative_Driver')
+                </if>
+            </foreach>
+            -- include mutations based on driver tiers
+            AND (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
+            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                <foreach  item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
+                    (#{geneQuery.getEntrezGeneId()}, #{tier})
+                </foreach>
+            </foreach>
         </if>
     </sql>
 
@@ -164,7 +173,18 @@
         </if>
         <where>
             <include refid="whereInMultipleMolecularProfiles"/>
-            <include refid="whereExcludeVusAlterations"/>
+        </where>
+    </select>
+
+    <select id="getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries" resultType="org.cbioportal.model.DiscreteCopyNumberData">
+        SELECT
+        <include refid="select"/>
+        <include refid="from"/>
+        <if test="projection == 'DETAILED'">
+            INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID
+        </if>
+        <where>
+            <include refid="whereInMultipleMolecularProfiles"/>
         </where>
     </select>
 

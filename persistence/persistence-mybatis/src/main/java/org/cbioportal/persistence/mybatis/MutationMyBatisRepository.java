@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class MutationMyBatisRepository implements MutationRepository {
@@ -58,12 +59,15 @@ public class MutationMyBatisRepository implements MutationRepository {
                                                                                String sortBy,
                                                                                String direction) {
         boolean searchFusions = false;
-        boolean anyExcludeVUS = geneQueries.stream().anyMatch(q -> q.getExcludeVUS());
-        boolean anyExcludeGermline = geneQueries.stream().anyMatch(q -> q.getExcludeGermline());
-        boolean anyTiers = geneQueries.stream().map(q -> q.getSelectedTiers()).flatMap(Collection::stream).count() > 0;
-        return mutationMapper.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, sampleIds, geneQueries,
+        List<SingleGeneQuery> unrestrictedQueries = geneQueries.stream().filter(q -> !q.getExcludeVUS() && !q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> restrictedQueries = geneQueries.stream().filter(q -> q.getExcludeVUS() || q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> germlineQueries = restrictedQueries.stream().filter(q -> q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> vusRestrictedQueries = restrictedQueries.stream().filter(q -> q.getExcludeVUS()).collect(Collectors.toList());
+        List<SingleGeneQuery> tiersRestrictedQueries = vusRestrictedQueries.stream().filter(q -> q.getExcludeVUS() && q.getSelectedTiers() != null && q.getSelectedTiers().size() > 0).collect(Collectors.toList());
+        
+        return mutationMapper.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, sampleIds,
             null, searchFusions, projection, pageSize, offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction,
-            anyExcludeVUS, anyExcludeGermline, anyTiers);
+            unrestrictedQueries, germlineQueries, vusRestrictedQueries, tiersRestrictedQueries);
     }
 
     @Override
@@ -123,13 +127,17 @@ public class MutationMyBatisRepository implements MutationRepository {
                                                                              Integer pageNumber,
                                                                              String sortBy,
                                                                              String direction) {
-        boolean searchFusion = true;
-        boolean anyExcludeVUS = geneQueries.stream().anyMatch(q -> q.getExcludeVUS());
-        boolean anyExcludeGermline = geneQueries.stream().anyMatch(q -> q.getExcludeGermline());
-        boolean anyTiers = geneQueries.stream().map(q -> q.getSelectedTiers()).flatMap(Collection::stream).count() > 0;
-        return mutationMapper.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,
-            sampleIds, geneQueries, false, searchFusion, projection, pageSize, pageNumber, sortBy, direction,
-            anyExcludeVUS, anyExcludeGermline, anyTiers);
+        boolean searchFusions = true;
+        List<SingleGeneQuery> unrestrictedQueries = geneQueries.stream().filter(q -> !q.getExcludeVUS() && !q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> restrictedQueries = geneQueries.stream().filter(q -> q.getExcludeVUS() || q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> germlineQueries = restrictedQueries.stream().filter(q -> q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> vusRestrictedQueries = restrictedQueries.stream().filter(q -> q.getExcludeVUS() && q.getSelectedTiers().size() == 0).collect(Collectors.toList());
+        List<SingleGeneQuery> tiersRestrictedQueries = restrictedQueries.stream().filter(q -> q.getExcludeVUS() && q.getSelectedTiers().size() > 0).collect(Collectors.toList());
+
+
+        return mutationMapper.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, sampleIds,
+            null, searchFusions, projection, pageSize, offsetCalculator.calculate(pageSize, pageNumber), sortBy, direction,
+            unrestrictedQueries, germlineQueries, vusRestrictedQueries, tiersRestrictedQueries);
     }
     // TODO: cleanup once fusion/structural data is fixed in database
 

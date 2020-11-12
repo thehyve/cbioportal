@@ -151,44 +151,47 @@
                 #{item}
             </foreach>
         </if>
-        <if test="_parameter.containsKey('geneQueries') and geneQueries != null and !geneQueries.isEmpty()">
-            --   exclude germline mutations
-            <if test="anyExcludeGermline">
-                AND NOT (mutation.ENTREZ_GENE_ID, mutation.MUTATION_STATUS) IN
-                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    <if test="geneQuery.getExcludeGermline()">
-                       (${geneQuery.getEntrezGeneId()}, 'Germline')
+        <if test="(_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0)
+                    or (_parameter.containsKey('vusRestrictedQueries') and vusRestrictedQueries != null and vusRestrictedQueries.size() > 0)">
+            AND (
+                <if test="_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0">
+                    mutation.ENTREZ_GENE_ID IN
+                    <foreach item="geneQuery" collection="unrestrictedQueries" open="(" separator="," close=")">
+                        ${geneQuery.getEntrezGeneId()}
+                    </foreach>
+                </if>
+                --   include only driver mutations (exclude VUS)
+                <if test="_parameter.containsKey('vusRestrictedQueries') and vusRestrictedQueries != null and vusRestrictedQueries.size() > 0">
+                    <if test="(_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0)">
+                        OR
                     </if>
-                </foreach>
-            </if>
-            --   include only driver mutations (exclude VUS)
-            <if test="anyExcludeVUS">
-                AND (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
-                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    <if test="geneQuery.getExcludeVUS()">
-                        (${geneQuery.getEntrezGeneId()}, 'Putative_Driver')
-                    </if>
-                </foreach>
-                --   include mutations based on driver tiers
-                <if test="anySelectedTiers">
-                    OR BL (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
-                    <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                        <if test="geneQuery.getExcludeVUS() and geneQuery.getSelectedTiers() != null and geneQuery.getSelectedTiers().size() > 0">
-                            <foreach item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
-                                ${geneQuery.getEntrezGeneId()}, #{tier}
-                            </foreach>
+                    (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
+                    <foreach item="geneQuery" collection="vusRestrictedQueries" open="(" separator="," close=")">
+                        <if test="geneQuery.getExcludeVUS()">
+                            (${geneQuery.getEntrezGeneId()}, 'Putative_Driver')
                         </if>
                     </foreach>
                 </if>
-            </if>
-            --   restrict to entrez gene ids only when no other restrictions are present
-            <if test="!anyExcludeGermline and !anyExcludeVUS and !anySelectedTiers">
-                AND mutation.ENTREZ_GENE_ID IN
-                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    ${geneQuery.getEntrezGeneId()}
-                </foreach>
-            </if>
-        </if>            
+                --   include mutations based on driver tiers
+                <if test="_parameter.containsKey('tiersRestrictedQueries') and tiersRestrictedQueries != null and tiersRestrictedQueries.size() > 0">
+                    OR (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
+                    <foreach item="geneQuery" collection="tiersRestrictedQueries" open="(" separator="," close=")">
+                        <foreach item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
+                            ${geneQuery.getEntrezGeneId()}, #{tier}
+                        </foreach>
+                    </foreach>
+                </if>
+            )
+        </if>
+        --   exclude germline mutations
+        <if test="_parameter.containsKey('germlineQueries') and germlineQueries != null and germlineQueries.size() > 0">
+            AND NOT (mutation.ENTREZ_GENE_ID, mutation.MUTATION_STATUS) IN
+            <foreach item="geneQuery" collection="germlineQueries" open="(" separator="," close=")">
+                <if test="geneQuery.getExcludeGermline()">
+                   (${geneQuery.getEntrezGeneId()}, 'Germline')
+                </if>
+            </foreach>
+        </if>
         <if test="snpOnly != null and snpOnly == true">
             AND mutation_event.REFERENCE_ALLELE IN ('A','T','C','G')
             AND mutation_event.TUMOR_SEQ_ALLELE IN ('A','T','C','G')

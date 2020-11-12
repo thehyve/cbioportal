@@ -18,10 +18,13 @@ public interface MutationMapper {
 
     // TODO: cleanup searchFusions param once fusion/structural data is fixed in database
     List<Mutation> getMutationsInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds, List<String> sampleIds,
-                                                                        List<SingleGeneQuery> geneQueries, Boolean snpOnly,
-                                                                        boolean searchFusions, String projection, Integer limit,
-                                                                        Integer offset, String sortBy, String direction, 
-                                                                        boolean anyExcludeVUS, boolean anyExcludeGermline, boolean anySelectedTiers);
+                                                                        Boolean snpOnly, boolean searchFusions,
+                                                                        String projection, Integer limit, Integer offset,
+                                                                        String sortBy, String direction,
+                                                                        List<SingleGeneQuery> unrestrictedQueries,
+                                                                        List<SingleGeneQuery> germlineQueries,
+                                                                        List<SingleGeneQuery> vusRestrictedQueries,
+                                                                        List<SingleGeneQuery> tiersRestrictedQueries);
     
     // TODO: cleanup searchFusions param once fusion/structural data is fixed in database
     List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,

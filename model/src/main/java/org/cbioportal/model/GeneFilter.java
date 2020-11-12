@@ -1,7 +1,5 @@
 package org.cbioportal.model;
 
-import org.cbioportal.model.CNA;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -21,8 +19,9 @@ public class GeneFilter implements Serializable {
         private boolean excludeGermline;
         private List<String> selectedTiers;
 
-        public SingleGeneQuery(String hugoGeneSymbol, List<CNA> alterations, boolean excludeVUS, boolean excludeGermline, List<String> selectedTiers) {
+        public SingleGeneQuery(String hugoGeneSymbol, Integer entrezGeneId, List<CNA> alterations, boolean excludeVUS, boolean excludeGermline, List<String> selectedTiers) {
             this.hugoGeneSymbol = hugoGeneSymbol;
+            this.entrezGeneId = entrezGeneId;
             this.alterations = alterations;
             this.excludeVUS = excludeVUS;
             this.excludeGermline = excludeGermline;

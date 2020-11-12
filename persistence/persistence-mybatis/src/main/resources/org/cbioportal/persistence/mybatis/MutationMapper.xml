@@ -156,9 +156,8 @@
             <if test="anyExcludeGermline">
                 AND NOT (mutation.ENTREZ_GENE_ID, mutation.MUTATION_STATUS) IN
                 <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
                     <if test="geneQuery.getExcludeGermline()">
-                       (#{entrezGeneId}, 'Germline')
+                       (${geneQuery.getEntrezGeneId()}, 'Germline')
                     </if>
                 </foreach>
             </if>
@@ -166,21 +165,27 @@
             <if test="anyExcludeVUS">
                 AND (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
                 <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
                     <if test="geneQuery.getExcludeVUS()">
-                        (#{entrezGeneId}, 'Putative_Driver')
+                        (${geneQuery.getEntrezGeneId()}, 'Putative_Driver')
                     </if>
                 </foreach>
-            </if>
-        -- include mutations based on driver tiers
-            <if test="anySelectedTiers">
-                AND (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
-                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                    <bind name="selectedTiers" value="geneQuery.getSelectedTiers()"/>
-                    <bind name="entrezGeneId" value="geneQuery.getEntrezGeneId()"/>
-                    <foreach item="tier" collection="selectedTiers" open="(" separator="," close=")">
-                        #{entrezGeneId}, #{tier}
+                --   include mutations based on driver tiers
+                <if test="anySelectedTiers">
+                    OR BL (mutation.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
+                    <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                        <if test="geneQuery.getExcludeVUS() and geneQuery.getSelectedTiers() != null and geneQuery.getSelectedTiers().size() > 0">
+                            <foreach item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
+                                ${geneQuery.getEntrezGeneId()}, #{tier}
+                            </foreach>
+                        </if>
                     </foreach>
+                </if>
+            </if>
+            --   restrict to entrez gene ids only when no other restrictions are present
+            <if test="!anyExcludeGermline and !anyExcludeVUS and !anySelectedTiers">
+                AND mutation.ENTREZ_GENE_ID IN
+                <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
+                    ${geneQuery.getEntrezGeneId()}
                 </foreach>
             </if>
         </if>            

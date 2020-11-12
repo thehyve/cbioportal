@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class DiscreteCopyNumberMyBatisRepository implements DiscreteCopyNumberRepository {
@@ -67,9 +68,14 @@ public class DiscreteCopyNumberMyBatisRepository implements DiscreteCopyNumberRe
                                                                                            List<String> sampleIds,
                                                                                            List<SingleGeneQuery> geneQueries,
                                                                                            String projection) {
+        
+        List<SingleGeneQuery> unrestrictedQueries = geneQueries.stream().filter(q -> !q.getExcludeVUS() && !q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> restrictedQueries = geneQueries.stream().filter(q -> q.getExcludeVUS() || q.getExcludeGermline()).collect(Collectors.toList());
+        List<SingleGeneQuery> vusRestrictedQueries = restrictedQueries.stream().filter(q -> q.getExcludeVUS()).collect(Collectors.toList());
+        List<SingleGeneQuery> tiersRestrictedQueries = vusRestrictedQueries.stream().filter(q -> q.getExcludeVUS() && q.getSelectedTiers() != null && q.getSelectedTiers().size() > 0).collect(Collectors.toList());
 
         return discreteCopyNumberMapper.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, 
-            sampleIds, geneQueries, projection);
+            sampleIds, projection, unrestrictedQueries, vusRestrictedQueries, tiersRestrictedQueries);
     }
 
     @Override

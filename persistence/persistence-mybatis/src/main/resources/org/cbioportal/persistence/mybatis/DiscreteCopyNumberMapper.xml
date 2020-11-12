@@ -94,40 +94,49 @@
                 (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
             </foreach>
         </if>
-        <if test="entrezGeneIds != null and !entrezGeneIds.isEmpty()">
+        <if test="_parameter.containsKey('entrezGeneIds') and entrezGeneIds != null and !entrezGeneIds.isEmpty()">
             AND cna_event.ENTREZ_GENE_ID IN
             <foreach item="item" collection="entrezGeneIds" open="(" separator="," close=")">
                 #{item}
             </foreach>
         </if>
-        <if test="alterationTypes != null and !alterationTypes.isEmpty()">
+        <if test="_parameter.containsKey('alterationTypes') and alterationTypes != null and !alterationTypes.isEmpty()">
             AND cna_event.ALTERATION IN
             <foreach item="item" collection="alterationTypes" open="(" separator="," close=")">
                 #{item}
             </foreach>
         </if>
-        <if test="geneQueries != null and !geneQueries.isEmpty()">
-            --  include only CNA's of specified type (AMP, HOMDEL, ... )
-            AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN
-            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                <foreach  item="cna" collection="geneQuery.getAlterations()" open="(" separator="," close=")">
-                    (#{geneQuery.getEntrezGeneId()}, #{cna.getCode()})
+        <if test="(_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0)
+                    or (_parameter.containsKey('vusRestrictedQueries') and vusRestrictedQueries != null and vusRestrictedQueries.size() > 0)">
+            AND (
+            <if test="_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0">
+                cna_event.ENTREZ_GENE_ID IN
+                <foreach item="geneQuery" collection="unrestrictedQueries" open="(" separator="," close=")">
+                    ${geneQuery.getEntrezGeneId()}
                 </foreach>
-            </foreach>
-            --   include only driver events (exclude VUS)
-            AND (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
-            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                <if test="qeneQuery.getExcludeVUS()">
-                    (#{geneQuery.getEntrezGeneId()}, 'Putative_Driver')
+            </if>
+            --   include only driver cna's (exclude VUS)
+            <if test="_parameter.containsKey('vusRestrictedQueries') and vusRestrictedQueries != null and vusRestrictedQueries.size() > 0">
+                <if test="(_parameter.containsKey('unrestrictedQueries') and unrestrictedQueries != null and unrestrictedQueries.size() > 0)">
+                    OR
                 </if>
-            </foreach>
-            -- include mutations based on driver tiers
-            AND (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
-            <foreach item="geneQuery" collection="geneQueries" open="(" separator="," close=")">
-                <foreach  item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
-                    (#{geneQuery.getEntrezGeneId()}, #{tier})
+                (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_FILTER) IN
+                <foreach item="geneQuery" collection="vusRestrictedQueries" open="(" separator="," close=")">
+                    <if test="geneQuery.getExcludeVUS()">
+                        (${geneQuery.getEntrezGeneId()}, 'Putative_Driver')
+                    </if>
                 </foreach>
-            </foreach>
+            </if>
+            --   include mutations based on driver tiers
+            <if test="_parameter.containsKey('tiersRestrictedQueries') and tiersRestrictedQueries != null and tiersRestrictedQueries.size() > 0">
+                OR (cna_event.ENTREZ_GENE_ID, alteration_driver_annotation.DRIVER_TIERS_FILTER) IN
+                <foreach item="geneQuery" collection="tiersRestrictedQueries" open="(" separator="," close=")">
+                    <foreach item="tier" collection="geneQuery.getSelectedTiers()" open="(" separator="," close=")">
+                        ${geneQuery.getEntrezGeneId()}, #{tier}
+                    </foreach>
+                </foreach>
+            </if>
+            )
         </if>
     </sql>
 

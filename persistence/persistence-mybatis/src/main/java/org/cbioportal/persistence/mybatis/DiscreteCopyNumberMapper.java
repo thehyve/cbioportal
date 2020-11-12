@@ -28,9 +28,11 @@ public interface DiscreteCopyNumberMapper {
                                                                                    String projection);
     
     List<DiscreteCopyNumberData> getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds, 
-                                                                                   List<String> sampleIds,
-                                                                                   List<SingleGeneQuery> geneQueries,
-                                                                                   String projection);
+                                                                                                List<String> sampleIds,
+                                                                                                String projection,
+                                                                                                List<SingleGeneQuery> unrestrictedQueries,
+                                                                                                List<SingleGeneQuery> vusRestrictedQueries,
+                                                                                                List<SingleGeneQuery> tiersRestrictedQueries);
 
     BaseMeta getMetaDiscreteCopyNumbersBySampleIds(String molecularProfileId, List<String> sampleIds,
                                                    List<Integer> entrezGeneIds, List<Integer> alterationTypes);

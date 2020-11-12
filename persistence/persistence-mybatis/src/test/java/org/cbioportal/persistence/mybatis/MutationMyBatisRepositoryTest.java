@@ -409,6 +409,44 @@ public class MutationMyBatisRepositoryTest {
     }
 
     @Test
+    public void getMutationsInMultipleMolecularProfilesByGeneQueriesFilterTiersNoVusSet() throws Exception {
+
+        List<String> molecularProfileIds = new ArrayList<>();
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+        molecularProfileIds.add("study_tcga_pub_mutations");
+
+        List<String> sampleIds = new ArrayList<>();
+        sampleIds.add("TCGA-A1-B0SO-01");
+        sampleIds.add("TCGA-A1-A0SB-01");
+        sampleIds.add("TCGA-A1-A0SD-01");
+        sampleIds.add("TCGA-A1-A0SE-01");
+        sampleIds.add("TCGA-A1-A0SH-01");
+        sampleIds.add("TCGA-A1-A0SI-01");
+        sampleIds.add("TCGA-A1-A0SO-01");
+        sampleIds.add("TCGA-A1-A0SP-01");
+
+        boolean excludeVUS = false;
+        boolean excludeGermline = false;
+        List<String> tiers = Arrays.asList("Tier 2");
+
+        SingleGeneQuery geneQuery1 = new SingleGeneQuery("BRCA1", 672, null, excludeVUS, excludeGermline, tiers);
+        SingleGeneQuery geneQuery2 = new SingleGeneQuery("AKT1", 207, null, excludeVUS, excludeGermline, tiers);
+        SingleGeneQuery geneQuery3 = new SingleGeneQuery("AKT2", 208, null, excludeVUS, excludeGermline, tiers);
+        List<SingleGeneQuery> geneQueries =  Arrays.asList(geneQuery1, geneQuery2, geneQuery3);
+
+        List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,
+            sampleIds, geneQueries, "SUMMARY", null, null, null, null);
+
+        Assert.assertEquals(8, result.size());
+    }
+
+    @Test
     public void getMutationsInMultipleMolecularProfilesByGeneQueriesMixed() throws Exception {
 
         List<String> molecularProfileIds = new ArrayList<>();

@@ -362,6 +362,7 @@ public class StudyViewFilterApplierTest {
 
         Gene gene1 = new Gene();
         gene1.setEntrezGeneId(ENTREZ_GENE_ID_1);
+        gene1.setHugoGeneSymbol(HUGO_GENE_SYMBOL_1);
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_1), GeneIdType.HUGO_GENE_SYMBOL.name(),
                 Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene1));
         Mockito.when(mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(
@@ -392,6 +393,7 @@ public class StudyViewFilterApplierTest {
 
         Gene gene2 = new Gene();
         gene2.setEntrezGeneId(ENTREZ_GENE_ID_2);
+        gene2.setHugoGeneSymbol(HUGO_GENE_SYMBOL_2);
         Mockito.when(geneService.fetchGenes(Arrays.asList(HUGO_GENE_SYMBOL_2), GeneIdType.HUGO_GENE_SYMBOL.name(),
             Projection.SUMMARY.name())).thenReturn(Arrays.asList(gene2));
 

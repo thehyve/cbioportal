@@ -374,7 +374,7 @@ public class MutationControllerTest {
 
         List<Mutation> mutationList = createExampleMutations();
 
-        Mockito.when(mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(Mockito.any(),
+        Mockito.when(mutationService.getMutationsInMultipleMolecularProfiles(Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(mutationList);
 

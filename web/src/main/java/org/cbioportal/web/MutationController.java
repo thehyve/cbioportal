@@ -197,7 +197,7 @@ public class MutationController {
         } else {
             List<Mutation> mutations;
             if (interceptedMutationMultipleStudyFilter.getMolecularProfileIds() != null) {
-                mutations = mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(
+                mutations = mutationService.getMutationsInMultipleMolecularProfiles(
                     interceptedMutationMultipleStudyFilter.getMolecularProfileIds(), null,
                     interceptedMutationMultipleStudyFilter.getEntrezGeneIds(), projection.name(), pageSize, pageNumber,
                     sortBy == null ? null : sortBy.getOriginalValue(), direction.name());
@@ -206,7 +206,7 @@ public class MutationController {
                 List<String> molecularProfileIds = new ArrayList<>();
                 List<String> sampleIds = new ArrayList<>();
                 extractMolecularProfileAndSampleIds(interceptedMutationMultipleStudyFilter, molecularProfileIds, sampleIds);
-                mutations = mutationService.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,
+                mutations = mutationService.getMutationsInMultipleMolecularProfiles(molecularProfileIds,
                     sampleIds, interceptedMutationMultipleStudyFilter.getEntrezGeneIds(), projection.name(), pageSize,
                     pageNumber, sortBy == null ? null : sortBy.getOriginalValue(), direction.name());
             }

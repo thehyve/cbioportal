@@ -64,9 +64,9 @@ public class MutationServiceImpl implements MutationService {
 
     @Override
     public List<Mutation> getMutationsInMultipleMolecularProfiles(List<String> molecularProfileIds, List<String> sampleIds,
-                                                                               List<Integer> entrezGeneIds, String projection, Integer pageSize,
-                                                                               Integer pageNumber, String sortBy, String direction) {
-        return getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
+                                                                  List<Integer> entrezGeneIds, String projection, Integer pageSize,
+                                                                  Integer pageNumber, String sortBy, String direction) {
+        return mutationRepository.getMutationsInMultipleMolecularProfiles(molecularProfileIds, sampleIds,
             entrezGeneIds, projection, pageSize, pageNumber, sortBy, direction);
     }
 

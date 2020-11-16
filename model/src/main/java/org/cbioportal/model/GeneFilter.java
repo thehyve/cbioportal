@@ -76,7 +76,7 @@ public class GeneFilter implements Serializable {
             this.selectedTiers = selectedTiers;
         }
     }
-//
+
 //    @AssertTrue
 //    private boolean isValid() {
 //        if (!CollectionUtils.isEmpty(geneQueries) && !CollectionUtils.isEmpty(molecularProfileIds)) {

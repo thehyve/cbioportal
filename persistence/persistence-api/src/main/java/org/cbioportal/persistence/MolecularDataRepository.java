@@ -3,11 +3,9 @@ package org.cbioportal.persistence;
 import java.util.List;
 import java.util.Map;
 
-import org.cbioportal.model.GeneMolecularAlteration;
-import org.cbioportal.model.GenericAssayMolecularAlteration;
-import org.cbioportal.model.GenesetMolecularAlteration;
+import org.cbioportal.model.*;
+import org.cbioportal.model.GeneFilter.SingleGeneQuery;
 import org.springframework.cache.annotation.Cacheable;
-import org.cbioportal.model.MolecularProfileSamples;
 
 public interface MolecularDataRepository {
 
@@ -41,4 +39,5 @@ public interface MolecularDataRepository {
 	@Cacheable(cacheNames = "GeneralRepositoryCache", condition = "@cacheEnabledConfig.getEnabled()")
 	Iterable<GenericAssayMolecularAlteration> getGenericAssayMolecularAlterationsIterable(String molecularProfileId,
 			List<String> stableIds, String projection);
+
 }

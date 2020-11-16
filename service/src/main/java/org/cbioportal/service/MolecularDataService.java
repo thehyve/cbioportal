@@ -32,7 +32,8 @@ public interface MolecularDataService {
     Integer getNumberOfSamplesInMolecularProfile(String molecularProfileId);
 
     List<GeneMolecularData> getMolecularDataInMultipleMolecularProfiles(List<String> molecularProfileIds,
-                                                                        List<String> sampleIds, List<Integer> entrezGeneIds,
+                                                                        List<String> sampleIds,
+                                                                        List<Integer> entrezGeneIds,
                                                                         String projection);
 
     List<GeneMolecularData> getMolecularDataInMultipleMolecularProfilesByGeneQueries(List<String> molecularProfileIds,

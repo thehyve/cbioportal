@@ -124,7 +124,7 @@ public class MutationServiceImplTest extends BaseServiceImplTest {
 
         SingleGeneQuery geneQuery = mock(SingleGeneQuery.class);
 
-        Mockito.when(mutationRepository.getMutationsInMultipleMolecularProfiles(anyList(),
+        Mockito.when(mutationRepository.getMutationsInMultipleMolecularProfilesByGeneQueries(anyList(),
             anyList(), anyList(), eq(PROJECTION), eq(PAGE_SIZE), eq(PAGE_NUMBER), eq(SORT),
             eq(DIRECTION))).thenReturn(expectedMutationList);
         

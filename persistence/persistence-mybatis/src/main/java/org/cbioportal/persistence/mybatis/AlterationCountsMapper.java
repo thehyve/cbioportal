@@ -51,8 +51,7 @@ public interface AlterationCountsMapper {
                                                            boolean searchFusions);
 
     // legacy method that returns CopyNumberCountByGene
-    List<CopyNumberCountByGene> getSampleCnaCounts(List<String> molecularProfileIds,
-                                                          List<String> sampleIds,
+    List<CopyNumberCountByGene> getSampleCnaCounts(List<Integer> internalSampleIds,
                                                           List<Integer> entrezGeneIds,
                                                           Select<Integer> cnaTypes);
 

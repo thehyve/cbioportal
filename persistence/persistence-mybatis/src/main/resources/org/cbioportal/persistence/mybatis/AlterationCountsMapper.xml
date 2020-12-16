@@ -182,27 +182,11 @@
         INNER JOIN reference_genome_gene ON reference_genome_gene.ENTREZ_GENE_ID = cna_event.ENTREZ_GENE_ID
         AND reference_genome_gene.reference_genome_id = cancer_study.reference_genome_id
         WHERE
-        <if test="sampleIds != null and !sampleIds.isEmpty()">
-            sample_cna_event.SAMPLE_ID IN (
-            SELECT sample.INTERNAL_ID from sample
-            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
-            INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
-            WHERE
-            <if test="molecularProfileIds.stream().distinct().count() == 1">
-                genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
-                sample.STABLE_ID IN
-                <foreach item="item" collection="sampleIds" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="molecularProfileIds.stream().distinct().count() > 1">
-                (sample.STABLE_ID, genetic_profile.STABLE_ID) IN
-                <foreach index="i" collection="sampleIds" open="(" separator="," close=")">
-                    (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
-                </foreach>
-            </if>
-            AND sample.INTERNAL_ID = sample_cna_event.SAMPLE_ID
-            AND genetic_profile.GENETIC_PROFILE_ID = sample_cna_event.GENETIC_PROFILE_ID)
+        <if test="internalSampleIds != null and !internalSampleIds.isEmpty()">
+            sample_cna_event.SAMPLE_ID IN
+            <foreach item="internalSampleId" collection="internalSampleIds" open="(" separator="," close=")">
+                #{internalSampleId}
+            </foreach>
         </if>
         <if test="entrezGeneIds != null and cnaTypes.hasValues()">
             AND (cna_event.ENTREZ_GENE_ID, cna_event.ALTERATION) IN

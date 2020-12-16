@@ -30,9 +30,13 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
 
+        List<Integer> internalSampleIds = alterationCountsMapper.getSampleInternalIds(caseIdToProfileIdArrays.getLeft(),
+            caseIdToProfileIdArrays.getRight());
+        if (internalSampleIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         return alterationCountsMapper.getSampleAlterationCounts(
-            caseIdToProfileIdArrays.getLeft(),
-            caseIdToProfileIdArrays.getRight(),
+            internalSampleIds,
             entrezGeneIds,
             createMutationTypeList(mutationEventTypes),
             createCnaTypeList(cnaEventTypes),

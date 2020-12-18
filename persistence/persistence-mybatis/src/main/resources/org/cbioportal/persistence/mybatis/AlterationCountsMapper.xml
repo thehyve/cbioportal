@@ -76,28 +76,6 @@
         GROUP BY ENTREZ_GENE_ID, HUGO_GENE_SYMBOL;
     </select>
 
-    <select id="getSampleInternalIds" resultType="Integer">
-        SELECT sample.INTERNAL_ID
-        from sample
-        INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
-        INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
-        <where>
-            <if test="molecularProfileIds.stream().distinct().count() == 1">
-                genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
-                sample.STABLE_ID IN
-                <foreach item="item" collection="sampleIds" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="molecularProfileIds.stream().distinct().count() > 1">
-                (sample.STABLE_ID, genetic_profile.STABLE_ID) IN
-                <foreach index="i" collection="sampleIds" open="(" separator="," close=")">
-                    (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
-                </foreach>
-            </if>
-        </where>
-    </select>
-
     <select id="getPatientAlterationCounts" resultType="org.cbioportal.model.AlterationCountByGene">
         SELECT
             ENTREZ_GENE_ID AS entrezGeneId,
@@ -132,6 +110,12 @@
                         </otherwise>
                     </choose>
                 </if>
+                <if test="internalPatientIds != null and !internalPatientIds.isEmpty()">
+                    AND patient.INTERNAL_ID IN
+                    <foreach item="internalPatientId" collection="internalPatientIds" open="(" separator="," close=")">
+                        #{internalPatientId}
+                    </foreach>
+                </if>
                 <include refid="whereSearchFusions"/>
             </where>
             UNION ALL
@@ -158,13 +142,61 @@
                         </otherwise>
                     </choose>
                 </if>
+                <if test="internalPatientIds != null and !internalPatientIds.isEmpty()">
+                    AND patient.INTERNAL_ID IN
+                    <foreach item="internalPatientId" collection="internalPatientIds" open="(" separator="," close=")">
+                        #{internalPatientId}
+                    </foreach>
+                </if>
             </where>
         ) as JoinedTable
         <where>
-            <include refid="wherePatients"/>
             <include refid="whereGene"/>
         </where>
         GROUP BY ENTREZ_GENE_ID, HUGO_GENE_SYMBOL;
+    </select>
+
+    <select id="getSampleInternalIds" resultType="Integer">
+        SELECT sample.INTERNAL_ID
+        from sample
+        INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+        INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
+        <where>
+            <if test="molecularProfileIds.stream().distinct().count() == 1">
+                genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
+                sample.STABLE_ID IN
+                <foreach item="item" collection="sampleIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="molecularProfileIds.stream().distinct().count() > 1">
+                (sample.STABLE_ID, genetic_profile.STABLE_ID) IN
+                <foreach index="i" collection="sampleIds" open="(" separator="," close=")">
+                    (#{sampleIds[${i}]}, #{molecularProfileIds[${i}]})
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getPatientInternalIds" resultType="Integer">
+        SELECT patient.INTERNAL_ID
+        from patient
+        INNER JOIN genetic_profile ON patient.CANCER_STUDY_ID = genetic_profile.CANCER_STUDY_ID
+        <where>
+            <if test="molecularProfileIds.stream().distinct().count() == 1">
+                genetic_profile.STABLE_ID = #{molecularProfileIds[0]} AND
+                patient.STABLE_ID IN
+                <foreach item="item" collection="patientIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="molecularProfileIds.stream().distinct().count() > 1">
+                (patient.STABLE_ID, genetic_profile.STABLE_ID) IN
+                <foreach index="i" collection="patientIds" open="(" separator="," close=")">
+                    (#{patientIds[${i}]}, #{molecularProfileIds[${i}]})
+                </foreach>
+            </if>
+        </where>
     </select>
 
     <select id="getSampleCnaCounts" resultType="org.cbioportal.model.CopyNumberCountByGene">
@@ -287,25 +319,6 @@
             <foreach item="entrezGeneId" collection="entrezGeneIds" open="(" separator="," close=")">
                 #{entrezGeneId}
             </foreach>
-        </if>
-    </sql>
-
-    <sql id="wherePatients">
-        <if test="patientIds != null and !patientIds.isEmpty()">
-            AND
-            <if test="molecularProfileIds.stream().distinct().count() == 1">
-                JoinedTable.GENETIC_PROFILE_STABLE_ID = #{molecularProfileIds[0]}
-                AND PATIENT_ID IN
-                <foreach item="item" collection="patientIds" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="molecularProfileIds.stream().distinct().count() > 1">
-                (JoinedTable.PATIENT_ID, JoinedTable.GENETIC_PROFILE_STABLE_ID) IN
-                <foreach index="i" collection="patientIds" open="(" separator="," close=")">
-                    (#{patientIds[${i}]}, #{molecularProfileIds[${i}]})
-                </foreach>
-            </if>
         </if>
     </sql>
 

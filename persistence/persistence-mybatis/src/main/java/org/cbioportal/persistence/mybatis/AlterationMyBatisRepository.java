@@ -24,7 +24,8 @@ public class AlterationMyBatisRepository implements AlterationRepository {
                                                                  final Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                                  boolean searchFusions) {
 
-        if (mutationEventTypes.hasNone() && cnaEventTypes.hasNone()) {
+        if ((mutationEventTypes.hasNone() && cnaEventTypes.hasNone())
+            || molecularProfileCaseIdentifiers.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -50,11 +51,18 @@ public class AlterationMyBatisRepository implements AlterationRepository {
                                                                   Select<CopyNumberAlterationEventType> cnaEventTypes,
                                                                   boolean searchFusions) {
 
-        if (mutationEventTypes.hasNone() && cnaEventTypes.hasNone()) {
+        if ((mutationEventTypes.hasNone() && cnaEventTypes.hasNone())
+            || molecularProfileCaseIdentifiers.isEmpty()) {
             return Collections.emptyList();
         }
 
         Pair<List<String>, List<String>> caseIdToProfileIdArrays = createCaseIdToProfileIdArrays(molecularProfileCaseIdentifiers);
+
+        List<Integer> internalPatientIds = alterationCountsMapper.getPatientInternalIds(caseIdToProfileIdArrays.getLeft(),
+            caseIdToProfileIdArrays.getRight());
+        if (internalPatientIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         return alterationCountsMapper.getPatientAlterationCounts(
             caseIdToProfileIdArrays.getLeft(),
@@ -69,7 +77,6 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     public List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                           List<Integer> entrezGeneIds,
                                                           Select<CopyNumberAlterationEventType> cnaEventTypes) {
-
 
         if (cnaEventTypes.hasNone()) {
             return Collections.emptyList();

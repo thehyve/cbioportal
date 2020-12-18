@@ -50,6 +50,17 @@ public interface AlterationCountsMapper {
                                                            Select<Integer> cnaTypes,
                                                            boolean searchFusions);
 
+
+    /**
+     * Gets internal sample ids for samples that match (molecularProfileId, sampleId) pair
+     * Note: Molecular profile id in molecularProfileIds.get(N) corresponds with sample id in sampleIds.get(N)
+     * @param molecularProfileIds  List of stable id's of molecular profiles to include in alteration counts. Forms pairs with sampleIds based on array index.
+     * @param patientIds List of stable id's of patients to include in alteration counts. Forms pairs with patientIds based on array index.
+     * @return
+     */
+    List<Integer> getPatientInternalIds(List<String> molecularProfileIds,
+                                       List<String> patientIds);
+    
     // legacy method that returns CopyNumberCountByGene
     List<CopyNumberCountByGene> getSampleCnaCounts(List<Integer> internalSampleIds,
                                                           List<Integer> entrezGeneIds,

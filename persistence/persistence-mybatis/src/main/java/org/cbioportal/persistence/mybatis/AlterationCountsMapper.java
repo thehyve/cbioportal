@@ -35,7 +35,6 @@ public interface AlterationCountsMapper {
 
     /**
      * Calculate patient-level counts of mutation and discrete CNA alteration events.
-     * @param molecularProfileIds  List of stable id's of molecular profiles to include in alteration counts. Forms pairs with sampleIds based on array index. 
      * @param patientIds List of stable id's of patients to include in alteration counts. Forms pairs with sampleIds based on array index.
      * @param entrezGeneIds  List of gene ids to get counts for.
      * @param mutationTypes  Types of mutations to include in alteration counts. When 'null' all types will be included. When empty list mutations will be excluded from counts. 
@@ -43,8 +42,7 @@ public interface AlterationCountsMapper {
      * @param searchFusions  When 'true' mutation counts will be limited to fusion type alterations. When 'false' mutation counts will be limited to non-fusion alterations.
      * @return Gene-level counts of (1) the total number of alterations and (2) the number of altered patients.
      */
-    List<AlterationCountByGene> getPatientAlterationCounts(List<String> molecularProfileIds,
-                                                           List<String> patientIds,
+    List<AlterationCountByGene> getPatientAlterationCounts(List<Integer> internalPatientIds,
                                                            List<Integer> entrezGeneIds,
                                                            Select<String> mutationTypes,
                                                            Select<Integer> cnaTypes,

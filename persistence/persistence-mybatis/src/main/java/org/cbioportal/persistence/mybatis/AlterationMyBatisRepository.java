@@ -65,8 +65,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         }
 
         return alterationCountsMapper.getPatientAlterationCounts(
-            caseIdToProfileIdArrays.getLeft(),
-            caseIdToProfileIdArrays.getRight(),
+            internalPatientIds,
             entrezGeneIds,
             createMutationTypeList(mutationEventTypes),
             createCnaTypeList(cnaEventTypes),

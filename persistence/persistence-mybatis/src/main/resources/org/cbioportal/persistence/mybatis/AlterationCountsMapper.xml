@@ -67,6 +67,7 @@
                         </foreach>
                     </when>
                 </choose>
+                <include refid="whereCustomAnnotations"/>
                 <include refid="whereInternalSampleIdsCna"/>
             </where>
         ) as JoinedTable
@@ -202,6 +203,7 @@
             gene.HUGO_GENE_SYMBOL AS hugoGeneSymbol,
             reference_genome_gene.CYTOBAND as cytoband,
             cna_event.ALTERATION AS alteration,
+            COUNT(*) AS totalCount,
             COUNT(DISTINCT(sample_cna_event.SAMPLE_ID)) AS numberOfAlteredCases
         FROM cna_event
         INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
@@ -221,11 +223,12 @@
                 <when test="!cnaTypes.hasAll()">
                     cna_event.ALTERATION IN
                     <foreach item="type" collection="cnaTypes" open="("
-                        separator="," close=")">
+                             separator="," close=")">
                         #{type}
                     </foreach>
                 </when>
             </choose>
+            <include refid="whereCustomAnnotations"/>
             <include refid="whereInternalSampleIdsCna"/>
             <include refid="whereGeneCna"/>
         </where>

@@ -207,10 +207,6 @@
             COUNT(DISTINCT(sample_cna_event.SAMPLE_ID)) AS numberOfAlteredCases
         FROM cna_event
         INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
-            COUNT(*) AS totalCount,
-            COUNT(DISTINCT(sample_cna_event.SAMPLE_ID)) AS numberOfAlteredCases
-        FROM cna_event
-        INNER JOIN sample_cna_event ON cna_event.CNA_EVENT_ID = sample_cna_event.CNA_EVENT_ID
         <include refid="fromIncludeCustomAnnotationsCna"/>
         INNER JOIN genetic_profile ON sample_cna_event.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
         INNER JOIN gene ON cna_event.ENTREZ_GENE_ID = gene.ENTREZ_GENE_ID

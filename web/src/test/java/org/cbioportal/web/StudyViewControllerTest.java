@@ -2,6 +2,7 @@ package org.cbioportal.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cbioportal.model.AlterationCountByGene;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.ClinicalAttribute;
 import org.cbioportal.model.ClinicalData;
 import org.cbioportal.model.ClinicalDataCount;
@@ -50,7 +51,6 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -319,7 +319,7 @@ public class StudyViewControllerTest {
 
         StudyViewFilter studyViewFilter = new StudyViewFilter();
         studyViewFilter.setStudyIds(Arrays.asList(TEST_STUDY_ID));
-        studyViewFilter.setSelectedTiers(new HashMap<>());
+        studyViewFilter.setAnnotationFilter(new AlterationFilter());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/mutated-genes/fetch")
             .accept(MediaType.APPLICATION_JSON)
@@ -382,7 +382,7 @@ public class StudyViewControllerTest {
 
         StudyViewFilter studyViewFilter = new StudyViewFilter();
         studyViewFilter.setStudyIds(Arrays.asList(TEST_STUDY_ID));
-        studyViewFilter.setSelectedTiers(new HashMap<>());
+        studyViewFilter.setAnnotationFilter(new AlterationFilter());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/fusion-genes/fetch")
             .accept(MediaType.APPLICATION_JSON)
@@ -445,7 +445,7 @@ public class StudyViewControllerTest {
 
         StudyViewFilter studyViewFilter = new StudyViewFilter();
         studyViewFilter.setStudyIds(Arrays.asList(TEST_STUDY_ID));
-        studyViewFilter.setSelectedTiers(new HashMap<>());
+        studyViewFilter.setAnnotationFilter(new AlterationFilter());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/cna-genes/fetch")
             .accept(MediaType.APPLICATION_JSON)
@@ -641,7 +641,7 @@ public class StudyViewControllerTest {
 
         StudyViewFilter studyViewFilter = new StudyViewFilter();
         studyViewFilter.setStudyIds(Arrays.asList(TEST_STUDY_ID));
-        studyViewFilter.setSelectedTiers(new HashMap<>());
+        studyViewFilter.setAnnotationFilter(new AlterationFilter());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/clinical-data-density-plot/fetch")
             .accept(MediaType.APPLICATION_JSON)

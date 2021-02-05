@@ -40,6 +40,7 @@ import org.cbioportal.service.SignificantlyMutatedGeneService;
 import org.cbioportal.service.exception.StudyNotFoundException;
 import org.cbioportal.service.util.ClinicalAttributeUtil;
 import org.cbioportal.web.config.annotation.InternalApi;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.web.parameter.ClinicalDataBinCountFilter;
 import org.cbioportal.web.parameter.ClinicalDataBinFilter;
 import org.cbioportal.web.parameter.ClinicalDataCountFilter;
@@ -322,13 +323,7 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        Select<String> selectedTiers = Select.byValues(
-            interceptedStudyViewFilter.getSelectedTiers().entrySet().stream()
-                .filter(e -> e.getValue())
-                .map(e -> e.getKey()));
-        if (interceptedStudyViewFilter.getSelectedTiers().keySet().size() > 0
-            && interceptedStudyViewFilter.getSelectedTiers().entrySet().stream().allMatch(e -> e.getValue()))
-            selectedTiers.hasAll(true);
+        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();    
 
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<AlterationCountByGene> result = new ArrayList<>();
@@ -347,14 +342,14 @@ public class StudyViewController {
                 true, 
                 false,
                 Select.all(),
-                interceptedStudyViewFilter.isIncludeDriver(),
-                interceptedStudyViewFilter.isIncludeVUS(),
-                interceptedStudyViewFilter.isIncludeUnknownOncogenicity(),
-                selectedTiers,
-                interceptedStudyViewFilter.isIncludeUnknownTier(),
-                interceptedStudyViewFilter.isIncludeGermline(),
-                interceptedStudyViewFilter.isIncludeSomatic(),
-                interceptedStudyViewFilter.isIncludeUnknownStatus());
+                annotationFilters.getIncludeDriver(),
+                annotationFilters.getIncludeVUS(),
+                annotationFilters.getIncludeUnknownOncogenicity(),
+                annotationFilters.getSelectedTiers(),
+                annotationFilters.getIncludeUnknownTier(),
+                annotationFilters.getIncludeGermline(),
+                annotationFilters.getIncludeSomatic(),
+                annotationFilters.getIncludeUnknownStatus());
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -384,13 +379,7 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        Select<String> selectedTiers = Select.byValues(
-            interceptedStudyViewFilter.getSelectedTiers().entrySet().stream()
-                .filter(e -> e.getValue())
-                .map(e -> e.getKey()));
-        if (interceptedStudyViewFilter.getSelectedTiers().keySet().size() > 0
-            && interceptedStudyViewFilter.getSelectedTiers().entrySet().stream().allMatch(e -> e.getValue()))
-            selectedTiers.hasAll(true);
+        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();
         
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<AlterationCountByGene> result = new ArrayList<>();
@@ -409,14 +398,14 @@ public class StudyViewController {
                 true,
                 false,
                 Select.all(),
-                interceptedStudyViewFilter.isIncludeDriver(),
-                interceptedStudyViewFilter.isIncludeVUS(),
-                interceptedStudyViewFilter.isIncludeUnknownOncogenicity(),
-                selectedTiers,
-                interceptedStudyViewFilter.isIncludeUnknownTier(),
-                interceptedStudyViewFilter.isIncludeGermline(),
-                interceptedStudyViewFilter.isIncludeSomatic(),
-                interceptedStudyViewFilter.isIncludeUnknownStatus());
+                annotationFilters.getIncludeDriver(),
+                annotationFilters.getIncludeVUS(),
+                annotationFilters.getIncludeUnknownOncogenicity(),
+                annotationFilters.getSelectedTiers(),
+                annotationFilters.getIncludeUnknownTier(),
+                annotationFilters.getIncludeGermline(),
+                annotationFilters.getIncludeSomatic(),
+                annotationFilters.getIncludeUnknownStatus());
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -447,14 +436,8 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        Select<String> selectedTiers = Select.byValues(
-            interceptedStudyViewFilter.getSelectedTiers().entrySet().stream()
-                .filter(e -> e.getValue())
-                .map(e -> e.getKey()));
-        if (interceptedStudyViewFilter.getSelectedTiers().keySet().size() > 0
-            && interceptedStudyViewFilter.getSelectedTiers().entrySet().stream().allMatch(e -> e.getValue()))
-            selectedTiers.hasAll(true);
-        
+        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();
+
         // TODO refactor resolution of sampleids to List<MolecularProfileCaseIdentifier> and share between methods
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<CopyNumberCountByGene> result = new ArrayList<>();
@@ -474,11 +457,11 @@ public class StudyViewController {
                 true,
                 false,
                 cnaTypes,
-                interceptedStudyViewFilter.isIncludeDriver(),
-                interceptedStudyViewFilter.isIncludeVUS(),
-                interceptedStudyViewFilter.isIncludeUnknownOncogenicity(),
-                selectedTiers,
-                interceptedStudyViewFilter.isIncludeUnknownTier());
+                annotationFilters.getIncludeDriver(),
+                annotationFilters.getIncludeVUS(),
+                annotationFilters.getIncludeUnknownOncogenicity(),
+                annotationFilters.getSelectedTiers(),
+                annotationFilters.getIncludeUnknownTier());
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {

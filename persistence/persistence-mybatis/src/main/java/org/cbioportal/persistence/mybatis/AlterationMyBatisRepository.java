@@ -41,8 +41,8 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
-            || (!includeGermline && !includeSomatic && !includeUnknownStatus
-            && !includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier)) {
+            || allAlterationsExcluded(includeGermline, includeSomatic, includeUnknownStatus,
+            includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
             return Collections.emptyList();
         }
 
@@ -84,8 +84,8 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
-            || (!includeGermline && !includeSomatic && !includeUnknownStatus
-            && !includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier)) {
+            || allAlterationsExcluded(includeGermline, includeSomatic, includeUnknownStatus,
+            includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
             return Collections.emptyList();
         }
 
@@ -118,7 +118,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
             || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || (!includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier)) {
+            || allAlterationsExcluded(includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
             return Collections.emptyList();
         }
 
@@ -147,7 +147,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
             || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || (!includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier)) {
+            || allAlterationsExcluded(includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
             return Collections.emptyList();
         }
 
@@ -170,6 +170,32 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
     private Select<String> createMutationTypeList(final Select<MutationEventType> mutationEventTypes) {
         return mutationEventTypes != null ? mutationEventTypes.map(MutationEventType::getMutationType) : Select.none();
+    }
+
+    private boolean allAlterationsExcluded(boolean includeGermline,
+                                           boolean includeSomatic,
+                                           boolean includeUnknownStatus,
+                                           boolean includeDriver,
+                                           boolean includeVUS,
+                                           boolean includeUnknownOncogenicity,
+                                           Select selectedTiers,
+                                           boolean includeUnknownTier) {
+        return !includeGermline && !includeSomatic && !includeUnknownStatus
+            && !includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier;
+    }
+    private boolean allAlterationsExcluded(boolean includeDriver,
+                                           boolean includeVUS,
+                                           boolean includeUnknownOncogenicity,
+                                           Select selectedTiers,
+                                           boolean includeUnknownTier) {
+        return allAlterationsExcluded(false,
+            false,
+            false,
+            includeDriver,
+            includeVUS,
+            includeUnknownOncogenicity,
+            selectedTiers,
+            includeUnknownTier);
     }
 
 }

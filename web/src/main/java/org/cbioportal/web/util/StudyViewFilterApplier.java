@@ -1,22 +1,65 @@
 package org.cbioportal.web.util;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.cbioportal.model.*;
-import org.cbioportal.model.MolecularProfile.MolecularAlterationType;
-import org.cbioportal.service.*;
-import org.cbioportal.service.exception.MolecularProfileNotFoundException;
-import org.cbioportal.web.parameter.*;
+import org.cbioportal.model.ClinicalAttribute;
+import org.cbioportal.model.ClinicalData;
+import org.cbioportal.model.DataBin;
+import org.cbioportal.model.DiscreteCopyNumberData;
+import org.cbioportal.model.Gene;
+import org.cbioportal.model.GeneFilter;
 import org.cbioportal.model.GeneFilterQuery;
+import org.cbioportal.model.GenePanelData;
+import org.cbioportal.model.GenericAssayDataBin;
+import org.cbioportal.model.GenomicDataBin;
+import org.cbioportal.model.MolecularProfile;
+import org.cbioportal.model.MolecularProfile.MolecularAlterationType;
+import org.cbioportal.model.Mutation;
+import org.cbioportal.model.Sample;
+import org.cbioportal.model.SampleList;
+import org.cbioportal.service.ClinicalAttributeService;
+import org.cbioportal.service.DiscreteCopyNumberService;
+import org.cbioportal.service.GenePanelService;
+import org.cbioportal.service.GeneService;
+import org.cbioportal.service.GenericAssayService;
+import org.cbioportal.service.MolecularDataService;
+import org.cbioportal.service.MolecularProfileService;
+import org.cbioportal.service.MutationService;
+import org.cbioportal.service.SampleListService;
+import org.cbioportal.service.SampleService;
+import org.cbioportal.service.exception.MolecularProfileNotFoundException;
+import org.cbioportal.web.parameter.ClinicalDataFilter;
+import org.cbioportal.web.parameter.ClinicalDataType;
+import org.cbioportal.web.parameter.DataBinCountFilter;
+import org.cbioportal.web.parameter.DataBinFilter;
+import org.cbioportal.web.parameter.DataBinMethod;
+import org.cbioportal.web.parameter.DataFilter;
+import org.cbioportal.web.parameter.DiscreteCopyNumberEventType;
+import org.cbioportal.web.parameter.GeneIdType;
+import org.cbioportal.web.parameter.GenericAssayDataBinCountFilter;
+import org.cbioportal.web.parameter.GenericAssayDataBinFilter;
+import org.cbioportal.web.parameter.GenericAssayDataFilter;
+import org.cbioportal.web.parameter.GenomicDataBinCountFilter;
+import org.cbioportal.web.parameter.GenomicDataBinFilter;
+import org.cbioportal.web.parameter.GenomicDataFilter;
+import org.cbioportal.web.parameter.Projection;
+import org.cbioportal.web.parameter.SampleIdentifier;
+import org.cbioportal.web.parameter.StudyViewFilter;
 import org.cbioportal.web.util.appliers.PatientTreatmentFilterApplier;
 import org.cbioportal.web.util.appliers.SampleTreatmentFilterApplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class StudyViewFilterApplier {
@@ -299,12 +342,14 @@ public class StudyViewFilterApplier {
                 List<String> sampleIds = new ArrayList<>();
 
                 List<String> hugoGeneSymbols = geneQueries.stream()
-                    .map(org.cbioportal.model.GeneFilterQuery::getHugoGeneSymbol).collect(Collectors.toList());
+                    .map(GeneFilterQuery::getHugoGeneSymbol)
+                    .collect(Collectors.toList());
 
                 Map<String, Integer> symbolToEntrezGeneId = geneService
                     .fetchGenes(new ArrayList<>(hugoGeneSymbols),
                         GeneIdType.HUGO_GENE_SYMBOL.name(), Projection.SUMMARY.name())
-                    .stream().collect(Collectors.toMap(x -> x.getHugoGeneSymbol(), x -> x.getEntrezGeneId()));
+                    .stream()
+                    .collect(Collectors.toMap(Gene::getHugoGeneSymbol, Gene::getEntrezGeneId));
 
                 geneQueries.removeIf(
                     q -> !symbolToEntrezGeneId.containsKey(q.getHugoGeneSymbol())
@@ -405,7 +450,7 @@ public class StudyViewFilterApplier {
                                 .collect(Collectors.toList());
 
                             List<String> hugoGeneSymbols = filteredGeneQueries.stream()
-                                    .map(org.cbioportal.model.GeneFilterQuery::getHugoGeneSymbol).collect(Collectors.toList());
+                                    .map(GeneFilterQuery::getHugoGeneSymbol).collect(Collectors.toList());
 
                             Map<String, Integer> symbolToEntrezGeneId = geneService
                                 .fetchGenes(new ArrayList<>(hugoGeneSymbols),

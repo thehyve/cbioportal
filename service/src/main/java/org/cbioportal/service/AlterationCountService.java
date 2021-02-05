@@ -122,7 +122,8 @@ public interface AlterationCountService {
                                                    boolean includeDriver,
                                                    boolean includeVUS,
                                                    boolean includeUnknownOncogenicity,
-                                                   Select<String> selectedTiers, boolean includeUnknownTier);
+                                                   Select<String> selectedTiers,
+                                                   boolean includeUnknownTier);
 
     List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                     Select<Integer> entrezGeneIds,
@@ -132,6 +133,7 @@ public interface AlterationCountService {
                                                     boolean includeDriver,
                                                     boolean includeVUS,
                                                     boolean includeUnknownOncogenicity,
-                                                    Select<String> selectedTiers, boolean includeUnknownTier);
+                                                    Select<String> selectedTiers,
+                                                    boolean includeUnknownTier);
     
 }

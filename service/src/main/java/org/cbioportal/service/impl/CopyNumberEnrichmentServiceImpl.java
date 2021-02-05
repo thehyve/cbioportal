@@ -61,7 +61,8 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
         boolean includeDriver,
         boolean includeVUS,
         boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers, boolean includeUnknownTier) {
+        Select<String> selectedTiers,
+        boolean includeUnknownTier) {
         return molecularProfileCaseSets
             .entrySet()
             .stream()

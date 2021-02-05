@@ -74,15 +74,29 @@ public class CopyNumberEnrichmentServiceImplTest {
             argThat(new SelectMockitoArgumentMatcher("ALL")),
             eq(true),
             eq(true),
-            argThat(new SelectMockitoArgumentMatcher("SOME")))
-        ).thenReturn(counts);
+            argThat(new SelectMockitoArgumentMatcher("SOME")),
+            eq(true),
+            eq(true),
+            eq(true),
+            argThat(new SelectMockitoArgumentMatcher("ALL")),
+            eq(true)
+        )).thenReturn(counts);
     }
 
     Map<String, List<MolecularProfileCaseIdentifier>> groupMolecularProfileCaseSets;
 
     @Test
     public void testGetCopyNumberCountByGeneAndGroup() throws MolecularProfileNotFoundException {
-        Map<String, List<CopyNumberCountByGene>> copyNumberCountByGeneAndGroup = cnaCountService.getCopyNumberCountByGeneAndGroup(groupMolecularProfileCaseSets, CNA.AMP, EnrichmentType.SAMPLE);
+        Map<String, List<CopyNumberCountByGene>> copyNumberCountByGeneAndGroup = cnaCountService.getCopyNumberCountByGeneAndGroup(
+            groupMolecularProfileCaseSets,
+            CNA.AMP,
+            EnrichmentType.SAMPLE,
+            true,
+            true,
+            true,
+            Select.all(),
+            true
+        );
         Assert.assertEquals(2, copyNumberCountByGeneAndGroup.keySet().size());
     }
 }

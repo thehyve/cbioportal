@@ -111,51 +111,49 @@
                     #{item}
                 </foreach>
             </if>
-        <include refid="whereWithGeneQueries"/>
+            <include refid="whereWithGeneQueries"/>
         </where>
     </sql>
 
     <sql id="whereWithGeneQueries">
-        <where>
-            <if test="(_parameter.containsKey('geneQueries') and geneQueries != null and !geneQueries.isEmpty())">
-                AND
-                <foreach item="geneFilterQuery" collection="geneQueries" open="(" separator=" OR " close=")">
-                    ( cna_event.ENTREZ_GENE_ID = '${geneFilterQuery.getEntrezGeneId()}'
-                    <if test="geneFilterQuery.getIncludeDriver() or geneFilterQuery.getIncludeVUS() or geneFilterQuery.getIncludeUnknownOncogenicity()">
-                        <trim prefix="AND (" prefixOverrides="OR">
-                            <if test="geneFilterQuery.getIncludeDriver()">
-                                OR LOWER(alteration_driver_annotation.DRIVER_FILTER) = 'putative_driver'
-                            </if>
-                            <if test="geneFilterQuery.getIncludeVUS()">
-                                OR LOWER(alteration_driver_annotation.DRIVER_FILTER) = 'putative_passenger'
-                            </if>
-                            <if test="geneFilterQuery.getIncludeUnknownOncogenicity()">
-                                OR alteration_driver_annotation.DRIVER_FILTER IS NULL
-                                OR LOWER(alteration_driver_annotation.DRIVER_FILTER) IN ('unknown', 'na', '')
-                            </if>
-                        </trim>
-                        )
-                    </if>
-                    <bind name="allTypesSelected" value="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasAll() and geneFilterQuery.includeUnknownTier" />
-                    <bind name="doNotFilterOnTiers" value="(geneFilterQuery.getSelectedTiers() == null or geneFilterQuery.getSelectedTiers().hasNone()) and not geneFilterQuery.getIncludeUnknownTier()" />
-                    <if test="not allTypesSelected and not doNotFilterOnTiers">
-                        <trim prefix="AND (" prefixOverrides="OR">
-                            <if test="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasValues()">
-                                <foreach item="tier" collection="geneFilterQuery.getSelectedTiers()" open="" separator="" close="">
-                                    OR alteration_driver_annotation.DRIVER_TIERS_FILTER = #{tier}
-                                </foreach>
-                            </if>
-                            <if test="geneFilterQuery.getIncludeUnknownTier()">
-                                OR alteration_driver_annotation.DRIVER_TIERS_FILTER IS NULL
-                                OR LOWER(alteration_driver_annotation.DRIVER_TIERS_FILTER) IN ('', 'na', 'unknown')
-                            </if>
-                        </trim>
-                        )
-                    </if>
+        <if test="(_parameter.containsKey('geneQueries') and geneQueries != null and !geneQueries.isEmpty())">
+            AND
+            <foreach item="geneFilterQuery" collection="geneQueries" open="(" separator=" OR " close=")">
+                ( cna_event.ENTREZ_GENE_ID = '${geneFilterQuery.getEntrezGeneId()}'
+                <if test="geneFilterQuery.getIncludeDriver() or geneFilterQuery.getIncludeVUS() or geneFilterQuery.getIncludeUnknownOncogenicity()">
+                    <trim prefix="AND (" prefixOverrides="OR">
+                        <if test="geneFilterQuery.getIncludeDriver()">
+                            OR LOWER(alteration_driver_annotation.DRIVER_FILTER) = 'putative_driver'
+                        </if>
+                        <if test="geneFilterQuery.getIncludeVUS()">
+                            OR LOWER(alteration_driver_annotation.DRIVER_FILTER) = 'putative_passenger'
+                        </if>
+                        <if test="geneFilterQuery.getIncludeUnknownOncogenicity()">
+                            OR alteration_driver_annotation.DRIVER_FILTER IS NULL
+                            OR LOWER(alteration_driver_annotation.DRIVER_FILTER) IN ('unknown', 'na', '')
+                        </if>
+                    </trim>
                     )
-                </foreach>
-            </if>
-        </where>    
+                </if>
+                <bind name="allTypesSelected" value="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasAll() and geneFilterQuery.includeUnknownTier" />
+                <bind name="doNotFilterOnTiers" value="(geneFilterQuery.getSelectedTiers() == null or geneFilterQuery.getSelectedTiers().hasNone()) and not geneFilterQuery.getIncludeUnknownTier()" />
+                <if test="not allTypesSelected and not doNotFilterOnTiers">
+                    <trim prefix="AND (" prefixOverrides="OR">
+                        <if test="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasValues()">
+                            <foreach item="tier" collection="geneFilterQuery.getSelectedTiers()" open="" separator="" close="">
+                                OR alteration_driver_annotation.DRIVER_TIERS_FILTER = #{tier}
+                            </foreach>
+                        </if>
+                        <if test="geneFilterQuery.getIncludeUnknownTier()">
+                            OR alteration_driver_annotation.DRIVER_TIERS_FILTER IS NULL
+                            OR LOWER(alteration_driver_annotation.DRIVER_TIERS_FILTER) IN ('', 'na', 'unknown')
+                        </if>
+                    </trim>
+                    )
+                </if>
+                )
+            </foreach>
+        </if>
     </sql>
 
     <select id="getDiscreteCopyNumbersBySampleListId" resultType="org.cbioportal.model.DiscreteCopyNumberData">

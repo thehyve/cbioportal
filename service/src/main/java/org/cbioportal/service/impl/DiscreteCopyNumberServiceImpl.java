@@ -94,8 +94,20 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
                                                                                           List<Integer> alterationTypes,
                                                                                           String projection) {
 
-        return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds,
-            sampleIds, entrezGeneIds, alterationTypes, projection);
+        if (isHomdelOrAmpOnly(alterationTypes)) {
+            return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfiles(molecularProfileIds,
+                sampleIds, entrezGeneIds, alterationTypes, projection);
+        }
+
+        return molecularDataService.getMolecularDataInMultipleMolecularProfiles(
+            molecularProfileIds,
+            sampleIds,
+            entrezGeneIds,
+            projection)
+            .stream()
+            .filter(g -> isValidAlteration(alterationTypes, g))
+            .map(this::convert)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -104,6 +116,12 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
                                                                                                        List<GeneFilterQuery> geneQueries,
                                                                                                        String projection) {
 
+        List<CNA> cnas = geneQueries.stream().map(q -> q.getAlterations()).flatMap(List::stream).collect(Collectors.toList());
+        if (isHomdelOrAmpOnlyCna(cnas)) {
+            return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,
+                sampleIds, geneQueries, projection);
+        }
+        
         return molecularDataService.getMolecularDataInMultipleMolecularProfilesByGeneQueries(molecularProfileIds, sampleIds,
             geneQueries, projection).stream()
             .map(this::convert)
@@ -194,8 +212,11 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
     }
 
     private boolean isHomdelOrAmpOnly(List<Integer> alterationTypes) {
-
         return !alterationTypes.contains(-1) && !alterationTypes.contains(0) && !alterationTypes.contains(1);
+    }
+    
+    private boolean isHomdelOrAmpOnlyCna(List<CNA> alterationTypes) {
+        return !alterationTypes.contains(CNA.HETLOSS) && !alterationTypes.contains(CNA.DIPLOID) && !alterationTypes.contains(CNA.GAIN);
     }
 
     private boolean isValidAlteration(List<Integer> alterationTypes, GeneMolecularData molecularData) {

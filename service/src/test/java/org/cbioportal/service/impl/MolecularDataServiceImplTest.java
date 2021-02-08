@@ -1,6 +1,11 @@
 package org.cbioportal.service.impl;
 
-import org.cbioportal.model.*;
+import org.cbioportal.model.DiscreteCopyNumberData;
+import org.cbioportal.model.GeneMolecularAlteration;
+import org.cbioportal.model.GeneMolecularData;
+import org.cbioportal.model.MolecularProfile;
+import org.cbioportal.model.MolecularProfileSamples;
+import org.cbioportal.model.Sample;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.persistence.DiscreteCopyNumberRepository;
 import org.cbioportal.persistence.MolecularDataRepository;
@@ -12,8 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -251,6 +254,7 @@ public class MolecularDataServiceImplTest extends BaseServiceImplTest {
     @Test
     public void getMolecularDataInMultipleMolecularProfilesByGeneQueries() {
 
+        // two record come in ..
         List<GeneMolecularData> unfilteredData = new ArrayList<>();
         GeneMolecularData geneMolecularData1 = new GeneMolecularData();
         geneMolecularData1.setEntrezGeneId(1);
@@ -280,6 +284,8 @@ public class MolecularDataServiceImplTest extends BaseServiceImplTest {
 
         List<GeneMolecularData> filteredData = spy.getMolecularDataInMultipleMolecularProfilesByGeneQueries(Arrays.asList(), Arrays.asList(), Arrays.asList(), "projection");
         
+        // one record comes out ...
+        // so, test whether record correctly removed from result set
         Assert.assertEquals(1, filteredData.size());
         Assert.assertEquals("sample1", filteredData.get(0).getSampleId());
 

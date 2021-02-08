@@ -237,24 +237,13 @@ public class MolecularDataServiceImpl implements MolecularDataService {
                 geneQueries, projection);
         
         // molecularProfile->entrezGeneId->sampleId->alterationType lookup table for CNA events
-        Map<String, Map<Integer, Map<String, Map<Integer, String>>>> cnaEventLookup = copyNumberData.stream()
-            .collect(
-                groupingBy(d -> d.getMolecularProfileId(),
-                    groupingBy(d -> d.getEntrezGeneId(),
-                        groupingBy(d -> d.getSampleId(),
-                                toMap(d -> d.getAlteration(), d -> d.getSampleId())
-                        )
-                    )
-                )
-            );
+        Map<String, DiscreteCopyNumberData> cnaEventLookup = copyNumberData.stream()
+            .collect(toMap(d -> cnaEventKey(d), Function.identity()));
         
         // remove molecular data that is not covered by a CNA event
-        molecularDataList = molecularDataList.stream().filter(
-            d -> cnaEventLookup.containsKey(d.getMolecularProfileId())
-                && cnaEventLookup.get(d.getMolecularProfileId()).containsKey(d.getEntrezGeneId())
-                && cnaEventLookup.get(d.getMolecularProfileId()).get(d.getEntrezGeneId()).containsKey(d.getSampleId())
-                && cnaEventLookup.get(d.getMolecularProfileId()).get(d.getEntrezGeneId()).get(d.getSampleId()).containsKey(Integer.parseInt(d.getValue()))
-        ).collect(Collectors.toList());
+        molecularDataList = molecularDataList.stream()
+            .filter(d -> cnaEventLookup.containsKey(cnaEventKey(d)))
+            .collect(Collectors.toList());
 
         return molecularDataList;
     }
@@ -280,5 +269,23 @@ public class MolecularDataServiceImpl implements MolecularDataService {
 
             throw new MolecularProfileNotFoundException(molecularProfileId);
         }
+    }
+    
+    private String cnaEventKey(DiscreteCopyNumberData cna) {
+        StringJoiner stringJoiner = new StringJoiner("_");
+        stringJoiner.add(cna.getMolecularProfileId());
+        stringJoiner.add(String.valueOf(cna.getEntrezGeneId()));
+        stringJoiner.add(cna.getSampleId());
+        stringJoiner.add(String.valueOf(cna.getAlteration()));
+        return stringJoiner.toString();
+    }
+    
+    private String cnaEventKey(GeneMolecularData cna) {
+        StringJoiner stringJoiner = new StringJoiner("_");
+        stringJoiner.add(cna.getMolecularProfileId());
+        stringJoiner.add(String.valueOf(cna.getEntrezGeneId()));
+        stringJoiner.add(cna.getSampleId());
+        stringJoiner.add(String.valueOf(cna.getValue()));
+        return stringJoiner.toString();
     }
 }

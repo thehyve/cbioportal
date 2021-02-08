@@ -23,8 +23,8 @@ public class AlterationDriverAnnotationServiceImpl implements AlterationDriverAn
             .getAlterationDriverAnnotations(molecularProfileIds);
         
         Set<String> tiers = rows.stream()
-            .filter(d -> !NO_DATA_TIERS.contains(d.getDriverTiersFilter()))
             .map(AlterationDriverAnnotation::getDriverTiersFilter)
+            .filter(driverTiersFilter -> !NO_DATA_TIERS.contains(driverTiersFilter))
             .collect(Collectors.toCollection(TreeSet::new));
         boolean hasBinary = rows.stream().anyMatch(d ->
             "Putative_Driver".equals(d.getDriverFilter()) ||

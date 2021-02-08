@@ -228,7 +228,9 @@ public class MolecularDataServiceImpl implements MolecularDataService {
                                                                                             List<GeneFilterQuery> geneQueries,
                                                                                             String projection) {
         // Molecular alterations for all genes in the geneQueries
-        List<Integer> entrezGeneIds = geneQueries.stream().map(q -> q.getEntrezGeneId()).collect(Collectors.toList());
+        List<Integer> entrezGeneIds = geneQueries.stream()
+            .map(GeneFilterQuery::getEntrezGeneId)
+            .collect(Collectors.toList());
         List<GeneMolecularData> molecularDataList = getMolecularDataInMultipleMolecularProfiles(molecularProfileIds, sampleIds, entrezGeneIds, projection);
 
         // All CNA events that match requested geneQueries

@@ -342,14 +342,7 @@ public class StudyViewController {
                 true, 
                 false,
                 Select.all(),
-                annotationFilters.getIncludeDriver(),
-                annotationFilters.getIncludeVUS(),
-                annotationFilters.getIncludeUnknownOncogenicity(),
-                annotationFilters.getSelectedTiers(),
-                annotationFilters.getIncludeUnknownTier(),
-                annotationFilters.getIncludeGermline(),
-                annotationFilters.getIncludeSomatic(),
-                annotationFilters.getIncludeUnknownStatus());
+                annotationFilters);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -398,14 +391,7 @@ public class StudyViewController {
                 true,
                 false,
                 Select.all(),
-                annotationFilters.getIncludeDriver(),
-                annotationFilters.getIncludeVUS(),
-                annotationFilters.getIncludeUnknownOncogenicity(),
-                annotationFilters.getSelectedTiers(),
-                annotationFilters.getIncludeUnknownTier(),
-                annotationFilters.getIncludeGermline(),
-                annotationFilters.getIncludeSomatic(),
-                annotationFilters.getIncludeUnknownStatus());
+                annotationFilters);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {
@@ -457,11 +443,7 @@ public class StudyViewController {
                 true,
                 false,
                 cnaTypes,
-                annotationFilters.getIncludeDriver(),
-                annotationFilters.getIncludeVUS(),
-                annotationFilters.getIncludeUnknownOncogenicity(),
-                annotationFilters.getSelectedTiers(),
-                annotationFilters.getIncludeUnknownTier());
+                annotationFilters);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {

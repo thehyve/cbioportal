@@ -25,18 +25,10 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
     public List<AlterationEnrichment> getMutationEnrichments(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
         EnrichmentType enrichmentType,
-        boolean includeDriver,
-        boolean includeVUS,
-        boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers,
-        boolean includeUnknownTier,
-        boolean includeGermline,
-        boolean includeSomatic,
-        boolean includeUnknownStatus) {
+        AlterationFilter alterationFilter) {
 
         Map<String, List<AlterationCountByGene>> mutationCountsbyEntrezGeneIdAndGroup = getMutationCountsbyEntrezGeneIdAndGroup(
-            molecularProfileCaseSets, enrichmentType, includeDriver, includeVUS, includeUnknownOncogenicity,
-            selectedTiers, includeUnknownTier, includeGermline, includeSomatic, includeUnknownStatus);
+            molecularProfileCaseSets, enrichmentType, alterationFilter);
 
         return alterationEnrichmentUtil.createAlterationEnrichments(mutationCountsbyEntrezGeneIdAndGroup,
             molecularProfileCaseSets);
@@ -45,14 +37,7 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
     public Map<String, List<AlterationCountByGene>> getMutationCountsbyEntrezGeneIdAndGroup(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
         EnrichmentType enrichmentType,
-        boolean includeDriver,
-        boolean includeVUS,
-        boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers,
-        boolean includeUnknownTier,
-        boolean includeGermline,
-        boolean includeSomatic,
-        boolean includeUnknownStatus) {
+        AlterationFilter alterationFilter) {
         return molecularProfileCaseSets
             .entrySet()
             .stream()
@@ -74,14 +59,7 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                             true,
                             true,
                             Select.all(),
-                            includeDriver,
-                            includeVUS,
-                            includeUnknownOncogenicity,
-                            selectedTiers,
-                            includeUnknownTier,
-                            includeGermline,
-                            includeSomatic,
-                            includeUnknownStatus);
+                            alterationFilter);
                     } else {
                         return alterationCountService
                             .getPatientMutationCounts(
@@ -90,14 +68,7 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                                 true,
                                 true,
                                 Select.all(),
-                                includeDriver,
-                                includeVUS,
-                                includeUnknownOncogenicity,
-                                selectedTiers,
-                                includeUnknownTier,
-                                includeGermline,
-                                includeSomatic,
-                                includeUnknownStatus);
+                                alterationFilter);
                     }
                 }));
     }

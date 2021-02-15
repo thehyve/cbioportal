@@ -15,14 +15,7 @@ public interface AlterationCountService {
                                                           Select<MutationEventType> mutationEventTypes,
                                                           Select<CNA> cnaEventTypes,
                                                           QueryElement searchFusions,
-                                                          boolean includeDriver,
-                                                          boolean includeVUS,
-                                                          boolean includeUnknownOncogenicity,
-                                                          Select<String> selectedTiers,
-                                                          boolean includeUnknownTier,
-                                                          boolean includeGermline,
-                                                          boolean includeSomatic,
-                                                          boolean includeUnknownStatus);
+                                                          AlterationFilter alterationFilter);
 
     List<AlterationCountByGene> getPatientAlterationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                            Select<Integer> entrezGeneIds,
@@ -31,70 +24,35 @@ public interface AlterationCountService {
                                                            Select<MutationEventType> mutationEventTypes,
                                                            Select<CNA> cnaEventTypes,
                                                            QueryElement searchFusions,
-                                                           boolean includeDriver,
-                                                           boolean includeVUS,
-                                                           boolean includeUnknownOncogenicity,
-                                                           Select<String> selectedTiers,
-                                                           boolean includeUnknownTier,
-                                                           boolean includeGermline,
-                                                           boolean includeSomatic,
-                                                           boolean includeUnknownStatus);
+                                                           AlterationFilter alterationFilter);
 
     List<AlterationCountByGene> getSampleMutationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                         Select<Integer> entrezGeneIds,
                                                         boolean includeFrequency,
                                                         boolean includeMissingAlterationsFromGenePanel,
                                                         Select<MutationEventType> mutationEventTypes,
-                                                        boolean includeDriver,
-                                                        boolean includeVUS,
-                                                        boolean includeUnknownOncogenicity,
-                                                        Select<String> selectedTiers,
-                                                        boolean includeUnknownTier,
-                                                        boolean includeGermline,
-                                                        boolean includeSomatic,
-                                                        boolean includeUnknownStatus);
+                                                        AlterationFilter alterationFilter);
 
     List<AlterationCountByGene> getPatientMutationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                          Select<Integer> entrezGeneIds,
                                                          boolean includeFrequency,
                                                          boolean includeMissingAlterationsFromGenePanel,
                                                          Select<MutationEventType> mutationEventTypes,
-                                                         boolean includeDriver,
-                                                         boolean includeVUS,
-                                                         boolean includeUnknownOncogenicity,
-                                                         Select<String> selectedTiers,
-                                                         boolean includeUnknownTier,
-                                                         boolean includeGermline,
-                                                         boolean includeSomatic,
-                                                         boolean includeUnknownStatus);
+                                                         AlterationFilter alterationFilter);
 
     List<AlterationCountByGene> getSampleFusionCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                       Select<Integer> entrezGeneIds,
                                                       boolean includeFrequency,
                                                       boolean includeMissingAlterationsFromGenePanel,
                                                       Select<MutationEventType> mutationEventTypes,
-                                                      boolean includeDriver,
-                                                      boolean includeVUS,
-                                                      boolean includeUnknownOncogenicity,
-                                                      Select<String> selectedTiers,
-                                                      boolean includeUnknownTier,
-                                                      boolean includeGermline,
-                                                      boolean includeSomatic,
-                                                      boolean includeUnknownStatus);
+                                                      AlterationFilter alterationFilter);
 
     List<AlterationCountByGene> getPatientFusionCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                        Select<Integer> entrezGeneIds,
                                                        boolean includeFrequency,
                                                        boolean includeMissingAlterationsFromGenePanel,
                                                        Select<MutationEventType> mutationEventTypes,
-                                                       boolean includeDriver,
-                                                       boolean includeVUS,
-                                                       boolean includeUnknownOncogenicity,
-                                                       Select<String> selectedTiers,
-                                                       boolean includeUnknownTier,
-                                                       boolean includeGermline,
-                                                       boolean includeSomatic,
-                                                       boolean includeUnknownStatus);
+                                                       AlterationFilter alterationFilter);
 
 // Should be restored when old CNA count endpoint is retired
 //    List<AlterationCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
@@ -102,16 +60,14 @@ public interface AlterationCountService {
 //                                                   boolean includeFrequency,
 //                                                   boolean includeMissingAlterationsFromGenePanel,
 //                                                   List<CNA> cnaEventTypes,
-//                                                   boolean excludeVUS,
-//                                                   Select<String> selectedTiers);
+//                                                   AlterationFilter alterationFilter);
 //
 //    List<AlterationCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
 //                                                    Select<Integer> entrezGeneIds,
 //                                                    boolean includeFrequency,
 //                                                    boolean includeMissingAlterationsFromGenePanel,
 //                                                    List<CNA> cnaEventTypes,
-//                                                   boolean excludeVUS,
-//                                                   Select<String> selectedTiers);
+//                                                   AlterationFilter alterationFilter);
 
     // Should be removed when old CNA count endpoint is retired
     List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
@@ -119,21 +75,13 @@ public interface AlterationCountService {
                                                    boolean includeFrequency,
                                                    boolean includeMissingAlterationsFromGenePanel,
                                                    Select<CNA> cnaEventTypes,
-                                                   boolean includeDriver,
-                                                   boolean includeVUS,
-                                                   boolean includeUnknownOncogenicity,
-                                                   Select<String> selectedTiers,
-                                                   boolean includeUnknownTier);
+                                                   AlterationFilter alterationFilter);
 
     List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                     Select<Integer> entrezGeneIds,
                                                     boolean includeFrequency,
                                                     boolean includeMissingAlterationsFromGenePanel,
                                                     Select<CNA> cnaEventTypes,
-                                                    boolean includeDriver,
-                                                    boolean includeVUS,
-                                                    boolean includeUnknownOncogenicity,
-                                                    Select<String> selectedTiers,
-                                                    boolean includeUnknownTier);
+                                                    AlterationFilter alterationFilter);
     
 }

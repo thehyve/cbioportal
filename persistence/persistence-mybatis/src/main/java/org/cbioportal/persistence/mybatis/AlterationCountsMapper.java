@@ -1,6 +1,7 @@
 package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.AlterationCountByGene;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CopyNumberCountByGene;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.model.QueryElement;
@@ -17,13 +18,7 @@ public interface AlterationCountsMapper {
      * @param mutationTypes  Types of mutations to include in alteration counts. 
      * @param cnaTypes  Types of discrete copy number alteration types to include in alteration counts.
      * @param searchFusions  'ACTIVE': counts are limited to fusion type. 'INACTIVE': counts are limited to non-fusion alterations.'PASS': no filtering on mutation vs fusions (mutation types and cnaTypes are used)
-     * @param includeDriver Include Variants of Unknown significance. Uses annotations loaded as 'custom driver annotations'.
-     * @param includeVUS  Include Variants of Unknown significance. Uses annotations loaded as 'custom driver annotations'.
-     * @param includeUnknownOncogenicity  Include variants that are not annotated as driver or VUS. Uses annotations loaded as 'custom driver annotations'.
-     * @param selectedTiers  Force alterations assigned to a tier to be interpreted as driver events. Uses tier annotations loaded as 'custom driver annotation tiers'.
-     * @param includeUnknownTier Include mutations that have unspecified tier, or tiers with '', 'NA' or 'unknown' in alteration counts
-     * @param includeGermline  Include germline mutations in alteration counts
-     * @param includeSomatic  Include somatic mutations in alteration counts
+     * @param alterationFilter Object that specifies filter options for mutation status, and custom driver annotations and tiers
      * @return  Gene-level counts of (1) the total number of alterations and (2) the number of altered samples.
      */
     List<AlterationCountByGene> getSampleAlterationCounts(List<Integer> internalSampleIds,
@@ -31,13 +26,7 @@ public interface AlterationCountsMapper {
                                                           Select<String> mutationTypes,
                                                           Select<Short> cnaTypes,
                                                           QueryElement searchFusions,
-                                                          boolean includeDriver,
-                                                          boolean includeVUS,
-                                                          boolean includeUnknownOncogenicity,
-                                                          Select<String> selectedTiers,
-                                                          boolean includeUnknownTier, boolean includeGermline,
-                                                          boolean includeSomatic,
-                                                          boolean includeUnknownStatus);
+                                                          AlterationFilter alterationFilter);
 
     /**
      * Gets internal sample ids for samples that match (molecularProfileId, sampleId) pair
@@ -52,15 +41,8 @@ public interface AlterationCountsMapper {
      * @param entrezGeneIds  Gene ids to get counts for.
      * @param mutationTypes  Types of mutations to include in alteration counts.
      * @param cnaTypes  Types of discrete copy number alteration types to include in alteration counts.
-     * @param searchFusions  'ACTIVE': counts are limited to fusion type. 'INACTIVE': counts are limited to non-fusion alterations.'PASS': no filtering on mutation vs fusions (mutation types and cnaTypes are used) 
-     * @param includeDriver Include Variants of Unknown significance. Uses annotations loaded as 'custom driver annotations'.
-     * @param includeVUS  Include Variants of Unknown significance. Uses annotations loaded as 'custom driver annotations'.
-     * @param includeUnknownOncogenicity  Include variants that are not annotated as driver or VUS. Uses annotations loaded as 'custom driver annotations'.
-     * @param selectedTiers  Force alterations assigned to a tier to be interpreted as driver events. Uses tier annotations loaded as 'custom driver annotation tiers'.
-     * @param includeUnknownTier  Include mutations that have unspecified tier, or tiers with '', 'NA' or 'unknown' in alteration counts
-     * @param includeGermline  Include germline mutations in alteration counts
-     * @param includeSomatic  Include somatic mutations in alteration counts
-     * @param includeUnknownStatus  Include mutations that have mutation status 'unknown' in alteration counts
+     * @param searchFusions  'ACTIVE': counts are limited to fusion type. 'INACTIVE': counts are limited to non-fusion alterations.'PASS': no filtering on mutation vs fusions (mutation types and cnaTypes are used)
+     * @param alterationFilter Object that specifies filter options for mutation status, and custom driver annotations and tiers
      * @return  Gene-level counts of (1) the total number of alterations and (2) the number of altered patients.
      */
     List<AlterationCountByGene> getPatientAlterationCounts(List<Integer> internalPatientIds,
@@ -68,13 +50,7 @@ public interface AlterationCountsMapper {
                                                            Select<String> mutationTypes,
                                                            Select<Short> cnaTypes,
                                                            QueryElement searchFusions,
-                                                           boolean includeDriver,
-                                                           boolean includeVUS,
-                                                           boolean includeUnknownOncogenicity,
-                                                           Select<String> selectedTiers,
-                                                           boolean includeUnknownTier, boolean includeGermline,
-                                                           boolean includeSomatic,
-                                                           boolean includeUnknownStatus);
+                                                           AlterationFilter alterationFilter);
 
     /**
      * Gets internal patient ids for patients that match (molecularProfileId, patientId) pair
@@ -87,19 +63,11 @@ public interface AlterationCountsMapper {
     List<CopyNumberCountByGene> getSampleCnaCounts(List<Integer> internalSampleIds,
                                                    Select<Integer> entrezGeneIds,
                                                    Select<Short> cnaTypes,
-                                                   boolean includeDriver,
-                                                   boolean includeVUS,
-                                                   boolean includeUnknownOncogenicity,
-                                                   Select<String> selectedTiers,
-                                                   boolean includeUnknownTier);
+                                                   AlterationFilter alterationFilter);
 
     // legacy method that returns CopyNumberCountByGene
     List<CopyNumberCountByGene> getPatientCnaCounts(List<Integer> internalPatientIds,
                                                     Select<Integer> entrezGeneIds,
                                                     Select<Short> cnaTypes,
-                                                    boolean includeDriver,
-                                                    boolean includeVUS,
-                                                    boolean includeUnknownOncogenicity,
-                                                    Select<String> selectedTiers,
-                                                    boolean includeUnknownTier);
+                                                    AlterationFilter alterationFilter);
 }

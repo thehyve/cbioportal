@@ -14,7 +14,9 @@ import java.util.Map;
 @JsonInclude(Include.NON_NULL)
 public class AlterationFilter implements Serializable {
     
-    // Default behavior of filter options is to include everything 
+    // Default behavior of filter options is to include everything
+    private Map<MutationEventType, Boolean> mutationEventTypes;
+    private Map<CNA, Boolean> copyNumberAlterationEventTypes;
     private boolean includeDriver = true;
     private boolean includeVUS = true;
     private boolean includeUnknownOncogenicity = true;
@@ -26,10 +28,16 @@ public class AlterationFilter implements Serializable {
     
     @JsonIgnore
     private Select<String> tiersSelect;
+    @JsonIgnore
+    private Select<MutationEventType> mutationTypeSelect;
+    @JsonIgnore
+    private Select<CNA> cnaTypeSelect;
 
     public AlterationFilter() {}
 
-    public AlterationFilter(boolean includeDriver,
+    public AlterationFilter(Select<MutationEventType> mutationEventTypes,
+                            Select<CNA> cnaEventTypes,
+                            boolean includeDriver,
                             boolean includeVUS,
                             boolean includeUnknownOncogenicity,
                             boolean includeGermline,
@@ -37,6 +45,8 @@ public class AlterationFilter implements Serializable {
                             boolean includeUnknownStatus,
                             Select<String> tiersSelect,
                             boolean includeUnknownTier) {
+        this.mutationTypeSelect = mutationEventTypes;
+        this.cnaTypeSelect = cnaEventTypes;
         this.includeDriver = includeDriver;
         this.includeVUS = includeVUS;
         this.includeUnknownOncogenicity = includeUnknownOncogenicity;
@@ -125,5 +135,53 @@ public class AlterationFilter implements Serializable {
     @JsonIgnore
     public void setTiersSelect(Select<String> tiersSelect) {
         this.tiersSelect = tiersSelect;
+    }
+    
+    public void setMutationEventTypes(Map<MutationEventType, Boolean> selectedTypes) {
+        if (selectedTypes == null)
+            this.mutationTypeSelect = Select.none();
+        else
+            this.mutationTypeSelect = Select.byValues(
+                selectedTypes.entrySet().stream()
+                    .filter(e -> e.getValue())
+                    .map(e -> e.getKey()));
+        if (selectedTypes.entrySet().stream().allMatch(e -> e.getValue()))
+            this.mutationTypeSelect.hasAll(true);
+    }
+
+    @JsonIgnore
+    public Select<MutationEventType> getMutationEventTypes() {
+        if (this.mutationTypeSelect == null)
+            return Select.all();
+        return this.mutationTypeSelect;
+    }
+
+    @JsonIgnore
+    public void setMutationTypeSelect(Select<MutationEventType> typeSelect) {
+        this.mutationTypeSelect = typeSelect;
+    }
+    
+    public void setCopyNumberAlterationEventTypes(Map<CNA, Boolean> selectedTypes) {
+        if (selectedTypes == null)
+            this.cnaTypeSelect = Select.none();
+        else
+            this.cnaTypeSelect = Select.byValues(
+                selectedTypes.entrySet().stream()
+                    .filter(e -> e.getValue())
+                    .map(e -> e.getKey()));
+        if (selectedTypes.entrySet().stream().allMatch(e -> e.getValue()))
+            this.cnaTypeSelect.hasAll(true);
+    }
+
+    @JsonIgnore
+    public Select<CNA> getCnaEventTypes() {
+        if (this.cnaTypeSelect == null)
+            return Select.all();
+        return this.cnaTypeSelect;
+    }
+
+    @JsonIgnore
+    public void setCnaTypeSelect(Select<CNA> typeSelect) {
+        this.cnaTypeSelect = typeSelect;
     }
 }

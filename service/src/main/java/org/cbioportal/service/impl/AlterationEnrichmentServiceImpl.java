@@ -26,18 +26,10 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                                                final Select<MutationEventType> mutationEventTypes,
                                                                final Select<CNA> cnaEventTypes,
                                                                EnrichmentType enrichmentType,
-                                                               boolean includeDriver,
-                                                               boolean includeVUS,
-                                                               boolean includeUnknownOncogenicity,
-                                                               Select<String> selectedTiers,
-                                                               boolean includeUnknownTier,
-                                                               boolean includeGermline,
-                                                               boolean includeSomatic,
-                                                               boolean includeUnknownStatus) {
+                                                               AlterationFilter alterationFilter) {
 
         Map<String, List<AlterationCountByGene>> alterationCountsbyEntrezGeneIdAndGroup = getAlterationCountsbyEntrezGeneIdAndGroup(
-            molecularProfileCaseSets, mutationEventTypes, cnaEventTypes, enrichmentType, includeDriver, includeVUS,
-            includeUnknownOncogenicity, selectedTiers, includeUnknownTier, includeGermline, includeSomatic, includeUnknownStatus);
+            molecularProfileCaseSets, mutationEventTypes, cnaEventTypes, enrichmentType, alterationFilter);
 
         return alterationEnrichmentUtil.createAlterationEnrichments(alterationCountsbyEntrezGeneIdAndGroup,
             molecularProfileCaseSets);
@@ -47,14 +39,7 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                                                                               Select<MutationEventType> mutationEventTypes,
                                                                                               Select<CNA> cnaEventTypes,
                                                                                               EnrichmentType enrichmentType,
-                                                                                              boolean includeDriver,
-                                                                                              boolean includeVUS,
-                                                                                              boolean includeUnknownOncogenicity,
-                                                                                              Select<String> selectedTiers,
-                                                                                              boolean includeUnknownTier,
-                                                                                              boolean includeGermline,
-                                                                                              boolean includeSomatic,
-                                                                                              boolean includeUnknownStatus) {
+                                                                                              AlterationFilter alterationFilter) {
         return molecularProfileCaseSets
             .entrySet()
             .stream()
@@ -72,14 +57,7 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                 mutationEventTypes,
                                 cnaEventTypes,
                                 QueryElement.PASS,
-                                includeDriver,
-                                includeVUS,
-                                includeUnknownOncogenicity,
-                                selectedTiers,
-                                includeUnknownTier,
-                                includeGermline,
-                                includeSomatic,
-                                includeUnknownStatus);
+                                alterationFilter);
                     } else {
                         return alterationCountService
                             .getPatientAlterationCounts(
@@ -90,14 +68,7 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                 mutationEventTypes,
                                 cnaEventTypes,
                                 QueryElement.PASS,
-                                includeDriver,
-                                includeVUS,
-                                includeUnknownOncogenicity,
-                                selectedTiers,
-                                includeUnknownTier,
-                                includeGermline,
-                                includeSomatic,
-                                includeUnknownStatus);
+                                alterationFilter);
                     }
                 }));
     }

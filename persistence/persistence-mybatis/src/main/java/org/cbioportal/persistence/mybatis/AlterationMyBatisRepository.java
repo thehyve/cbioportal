@@ -1,6 +1,7 @@
 package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.AlterationCountByGene;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CNA;
 import org.cbioportal.model.CopyNumberCountByGene;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
@@ -26,14 +27,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
                                                                  final Select<MutationEventType> mutationEventTypes,
                                                                  final Select<CNA> cnaEventTypes,
                                                                  QueryElement searchFusions,
-                                                                 boolean includeDriver,
-                                                                 boolean includeVUS,
-                                                                 boolean includeUnknownOncogenicity,
-                                                                 Select<String> selectedTiers,
-                                                                 boolean includeUnknownTier,
-                                                                 boolean includeGermline,
-                                                                 boolean includeSomatic,
-                                                                 boolean includeUnknownStatus) {
+                                                                 AlterationFilter alterationFilter) {
 
         if (mutationEventTypes != null && !mutationEventTypes.hasAll() && searchFusions != QueryElement.PASS)
             throw new IllegalArgumentException("Filtering for mutations vs. fusions and specifying mutation types" +
@@ -41,8 +35,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
-            || allAlterationsExcluded(includeGermline, includeSomatic, includeUnknownStatus,
-            includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
+            || (allAlterationsExcludedDriverAnnotation(alterationFilter) && allAlterationsExcludedMutationStatus(alterationFilter))) {
             return Collections.emptyList();
         }
 
@@ -54,14 +47,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
             createMutationTypeList(mutationEventTypes),
             createCnaTypeList(cnaEventTypes),
             searchFusions,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
     }
 
     @Override
@@ -70,13 +56,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
                                                                   Select<MutationEventType> mutationEventTypes,
                                                                   Select<CNA> cnaEventTypes,
                                                                   QueryElement searchFusions,
-                                                                  boolean includeDriver,
-                                                                  boolean includeVUS,
-                                                                  boolean includeUnknownOncogenicity,
-                                                                  Select<String> selectedTiers,
-                                                                  boolean includeUnknownTier, boolean includeGermline,
-                                                                  boolean includeSomatic,
-                                                                  boolean includeUnknownStatus) {
+                                                                  AlterationFilter alterationFilter) {
 
         if (mutationEventTypes != null && !mutationEventTypes.hasAll() && searchFusions != QueryElement.PASS)
             throw new IllegalArgumentException("Filtering for mutations vs. fusions and specifying mutation types" +
@@ -84,8 +64,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
 
         if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
-            || allAlterationsExcluded(includeGermline, includeSomatic, includeUnknownStatus,
-            includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
+            || (allAlterationsExcludedDriverAnnotation(alterationFilter) && allAlterationsExcludedMutationStatus(alterationFilter))) {
             return Collections.emptyList();
         }
 
@@ -97,28 +76,18 @@ public class AlterationMyBatisRepository implements AlterationRepository {
             createMutationTypeList(mutationEventTypes),
             createCnaTypeList(cnaEventTypes),
             searchFusions,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
     }
 
     @Override
     public List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                           Select<Integer> entrezGeneIds,
                                                           Select<CNA> cnaEventTypes,
-                                                          boolean includeDriver,
-                                                          boolean includeVUS,
-                                                          boolean includeUnknownOncogenicity,
-                                                          Select<String> selectedTiers, boolean includeUnknownTier) {
+                                                          AlterationFilter alterationFilter) {
 
         if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
             || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || allAlterationsExcluded(includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
+            || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
             return Collections.emptyList();
         }
 
@@ -128,26 +97,18 @@ public class AlterationMyBatisRepository implements AlterationRepository {
             internalSampleIds,
             entrezGeneIds,
             createCnaTypeList(cnaEventTypes),
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier);
+            alterationFilter);
     }
 
     @Override
     public List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                            Select<Integer> entrezGeneIds,
                                                            Select<CNA> cnaEventTypes,
-                                                           boolean includeDriver,
-                                                           boolean includeVUS,
-                                                           boolean includeUnknownOncogenicity,
-                                                           Select<String> selectedTiers,
-                                                           boolean includeUnknownTier) {
+                                                           AlterationFilter alterationFilter) {
 
         if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
             || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || allAlterationsExcluded(includeDriver, includeVUS, includeUnknownOncogenicity, selectedTiers, includeUnknownTier)) {
+            || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
             return Collections.emptyList();
         }
 
@@ -157,11 +118,7 @@ public class AlterationMyBatisRepository implements AlterationRepository {
             internalPatientIds,
             entrezGeneIds,
             createCnaTypeList(cnaEventTypes),
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier);
+            alterationFilter);
     }
     
     private Select<Short> createCnaTypeList(final Select<CNA> cnaEventTypes) {
@@ -172,30 +129,14 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         return mutationEventTypes != null ? mutationEventTypes.map(MutationEventType::getMutationType) : Select.none();
     }
 
-    private boolean allAlterationsExcluded(boolean includeGermline,
-                                           boolean includeSomatic,
-                                           boolean includeUnknownStatus,
-                                           boolean includeDriver,
-                                           boolean includeVUS,
-                                           boolean includeUnknownOncogenicity,
-                                           Select selectedTiers,
-                                           boolean includeUnknownTier) {
-        return !includeGermline && !includeSomatic && !includeUnknownStatus
-            && !includeDriver && !includeVUS && !includeUnknownOncogenicity && selectedTiers.hasNone() && !includeUnknownTier;
+    private boolean allAlterationsExcludedMutationStatus(AlterationFilter alterationFilter) {
+        return !alterationFilter.getIncludeGermline() && !alterationFilter.getIncludeSomatic() && !alterationFilter.getIncludeUnknownStatus();
     }
-    private boolean allAlterationsExcluded(boolean includeDriver,
-                                           boolean includeVUS,
-                                           boolean includeUnknownOncogenicity,
-                                           Select selectedTiers,
-                                           boolean includeUnknownTier) {
-        return allAlterationsExcluded(false,
-            false,
-            false,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier);
+    
+    private boolean allAlterationsExcludedDriverAnnotation(AlterationFilter alterationFilter) {
+        return !alterationFilter.getIncludeDriver() && !alterationFilter.getIncludeVUS()
+            && !alterationFilter.getIncludeUnknownOncogenicity() && alterationFilter.getSelectedTiers().hasNone()
+            && !alterationFilter.getIncludeUnknownTier();
     }
 
 }

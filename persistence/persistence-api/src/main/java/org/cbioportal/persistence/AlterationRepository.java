@@ -16,14 +16,7 @@ public interface AlterationRepository {
                                                           final Select<MutationEventType> mutationEventTypes,
                                                           final Select<CNA> cnaEventTypes,
                                                           QueryElement searchFusions,
-                                                          boolean includeDriver,
-                                                          boolean includeVUS,
-                                                          boolean includeUnknownOncogenicity,
-                                                          Select<String> selectedTiers,
-                                                          boolean includeUnknownTier,
-                                                          boolean includeGermline,
-                                                          boolean includeSomatic,
-                                                          boolean includeUnknownStatus);
+                                                          AlterationFilter alterationFilter);
 
     @Cacheable(cacheResolver = "generalRepositoryCacheResolver", condition = "@cacheEnabledConfig.getEnabled()")
     // TODO write javadoc
@@ -32,33 +25,18 @@ public interface AlterationRepository {
                                                            final Select<MutationEventType> mutationEventTypes,
                                                            final Select<CNA> cnaEventTypes,
                                                            QueryElement searchFusions,
-                                                           boolean includeDriver,
-                                                           boolean includeVUS,
-                                                           boolean includeUnknownOncogenicity,
-                                                           Select<String> selectedTiers,
-                                                           boolean includeUnknownTier,
-                                                           boolean includeGermline,
-                                                           boolean includeSomatic,
-                                                           boolean includeUnknownStatus);
+                                                           AlterationFilter alterationFilter);
 
     @Cacheable(cacheResolver = "generalRepositoryCacheResolver", condition = "@cacheEnabledConfig.getEnabled()")
     List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                    Select<Integer> entrezGeneIds,
                                                    final Select<CNA> cnaEventTypes,
-                                                   boolean includeDriver,
-                                                   boolean includeVUS,
-                                                   boolean includeUnknownOncogenicity,
-                                                   Select<String> selectedTiers,
-                                                   boolean includeUnknownTier);
+                                                   AlterationFilter alterationFilter);
 
     @Cacheable(cacheResolver = "generalRepositoryCacheResolver", condition = "@cacheEnabledConfig.getEnabled()")
     List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                     Select<Integer> entrezGeneIds,
                                                     final Select<CNA> cnaEventTypes,
-                                                    boolean includeDriver,
-                                                    boolean includeVUS,
-                                                    boolean includeUnknownOncogenicity,
-                                                    Select<String> selectedTiers,
-                                                    boolean includeUnknownTier);
+                                                    AlterationFilter alterationFilter);
     
 }

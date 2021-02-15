@@ -14,13 +14,6 @@ public interface AlterationEnrichmentService {
         final Select<MutationEventType> mutationEventTypes,
         final Select<CNA> cnaEventTypes,
         EnrichmentType enrichmentType,
-        boolean includeDriver,
-        boolean includeVUS,
-        boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers,
-        boolean includeUnknownTier,
-        boolean includeGermline,
-        boolean includeSomatic,
-        boolean includeUnknownStatus)
+        AlterationFilter alterationFilter)
         throws MolecularProfileNotFoundException;
 }

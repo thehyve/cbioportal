@@ -196,9 +196,9 @@
                     </trim>
                     )
                 </if>
-                <bind name="allTypesSelected" value="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasAll() and geneFilterQuery.getIncludeUnknownTier()" />
-                <bind name="doNotFilterOnTiers" value="(geneFilterQuery.getSelectedTiers() == null or geneFilterQuery.getSelectedTiers().hasNone()) and not geneFilterQuery.getIncludeUnknownTier()" />
-                <if test="not allTypesSelected and not doNotFilterOnTiers">
+                <bind name="allTierOptionsSelected" value="geneFilterQuery.getSelectedTiers() == null or geneFilterQuery.getSelectedTiers().hasAll() and geneFilterQuery.getIncludeUnknownTier()" />
+                <bind name="noTierOptionsSelected" value="(geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasNone()) and not geneFilterQuery.getIncludeUnknownTier()" />
+                <if test="not allTierOptionsSelected and not noTierOptionsSelected">
                     <trim prefix="AND (" prefixOverrides="OR">
                         <if test="geneFilterQuery.getSelectedTiers() != null and geneFilterQuery.getSelectedTiers().hasValues()">
                             <foreach item="tier" collection="geneFilterQuery.getSelectedTiers()" open="" separator="" close="">

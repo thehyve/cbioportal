@@ -323,7 +323,7 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();    
+        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAlterationFilter();    
 
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<AlterationCountByGene> result = new ArrayList<>();
@@ -341,7 +341,6 @@ public class StudyViewController {
                 Select.all(),
                 true, 
                 false,
-                Select.all(),
                 annotationFilters);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
@@ -372,7 +371,7 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();
+        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAlterationFilter();
         
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
         List<AlterationCountByGene> result = new ArrayList<>();
@@ -390,7 +389,6 @@ public class StudyViewController {
                 Select.all(),
                 true,
                 false,
-                Select.all(),
                 annotationFilters);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
@@ -422,7 +420,7 @@ public class StudyViewController {
         @ApiIgnore // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter) throws StudyNotFoundException {
 
-        AlterationFilter annotationFilters = interceptedStudyViewFilter.getAnnotationFilter();
+        AlterationFilter alterationFilter = interceptedStudyViewFilter.getAlterationFilter();
 
         // TODO refactor resolution of sampleids to List<MolecularProfileCaseIdentifier> and share between methods
         List<SampleIdentifier> filteredSampleIdentifiers = studyViewFilterApplier.apply(interceptedStudyViewFilter);
@@ -442,8 +440,7 @@ public class StudyViewController {
                 Select.all(),
                 true,
                 false,
-                cnaTypes,
-                annotationFilters);
+                alterationFilter);
             result.sort((a, b) -> b.getNumberOfAlteredCases() - a.getNumberOfAlteredCases());
             List<String> distinctStudyIds = studyIds.stream().distinct().collect(Collectors.toList());
             if (distinctStudyIds.size() == 1 && !result.isEmpty()) {

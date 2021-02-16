@@ -2,16 +2,15 @@ package org.cbioportal.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cbioportal.model.AlterationEnrichment;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CNA;
 import org.cbioportal.model.CountSummary;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.model.MutationEventType;
-import org.cbioportal.model.util.Select;
 import org.cbioportal.service.AlterationEnrichmentService;
-import org.cbioportal.web.parameter.AlterationEventTypeFilter;
 import org.cbioportal.web.parameter.MolecularProfileCasesGroupAndAlterationTypeFilter;
 import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
-import org.cbioportal.web.util.SelectMockitoArgumentMatcher;
+import org.cbioportal.web.util.AlterationFilterMockitoArgumentMatcher;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,8 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,7 +72,9 @@ public class AlterationEnrichmentControllerTest {
 
     private MockMvc mockMvc;
     private ArrayList<AlterationEnrichment> alterationEnrichments;
-    private AlterationEventTypeFilter eventTypes;
+    private AlterationFilter alterationFilter;
+    Map<MutationEventType, Boolean> mutationTypes;
+    Map<CNA, Boolean> cnaTypes;
 
     @Bean
     public AlterationEnrichmentService alterationEnrichmentService() {
@@ -146,26 +147,21 @@ public class AlterationEnrichmentControllerTest {
         filter = new MolecularProfileCasesGroupAndAlterationTypeFilter();
         filter.setMolecularProfileCasesGroupFilter(Arrays.asList(casesGroup1,casesGroup2));
 
-        eventTypes = new AlterationEventTypeFilter();
-        Map<MutationEventType, Boolean> mutationEventTypeMap = new HashMap();
-        mutationEventTypeMap.put(MutationEventType.missense_mutation, true);
-        mutationEventTypeMap.put(MutationEventType.feature_truncation, true);
-        Map<CNA, Boolean> cnaEventTypeMap = new HashMap();
-        cnaEventTypeMap.put(CNA.AMP, true);
-        cnaEventTypeMap.put(CNA.HOMDEL, true);
-        eventTypes.setMutationEventTypes(mutationEventTypeMap);
-        eventTypes.setCopyNumberAlterationEventTypes(cnaEventTypeMap);
-        filter.setAlterationEventTypes(eventTypes);
-        eventTypes.setIncludeDriver(true);
-        eventTypes.setIncludeVUS(true);
-        eventTypes.setIncludeUnknownOncogenicity(true);
-        eventTypes.setIncludeSomatic(true);
-        eventTypes.setIncludeGermline(true);
-        eventTypes.setIncludeUnknownStatus(true);
-        eventTypes.setIncludeUnknownTier(true);
-        eventTypes.setSelectedTiers(new HashMap<String, Boolean>());
+        alterationFilter = new AlterationFilter();
+        filter.setAlterationFilter(alterationFilter);
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setIncludeUnknownTier(true);
+        alterationFilter.setSelectedTiers(new HashMap<String, Boolean>());
         
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        
+        mutationTypes = new HashMap<>();
+        cnaTypes = new HashMap<>();
         
     }
 
@@ -174,17 +170,16 @@ public class AlterationEnrichmentControllerTest {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             argThat(new caseIdMatcher()),
-            argThat(new SelectMockitoArgumentMatcher("ALL")),
-            argThat(new SelectMockitoArgumentMatcher("ALL")),
             any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean())).thenReturn(alterationEnrichments);
+            argThat(new AlterationFilterMockitoArgumentMatcher("ALL", "ALL")))).thenReturn(alterationEnrichments);
+
+        mutationTypes.put(MutationEventType.missense_mutation, true);
+        mutationTypes.put(MutationEventType.feature_truncation, true);
+        cnaTypes.put(CNA.AMP, true);
+        cnaTypes.put(CNA.HOMDEL, true);
+
+        filter.getAlterationFilter().setMutationEventTypes(mutationTypes);
+        filter.getAlterationFilter().setCopyNumberAlterationEventTypes(cnaTypes);
         
         mockMvc.perform(MockMvcRequestBuilders.post(
             "/alteration-enrichments/fetch")
@@ -217,22 +212,16 @@ public class AlterationEnrichmentControllerTest {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             argThat(new caseIdMatcher()),
-            argThat(new SelectMockitoArgumentMatcher("EMPTY")),
-            argThat(new SelectMockitoArgumentMatcher("EMPTY")),
             any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean())).thenReturn(alterationEnrichments);
+            argThat(new AlterationFilterMockitoArgumentMatcher("EMPTY", "EMPTY")))).thenReturn(alterationEnrichments);
         
-        filter.getAlterationEventTypes().getMutationEventTypes().put(MutationEventType.missense_mutation, false);
-        filter.getAlterationEventTypes().getMutationEventTypes().put(MutationEventType.feature_truncation, false);
-        filter.getAlterationEventTypes().getCopyNumberAlterationEventTypes().put(CNA.AMP, false);
-        filter.getAlterationEventTypes().getCopyNumberAlterationEventTypes().put(CNA.HOMDEL, false);
+        mutationTypes.put(MutationEventType.missense_mutation, false);
+        mutationTypes.put(MutationEventType.feature_truncation, false);
+        cnaTypes.put(CNA.AMP, false);
+        cnaTypes.put(CNA.HOMDEL, false);
+        
+        filter.getAlterationFilter().setMutationEventTypes(mutationTypes);
+        filter.getAlterationFilter().setCopyNumberAlterationEventTypes(cnaTypes);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
             "/alteration-enrichments/fetch")
@@ -261,24 +250,21 @@ public class AlterationEnrichmentControllerTest {
     }
 
     @Test
-    public void fetchAlterationEnrichmentsNullMutationTypes() throws Exception {
+    public void fetchAlterationEnrichmentsAllMutationTypesDeselected() throws Exception {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             argThat(new caseIdMatcher()),
-            argThat(new SelectMockitoArgumentMatcher("EMPTY")),
-            argThat(new SelectMockitoArgumentMatcher("ALL")),
             any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean())).thenReturn(alterationEnrichments);
+            argThat(new AlterationFilterMockitoArgumentMatcher("EMPTY", "ALL"))
+        )).thenReturn(alterationEnrichments);
 
-        filter.getAlterationEventTypes().getMutationEventTypes().put(MutationEventType.missense_mutation, false);
-        filter.getAlterationEventTypes().getMutationEventTypes().put(MutationEventType.feature_truncation, false);
+        mutationTypes.put(MutationEventType.missense_mutation, false);
+        mutationTypes.put(MutationEventType.feature_truncation, false);
+        cnaTypes.put(CNA.AMP, true);
+        cnaTypes.put(CNA.HOMDEL, true);
+        
+        filter.getAlterationFilter().setMutationEventTypes(mutationTypes);
+        filter.getAlterationFilter().setCopyNumberAlterationEventTypes(cnaTypes);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
             "/alteration-enrichments/fetch")
@@ -307,25 +293,22 @@ public class AlterationEnrichmentControllerTest {
     }
 
     @Test
-    public void fetchAlterationEnrichmentsNullCnaTypes() throws Exception {
+    public void fetchAlterationEnrichmentsAllCnaTypesDeselected() throws Exception {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             argThat(new caseIdMatcher()),
-            argThat(new SelectMockitoArgumentMatcher("ALL")),
-            argThat(new SelectMockitoArgumentMatcher("EMPTY")),
             any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean())).thenReturn(alterationEnrichments);
+            argThat(new AlterationFilterMockitoArgumentMatcher("ALL", "EMPTY"))
+        )).thenReturn(alterationEnrichments);
 
-        filter.getAlterationEventTypes().getCopyNumberAlterationEventTypes().put(CNA.AMP, false);
-        filter.getAlterationEventTypes().getCopyNumberAlterationEventTypes().put(CNA.HOMDEL, false);
+        mutationTypes.put(MutationEventType.missense_mutation, true);
+        mutationTypes.put(MutationEventType.feature_truncation, true);
+        cnaTypes.put(CNA.AMP, false);
+        cnaTypes.put(CNA.HOMDEL, false);
 
+        filter.getAlterationFilter().setMutationEventTypes(mutationTypes);
+        filter.getAlterationFilter().setCopyNumberAlterationEventTypes(cnaTypes);
+        
         mockMvc.perform(MockMvcRequestBuilders.post(
             "/alteration-enrichments/fetch")
             .accept(MediaType.APPLICATION_JSON)
@@ -341,20 +324,16 @@ public class AlterationEnrichmentControllerTest {
 
         when(alterationEnrichmentService.getAlterationEnrichments(
             argThat(new caseIdMatcher()),
-            argThat(new SelectMockitoArgumentMatcher("SOME")),
-            argThat(new SelectMockitoArgumentMatcher("SOME")),
             any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean())).thenReturn(alterationEnrichments);
+            argThat(new AlterationFilterMockitoArgumentMatcher("SOME", "SOME")))).thenReturn(alterationEnrichments);
 
-        filter.getAlterationEventTypes().getMutationEventTypes().put(MutationEventType.missense_mutation, false);
-        filter.getAlterationEventTypes().getCopyNumberAlterationEventTypes().put(CNA.HOMDEL, false);
+        mutationTypes.put(MutationEventType.missense_mutation, false);
+        mutationTypes.put(MutationEventType.feature_truncation, true);
+        cnaTypes.put(CNA.AMP, false);
+        cnaTypes.put(CNA.HOMDEL, true);
+
+        filter.getAlterationFilter().setMutationEventTypes(mutationTypes);
+        filter.getAlterationFilter().setCopyNumberAlterationEventTypes(cnaTypes);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
             "/alteration-enrichments/fetch")

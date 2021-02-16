@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -117,6 +118,9 @@ public class DiscreteCopyNumberServiceImpl implements DiscreteCopyNumberService 
                                                                                                        String projection) {
 
         List<CNA> cnas = geneQueries.stream().map(q -> q.getAlterations()).flatMap(List::stream).collect(Collectors.toList());
+        if (cnas.isEmpty())
+            return Collections.emptyList();
+        
         if (isHomdelOrAmpOnlyCna(cnas)) {
             return discreteCopyNumberRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,
                 sampleIds, geneQueries, projection);

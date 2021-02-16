@@ -2,9 +2,9 @@ package org.cbioportal.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cbioportal.model.AlterationEnrichment;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CountSummary;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
-import org.cbioportal.model.util.Select;
 import org.cbioportal.service.CopyNumberEnrichmentService;
 import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
 import org.hamcrest.Matchers;
@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -114,14 +114,7 @@ public class CopyNumberEnrichmentControllerTest {
         alterationEnrichments.add(alterationEnrichment2);
 
         Mockito.when(copyNumberEnrichmentService.getCopyNumberEnrichments(
-            anyMap(),
-            any(),
-            any(),
-            anyBoolean(),
-            anyBoolean(),
-            anyBoolean(),
-            any(Select.class),
-            anyBoolean()))
+            anyMap(), any(), any(AlterationFilter.class)))
         .thenReturn(alterationEnrichments);
 
         MolecularProfileCaseIdentifier entity1 = new MolecularProfileCaseIdentifier();

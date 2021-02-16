@@ -419,8 +419,8 @@ public class DiscreteCopyNumberMyBatisRepositoryTest {
         List<CNA> cnas = Arrays.asList(CNA.AMP, CNA.HETLOSS);
         Select<String> tiers = Select.byValues(Arrays.asList("Tier 2"));
 
-        GeneFilterQuery geneFilterQuery1 = new GeneFilterQuery("AKT1", 207, cnas, false, false, false, tiers, includeUnknownTier, false, false, false);
-        GeneFilterQuery geneFilterQuery2 = new GeneFilterQuery("AKT2", 208, cnas, false, false, true, null, false, false, false, false);
+        GeneFilterQuery geneFilterQuery1 = new GeneFilterQuery("AKT1", 207, cnas, false, false, false, tiers, false, false, false, false);
+        GeneFilterQuery geneFilterQuery2 = new GeneFilterQuery("AKT2", 208, cnas, false, false, true, Select.none(), false, false, false, false);
         List<GeneFilterQuery> geneQueries =  Arrays.asList(geneFilterQuery1, geneFilterQuery2);
 
         List<DiscreteCopyNumberData> result = discreteCopyNumberMyBatisRepository.getDiscreteCopyNumbersInMultipleMolecularProfilesByGeneQueries(

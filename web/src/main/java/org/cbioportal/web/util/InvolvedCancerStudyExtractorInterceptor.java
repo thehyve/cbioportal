@@ -33,22 +33,47 @@
 package org.cbioportal.web.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.cbioportal.model.MolecularProfileCaseIdentifier;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.MolecularProfile;
+import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.model.SampleList;
 import org.cbioportal.persistence.mybatis.util.CacheMapUtil;
-import org.cbioportal.model.MutationEventType;
-import org.cbioportal.web.parameter.*;
+import org.cbioportal.web.parameter.ClinicalAttributeCountFilter;
+import org.cbioportal.web.parameter.ClinicalDataBinCountFilter;
+import org.cbioportal.web.parameter.ClinicalDataCountFilter;
+import org.cbioportal.web.parameter.ClinicalDataIdentifier;
+import org.cbioportal.web.parameter.ClinicalDataMultiStudyFilter;
+import org.cbioportal.web.parameter.GenericAssayDataBinCountFilter;
+import org.cbioportal.web.parameter.GenericAssayDataMultipleStudyFilter;
+import org.cbioportal.web.parameter.GenericAssayMetaFilter;
+import org.cbioportal.web.parameter.GenomicDataBinCountFilter;
+import org.cbioportal.web.parameter.GroupFilter;
+import org.cbioportal.web.parameter.MolecularDataMultipleStudyFilter;
+import org.cbioportal.web.parameter.MolecularProfileCasesGroupAndAlterationTypeFilter;
+import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
+import org.cbioportal.web.parameter.MolecularProfileFilter;
+import org.cbioportal.web.parameter.MutationMultipleStudyFilter;
+import org.cbioportal.web.parameter.PatientFilter;
+import org.cbioportal.web.parameter.PatientIdentifier;
+import org.cbioportal.web.parameter.SampleFilter;
+import org.cbioportal.web.parameter.SampleIdentifier;
+import org.cbioportal.web.parameter.SampleMolecularIdentifier;
+import org.cbioportal.web.parameter.StructuralVariantFilter;
+import org.cbioportal.web.parameter.StudyViewFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class InvolvedCancerStudyExtractorInterceptor extends HandlerInterceptorAdapter {
@@ -601,8 +626,8 @@ public class InvolvedCancerStudyExtractorInterceptor extends HandlerInterceptorA
             LOG.debug("extracted molecularProfileCasesGroupFilters: " + molecularProfileCasesGroupFilters.toString());
             LOG.debug("setting interceptedMolecularProfileCasesGroupFilters to " + molecularProfileCasesGroupFilters);
             request.setAttribute("interceptedMolecularProfileCasesGroupFilters", molecularProfileCasesGroupFilters);
-            if (molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationEventTypes() != null) {
-                AlterationEventTypeFilter alterationEnrichmentEventTypes = molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationEventTypes();
+            if (molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationFilter() != null) {
+                AlterationFilter alterationEnrichmentEventTypes = molecularProfileCasesAndAlterationTypesGroupFilters.getAlterationFilter();
                 LOG.debug("extracted alterationEventTypes: " + alterationEnrichmentEventTypes.toString());
                 LOG.debug("setting alterationEventTypes to " + alterationEnrichmentEventTypes);
                 request.setAttribute("alterationEventTypes", alterationEnrichmentEventTypes);

@@ -5,13 +5,11 @@ import org.cbioportal.model.util.Select;
 import java.io.Serializable;
 import java.util.List;
 
-public class GeneFilterQuery extends AlterationFilter implements Serializable {
+public class GeneFilterQuery extends MutationStatusAlterationFilter implements Serializable {
     
     private String hugoGeneSymbol;
     private Integer entrezGeneId;
     private List<CNA> alterations;
-
-    private boolean includeUnknownTier;
 
     public GeneFilterQuery() {}
 
@@ -21,12 +19,12 @@ public class GeneFilterQuery extends AlterationFilter implements Serializable {
                            boolean includeDriver,
                            boolean includeVUS,
                            boolean includeUnknownOncogenicity,
-                           Select<String> selectedTiers,
+                           Select<String> tiersSelect,
                            boolean includeUnknownTier,
                            boolean includeGermline,
                            boolean includeSomatic,
                            boolean includeUnknownStatus) {
-        super(includeDriver, includeVUS, includeUnknownOncogenicity, includeGermline, includeSomatic, includeUnknownStatus, selectedTiers, includeUnknownTier);
+        super(includeDriver, includeVUS, includeUnknownOncogenicity, includeGermline, includeSomatic, includeUnknownStatus, tiersSelect, includeUnknownTier);
         this.hugoGeneSymbol = hugoGeneSymbol;
         this.entrezGeneId = entrezGeneId;
         this.alterations = alterations;
@@ -54,14 +52,6 @@ public class GeneFilterQuery extends AlterationFilter implements Serializable {
 
     public void setAlterations(List<CNA> alterations) {
         this.alterations = alterations;
-    }
-
-    public boolean getIncludeUnknownTier() {
-        return includeUnknownTier;
-    }
-
-    public void setIncludeUnknownTier(boolean includeUnknownTier) {
-        this.includeUnknownTier = includeUnknownTier;
     }
     
 }

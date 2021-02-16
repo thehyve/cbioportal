@@ -4,12 +4,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.model.AlterationEnrichment;
+import org.cbioportal.model.AlterationFilter;
+import org.cbioportal.model.EnrichmentType;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
-import org.cbioportal.model.util.Select;
 import org.cbioportal.service.MutationEnrichmentService;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.web.config.annotation.InternalApi;
-import org.cbioportal.model.EnrichmentType;
 import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,13 +63,6 @@ public class MutationEnrichmentController {
             mutationEnrichmentService.getMutationEnrichments(
                 groupCaseIdentifierSet,
                 enrichmentType,
-                true,
-                true,
-                true,
-                Select.all(),
-                true,
-                true,
-                true,
-                true), HttpStatus.OK);
+                new AlterationFilter()), HttpStatus.OK);
     }
 }

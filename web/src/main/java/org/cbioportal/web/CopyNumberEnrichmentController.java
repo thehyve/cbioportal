@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.model.AlterationEnrichment;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CNA;
 import org.cbioportal.model.EnrichmentType;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -62,15 +64,12 @@ public class CopyNumberEnrichmentController {
                 .collect(Collectors.toMap(MolecularProfileCasesGroupFilter::getName,
                         MolecularProfileCasesGroupFilter::getMolecularProfileCaseIdentifiers));
 
+        AlterationFilter alterationFilter = new AlterationFilter();
+        alterationFilter.setMutationTypeSelect(Select.none());
+        alterationFilter.setCnaTypeSelect(Select.byValues(Arrays.asList(copyNumberEventType)));
+        
         return new ResponseEntity<>(
             copyNumberEnrichmentService.getCopyNumberEnrichments(
-                groupCaseIdentifierSet,
-                copyNumberEventType,
-                enrichmentType,
-                true,
-                true,
-                true,
-                Select.all(),
-                true), HttpStatus.OK);
+                groupCaseIdentifierSet, enrichmentType, alterationFilter), HttpStatus.OK);
     }
 }

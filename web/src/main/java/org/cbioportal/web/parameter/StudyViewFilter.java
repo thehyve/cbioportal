@@ -31,7 +31,7 @@ public class StudyViewFilter implements Serializable {
     private List<GenericAssayDataFilter> genericAssayDataFilters;
     private List<List<String>> caseLists;
     private List<ClinicalDataFilter> customDataFilters;
-    private AlterationFilter annotationFilter;
+    private AlterationFilter alterationFilter;
     
     @AssertTrue
     private boolean isEitherSampleIdentifiersOrStudyIdsPresent() {
@@ -160,11 +160,11 @@ public class StudyViewFilter implements Serializable {
         this.customDataFilters = customDataFilters;
     }
 
-    public AlterationFilter getAnnotationFilter() {
-        return annotationFilter;
+    public AlterationFilter getAlterationFilter() {
+        return alterationFilter;
     }
 
-    public void setAnnotationFilter(AlterationFilter annotationFilter) {
-        this.annotationFilter = annotationFilter;
+    public void setAlterationFilter(AlterationFilter alterationFilter) {
+        this.alterationFilter = alterationFilter;
     }
 }

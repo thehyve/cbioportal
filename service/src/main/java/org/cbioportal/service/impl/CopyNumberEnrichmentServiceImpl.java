@@ -1,7 +1,7 @@
 package org.cbioportal.service.impl;
 
 import org.cbioportal.model.AlterationEnrichment;
-import org.cbioportal.model.CNA;
+import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.model.CopyNumberCountByGene;
 import org.cbioportal.model.EnrichmentType;
 import org.cbioportal.model.MolecularProfileCaseIdentifier;
@@ -13,8 +13,6 @@ import org.cbioportal.service.util.AlterationEnrichmentUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,23 +28,13 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
     @Override
     public List<AlterationEnrichment> getCopyNumberEnrichments(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-        CNA copyNumberEventType,
         EnrichmentType enrichmentType,
-        boolean includeDriver,
-        boolean includeVUS,
-        boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers,
-        boolean includeUnknownTier) throws MolecularProfileNotFoundException {
+        AlterationFilter alterationFilter) throws MolecularProfileNotFoundException {
 
         Map<String, List<CopyNumberCountByGene>> copyNumberCountByGeneAndGroup = getCopyNumberCountByGeneAndGroup(
             molecularProfileCaseSets,
-            copyNumberEventType,
             enrichmentType,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            selectedTiers,
-            includeUnknownTier);
+            alterationFilter);
 
         return alterationEnrichmentUtil
             .createAlterationEnrichments(
@@ -56,13 +44,8 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
 
     public Map<String, List<CopyNumberCountByGene>> getCopyNumberCountByGeneAndGroup(
         Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-        CNA copyNumberEventType,
         EnrichmentType enrichmentType,
-        boolean includeDriver,
-        boolean includeVUS,
-        boolean includeUnknownOncogenicity,
-        Select<String> selectedTiers,
-        boolean includeUnknownTier) {
+        AlterationFilter alterationFilter) {
         return molecularProfileCaseSets
             .entrySet()
             .stream()
@@ -70,35 +53,20 @@ public class CopyNumberEnrichmentServiceImpl implements CopyNumberEnrichmentServ
                 entry -> entry.getKey(),
                 entry -> { //set value of each group to list of CopyNumberCountByGene
 
-                    List<String> molecularProfileIds = new ArrayList<>();
-                    List<String> sampleIds = new ArrayList<>();
-
-                    Select<CNA> cnaTypes = Select.byValues(Arrays.asList(copyNumberEventType));
-
                     if (enrichmentType.name().equals("SAMPLE")) {
                         return alterationCountService.getSampleCnaCounts(
                             entry.getValue(),
                             Select.all(),
                             true,
                             true,
-                            cnaTypes,
-                            includeDriver,
-                            includeVUS,
-                            includeUnknownOncogenicity,
-                            selectedTiers,
-                            includeUnknownTier);
+                            alterationFilter);
                     } else {
                         return alterationCountService.getPatientCnaCounts(
                             entry.getValue(),
                             Select.all(),
                             true,
                             true,
-                            cnaTypes,
-                            includeDriver,
-                            includeVUS,
-                            includeUnknownOncogenicity,
-                            selectedTiers,
-                            includeUnknownTier);
+                            alterationFilter);
                     }
                 }));
     }

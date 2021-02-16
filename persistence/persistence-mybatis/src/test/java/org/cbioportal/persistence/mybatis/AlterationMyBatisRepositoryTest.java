@@ -49,15 +49,9 @@ public class AlterationMyBatisRepositoryTest {
     ));
     List<MolecularProfileCaseIdentifier> sampleIdToProfileId = new ArrayList<>();
     List<MolecularProfileCaseIdentifier> patientIdToProfileId = new ArrayList<>();
+    AlterationFilter alterationFilter;
+    
     Select<Integer> entrezGeneIds;
-    Select<String> tiers = Select.none();
-    boolean includeUnknownTier = false;
-    boolean includeDriver = false;
-    boolean includeVUS = false;
-    boolean includeUnknownOncogenicity = false;
-    boolean includeGermline = false;
-    boolean includeSomatic = false;
-    boolean includeUnknownStatus = false;
 
     @Before
     public void setup() {
@@ -83,41 +77,35 @@ public class AlterationMyBatisRepositoryTest {
         patientIdToProfileId.add(new MolecularProfileCaseIdentifier("TCGA-A1-A0SD", "study_tcga_pub_gistic"));
 
         entrezGeneIds = Select.byValues(Arrays.asList(207, 208, 672));
-        
-        tiers = Select.none();
-        includeUnknownTier = false;
-        includeDriver = false;
-        includeVUS = false;
-        includeUnknownOncogenicity = false;
-        includeGermline = false;
-        includeSomatic = false;
-        includeUnknownStatus = false;
+        alterationFilter = new AlterationFilter(
+            mutationEventTypes,
+            cnaEventTypes,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            Select.none(),
+            false
+        );
     }
 
     @Test
     public void getSampleMutationCount() throws Exception {
 
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
-        includeGermline = true;
-        includeSomatic = true;
-        includeUnknownStatus = true;
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -134,27 +122,18 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCount() throws Exception {
 
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
-        includeGermline = true;
-        includeSomatic = true;
-        includeUnknownStatus = true;
-        mutationEventTypes = Select.none();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setMutationTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(2, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -168,26 +147,17 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleMutationAndCnaCount() throws Exception {
 
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
-        includeGermline = true;
-        includeSomatic = true;
-        includeUnknownStatus = true;
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -204,28 +174,19 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleMutationCountFilterFusions() throws Exception {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
-        cnaEventTypes = Select.none();
-        mutationEventTypes = Select.all();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
+        alterationFilter.setMutationTypeSelect(Select.all());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.ACTIVE,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
         // there are no fusion mutations in the test db
         Assert.assertEquals(0, result.size());
     }
@@ -233,27 +194,18 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationCount() throws Exception {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
-            entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
+            entrezGeneIds,    
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         // For testSql.sql there are no more samples per patient for the investigated genes.
         // Therefore, patient level counts are the same as the sample level counts.
@@ -272,24 +224,15 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCount() throws Exception {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        mutationEventTypes = Select.none();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setMutationTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
-            entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
+            entrezGeneIds,    
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         // For testSql.sql there are no more samples per patient for the investigated genes.
         // Therefore, patient level counts are the same as the sample level counts.
@@ -309,11 +252,13 @@ public class AlterationMyBatisRepositoryTest {
         // because it returns a single additional value 'cytoband'. It would make sense to 
         // harmonize these endpoints (both or none return 'cytoband') and use the AlterationCount
         // endpoint for all counts. Let's discuss...
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            sampleIdToProfileId, 
+            entrezGeneIds,
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result207up = result.stream().filter(r -> r.getEntrezGeneId() == 207 && r.getAlteration() == 2).findFirst().get();
@@ -331,11 +276,13 @@ public class AlterationMyBatisRepositoryTest {
         // because it returns a single additional value 'cytoband'. It would make sense to 
         // harmonize these endpoints (both or none return 'cytoband') and use the AlterationCount
         // endpoint for all counts. Let's discuss...
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId,
+            entrezGeneIds,
+            alterationFilter);
 
         // For testSql.sql there are no more samples per patient for the investigated genes.
         // Therefore, patient level counts are the same as the sample level counts.
@@ -351,28 +298,19 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleAlterationCountsReturnsZeroForMutationsAndCnaSelectorsInNone() {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
-        mutationEventTypes = Select.none();
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
+        alterationFilter.setMutationTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(0, result.size());
     }
@@ -380,28 +318,19 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleAlterationCountsReturnsAllForMutationsAndCnaSelectorsInAll() {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
-        mutationEventTypes = Select.all();
-        cnaEventTypes = Select.all();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.all());
+        alterationFilter.setMutationTypeSelect(Select.all());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
     }
@@ -409,124 +338,58 @@ public class AlterationMyBatisRepositoryTest {
     @Test(expected = IllegalArgumentException.class)
     public void disallowMutationTypesAndFusionSearchSamples() throws Exception {
         alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.ACTIVE,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, entrezGeneIds, QueryElement.ACTIVE,
+            alterationFilter);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void disallowMutationTypesAndMutationSearchSamples() throws Exception {
         alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.INACTIVE,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, entrezGeneIds, QueryElement.INACTIVE, alterationFilter);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void disallowMutationTypesAndFusionSearchPatients() throws Exception {
         alterationMyBatisRepository.getPatientAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.ACTIVE,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, entrezGeneIds, QueryElement.ACTIVE, alterationFilter);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void disallowMutationTypesAndMutationSearchPatients() throws Exception {
         alterationMyBatisRepository.getPatientAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.INACTIVE,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, entrezGeneIds, QueryElement.INACTIVE, alterationFilter);
     }
 
     @Test
     public void getSampleCountNullIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            null, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            null, entrezGeneIds, QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
-    }
-
-    @Test
-    public void getSampleCountNullMutations() throws Exception {
-        List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, null, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
-        Assert.assertEquals(2, result.size());
-    }
-
-    @Test
-    public void getSampleCountNullCnas() throws Exception {
-        List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, entrezGeneIds, mutationEventTypes, null, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
-        Assert.assertEquals(3, result.size());
     }
 
     @Test
     public void getPatientCountNullIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            null, entrezGeneIds, mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            null, entrezGeneIds, QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
-    }
-
-    @Test
-    public void getPatientCountNullMutations() throws Exception {
-        List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            patientIdToProfileId, entrezGeneIds, null, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
-        Assert.assertEquals(2, result.size());
-    }
-
-    @Test
-    public void getPatientCountNullCnas() throws Exception {
-        List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            patientIdToProfileId, entrezGeneIds, mutationEventTypes, null, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
-        Assert.assertEquals(3, result.size());
     }
 
     @Test
     public void getSampleCnaCountNullIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            null, entrezGeneIds, cnaEventTypes,
-            true, true, true, Select.all(), true);
+            null, entrezGeneIds, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
-
-    @Test
-    public void getSampleCnaCountNullCnas() throws Exception {
-        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, null,
-            true, true, true, Select.all(), true);
-        Assert.assertEquals(0, result.size());
-    }
-
 
     @Test
     public void getSampleCountIncludeOnlyDriver() throws Exception {
 
-        boolean includeDriver = true;
+        alterationFilter.setIncludeDriver(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(2, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -540,20 +403,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeOnlyVus() throws Exception {
 
-        boolean includeVUS = true;
+        alterationFilter.setIncludeVUS(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -570,20 +425,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeOnlyUnknownOncogenicity() throws Exception {
 
-        boolean includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -594,23 +441,14 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeAnyAndUnknownAnnotation() throws Exception {
 
-        includeDriver = true;
-        includeVUS = true;
-        includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -628,20 +466,12 @@ public class AlterationMyBatisRepositoryTest {
     public void getSampleCountIncludeOnlyTiers() throws Exception {
 
         // All 'Tier 2' tiers are forced to be interpreted as driver events
-        tiers = Select.byValues(Arrays.asList("Tier 2"));
+        alterationFilter.setTiersSelect(Select.byValues(Arrays.asList("Tier 2")));
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(2, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -655,22 +485,13 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeAnyAndUnknownTiers() throws Exception {
 
-        tiers = Select.all();
-        includeUnknownTier = true;
+        alterationFilter.setTiersSelect(Select.all());
+        alterationFilter.setIncludeUnknownTier(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -687,22 +508,13 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeAllTiers() throws Exception {
 
-        tiers = Select.all();
-        includeUnknownTier = true;
+        alterationFilter.setTiersSelect(Select.all());
+        alterationFilter.setIncludeUnknownTier(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -719,21 +531,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCountIncludeUnknownTier() throws Exception {
 
-        includeUnknownTier = true;
+        alterationFilter.setIncludeUnknownTier(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
             sampleIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -744,25 +547,17 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationAndCnaCount() throws Exception {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         // For testSql.sql there are no more samples per patient for the investigated genes.
         // Therefore, patient level counts are the same as the sample level counts.
@@ -781,22 +576,13 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationCountIncludeOnlyGermline() throws Exception {
 
-        boolean includeGermline = true;
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
         // all mutations in testSql.sql are Germline mutations
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -813,21 +599,13 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationCountIncludeOnlySomatic() throws Exception {
 
-        boolean includeSomatic = true;
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
         // all mutations in testSql.sql are Germline mutations
         Assert.assertEquals(0, result.size());
     }
@@ -835,21 +613,13 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationCountIncludeOnlyUnknownStatus() throws Exception {
 
-        boolean includeUnknownStatus = true;
-        cnaEventTypes = Select.none();
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
         // all mutations in testSql.sql are Germline mutations
         Assert.assertEquals(0, result.size());
     }
@@ -857,23 +627,14 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCountIncludeAnyAndUnknowStatus() throws Exception {
 
-        includeGermline = true;
-        includeSomatic = true;
-        includeUnknownStatus = true;
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -890,28 +651,19 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientMutationCountFilterFusions() throws Exception {
 
-        boolean includeDriver = true;
-        boolean includeVUS = true;
-        boolean includeUnknownOncogenicity = true;
-        boolean includeGermline = true;
-        boolean includeSomatic = true;
-        boolean includeUnknownStatus = true;
-        cnaEventTypes = Select.none();
-        mutationEventTypes = Select.all();
+        alterationFilter.setIncludeDriver(true);
+        alterationFilter.setIncludeVUS(true);
+        alterationFilter.setIncludeUnknownOncogenicity(true);
+        alterationFilter.setIncludeGermline(true);
+        alterationFilter.setIncludeSomatic(true);
+        alterationFilter.setIncludeUnknownStatus(true);
+        alterationFilter.setCnaTypeSelect(Select.none());
+        alterationFilter.setMutationTypeSelect(Select.all());
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.ACTIVE,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
         // there are no fusion mutations in the test db
         Assert.assertEquals(0, result.size());
     }
@@ -919,21 +671,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCountIncludeOnlyDriver() throws Exception {
 
-        boolean includeDriver = true;
+        alterationFilter.setIncludeDriver(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(2, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -947,21 +690,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCountIncludeOnlyVUS() throws Exception {
 
-        boolean includeVUS = true;
+        alterationFilter.setIncludeVUS(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(3, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -979,20 +713,12 @@ public class AlterationMyBatisRepositoryTest {
     public void getPatientCountIncludeOnlyTiers() throws Exception {
 
         // All 'Tier 2' tiers are forced to be interpreted as driver events
-        tiers = Select.byValues(Arrays.asList("Tier 2"));
+        alterationFilter.setTiersSelect( Select.byValues(Arrays.asList("Tier 2")));
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier, includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(2, result.size());
         AlterationCountByGene result672 = result.stream().filter(r -> r.getEntrezGeneId() == 672).findFirst().get();
@@ -1006,21 +732,12 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCountIncludeUnknownTier() throws Exception {
 
-        includeUnknownTier = true;
+        alterationFilter.setIncludeUnknownTier(true);
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
             patientIdToProfileId,
             entrezGeneIds,
-            mutationEventTypes,
-            cnaEventTypes,
             QueryElement.PASS,
-            includeDriver,
-            includeVUS,
-            includeUnknownOncogenicity,
-            tiers,
-            includeUnknownTier,
-            includeGermline,
-            includeSomatic,
-            includeUnknownStatus);
+            alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -1031,9 +748,8 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCountLegacyOnlyDriver() throws Exception {
 
-        includeDriver = true;
-        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+        alterationFilter.setIncludeDriver(true);
+        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(sampleIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1044,9 +760,8 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCountLegacyOnlyVUS() throws Exception {
 
-        includeVUS = true;
-        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+        alterationFilter.setIncludeVUS(true);
+        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(sampleIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1057,9 +772,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCountLegacyOnlyUnknownOncogenicity() throws Exception {
 
-        includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            sampleIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -1070,9 +785,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCountLegacyOnlyUnknownTier() throws Exception {
 
-        includeUnknownTier = true;
+        alterationFilter.setIncludeUnknownTier(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            sampleIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -1083,9 +798,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getSampleCnaCountLegacyOnlyTier2() throws Exception {
 
-        tiers = Select.byValues(Arrays.asList("Tier 2"));
+        alterationFilter.setTiersSelect( Select.byValues(Arrays.asList("Tier 2")));
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            sampleIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1096,9 +811,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountLegacyOnlyDriver() throws Exception {
 
-        includeDriver = true;
+        alterationFilter.setIncludeDriver(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1109,9 +824,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountLegacyOnlyVUS() throws Exception {
 
-        includeVUS = true;
+        alterationFilter.setIncludeVUS(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1122,9 +837,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountLegacyOnlyUnknownOncogenicity() throws Exception {
 
-        includeUnknownOncogenicity = true;
+        alterationFilter.setIncludeUnknownOncogenicity(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -1135,9 +850,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountLegacyOnlyUnknownTier() throws Exception {
 
-        includeUnknownTier = true;
+        alterationFilter.setIncludeUnknownTier(true);
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result208 = result.stream().filter(r -> r.getEntrezGeneId() == 208).findFirst().get();
@@ -1148,9 +863,9 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountLegacyOnlyTier2() throws Exception {
 
-        tiers = Select.byValues(Arrays.asList("Tier 2"));
+        alterationFilter.setTiersSelect( Select.byValues(Arrays.asList("Tier 2")));
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, cnaEventTypes, includeDriver, includeVUS, includeUnknownOncogenicity, tiers, includeUnknownTier);
+            patientIdToProfileId, entrezGeneIds, alterationFilter);
 
         Assert.assertEquals(1, result.size());
         AlterationCountByGene result207 = result.stream().filter(r -> r.getEntrezGeneId() == 207).findFirst().get();
@@ -1162,116 +877,91 @@ public class AlterationMyBatisRepositoryTest {
     @Test
     public void getPatientCnaCountNullIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            null, entrezGeneIds, cnaEventTypes, true, true, true, Select.all(), true);
-        Assert.assertEquals(0, result.size());
-    }
-
-    @Test
-    public void getPatientCnaCountNullCnas() throws Exception {
-        List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, entrezGeneIds, null, true, true, true, Select.all(), true);
+            null, entrezGeneIds, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
     
     @Test
     public void getSampleCountNullEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, null, mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-        true, true, true);
+            sampleIdToProfileId, null, QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
     
     @Test
     public void getSampleCountEmptyEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, Select.none(), mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, Select.none(), QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
     
     @Test
     public void getSampleCountAllEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getSampleAlterationCounts(
-            sampleIdToProfileId, Select.all(), mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            sampleIdToProfileId, Select.all(), QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(3, result.size());
     }
 
     @Test
     public void getPatientCountNullEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            patientIdToProfileId, null, mutationEventTypes, cnaEventTypes, QueryElement.PASS,
-            true, true, true, Select.all(), true,
-            true, true, true);
+            patientIdToProfileId, null, QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getPatientCountEmptyEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            patientIdToProfileId, Select.none(), mutationEventTypes, cnaEventTypes, QueryElement.PASS, 
-            true, true, true, Select.all(), true,
-            true, true, true);
+            patientIdToProfileId, Select.none(), QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getPatientCountAllEntrezGeneIds() throws Exception {
         List<AlterationCountByGene> result = alterationMyBatisRepository.getPatientAlterationCounts(
-            patientIdToProfileId, Select.all(), mutationEventTypes, cnaEventTypes, QueryElement.PASS, 
-            true, true, true, Select.all(), true,
-            true, true, true);
+            patientIdToProfileId, Select.all(), QueryElement.PASS, new AlterationFilter());
         Assert.assertEquals(3, result.size());
     }
 
     @Test
     public void getSampleCnaCountNullEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, null, cnaEventTypes, true, true,
-            true, Select.all(), true);
+            sampleIdToProfileId, null, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getSampleCnaCountEmptyEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, Select.none(), cnaEventTypes, true, true,
-            true, Select.all(), true);
+            sampleIdToProfileId, Select.none(), new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getSampleCnaCountAllEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getSampleCnaCounts(
-            sampleIdToProfileId, Select.all(), cnaEventTypes, true, true,
-            true, Select.all(), true);
+            sampleIdToProfileId, Select.all(), new AlterationFilter());
         Assert.assertEquals(3, result.size());
     }
 
     @Test
     public void getPatientCnaCountNullEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, null, cnaEventTypes, true, true,
-            true, Select.all(), true);
+            patientIdToProfileId, null, new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getPatientCnaCountEmptyEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, Select.none(), cnaEventTypes, true, true,
-            true, Select.all(), true);
+            patientIdToProfileId, Select.none(), new AlterationFilter());
         Assert.assertEquals(0, result.size());
     }
 
     @Test
     public void getPatientCnaCountAllEntrezGeneIds() throws Exception {
         List<CopyNumberCountByGene> result = alterationMyBatisRepository.getPatientCnaCounts(
-            patientIdToProfileId, Select.all(), cnaEventTypes, true, true,
-            true, Select.all(), true);
+            patientIdToProfileId, Select.all(), new AlterationFilter());
         Assert.assertEquals(3, result.size());
     }
     

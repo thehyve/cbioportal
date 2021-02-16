@@ -504,11 +504,11 @@ public class MutationMyBatisRepositoryTest {
     public void getMutationsInMultipleMolecularProfilesByGeneQueriesMixed() throws Exception {
 
         GeneFilterQuery geneFilterQuery1 = new GeneFilterQuery("BRCA1", 672, null,
-            false, true, false, null, false, false, false, false);
+            false, true, false, Select.none(), false, false, false, false);
         GeneFilterQuery geneFilterQuery2 = new GeneFilterQuery("AKT1", 207, null,
             false, false, false, Select.byValues(Arrays.asList("Tier 1")), false, false, false, false);
         GeneFilterQuery geneFilterQuery3 = new GeneFilterQuery("AKT2", 208, null,
-            true, false, false, null, false, false, false, false);
+            true, false, false, Select.none(), false, false, false, false);
         List<GeneFilterQuery> geneQueries =  Arrays.asList(geneFilterQuery1, geneFilterQuery2, geneFilterQuery3);
 
         List<Mutation> result = mutationMyBatisRepository.getMutationsInMultipleMolecularProfilesByGeneQueries(molecularProfileIds,

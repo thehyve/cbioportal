@@ -58,7 +58,6 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                             Select.all(),
                             true,
                             true,
-                            Select.all(),
                             alterationFilter);
                     } else {
                         return alterationCountService
@@ -67,7 +66,6 @@ public class MutationEnrichmentServiceImpl implements MutationEnrichmentService 
                                 Select.all(),
                                 true,
                                 true,
-                                Select.all(),
                                 alterationFilter);
                     }
                 }));

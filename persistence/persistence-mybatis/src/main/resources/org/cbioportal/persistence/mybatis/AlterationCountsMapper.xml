@@ -328,9 +328,9 @@
     </sql>
         
     <sql id="whereIncludeTiers">
-        <bind name="allTypesSelected" value="(selectedTiers != null and selectedTiers.hasAll()) and includeUnknownTier" />
-        <bind name="doNotFilterOnTiers" value="(selectedTiers == null or selectedTiers.hasNone()) and not includeUnknownTier" />
-        <if test="not allTypesSelected and not doNotFilterOnTiers">
+        <bind name="allTierOptionsSelected" value="(selectedTiers == null or selectedTiers.hasAll()) and includeUnknownTier" />
+        <bind name="noTierOptionsSelected" value="(selectedTiers != null and selectedTiers.hasNone()) and not includeUnknownTier" />
+        <if test="not allTierOptionsSelected and not noTierOptionsSelected">
             <trim prefix="AND (" prefixOverrides="OR">    
                 <if test="selectedTiers != null and selectedTiers.hasValues()">
                     OR alteration_driver_annotation.DRIVER_TIERS_FILTER IN

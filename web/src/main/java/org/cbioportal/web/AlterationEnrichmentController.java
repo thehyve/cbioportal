@@ -3,25 +3,33 @@ package org.cbioportal.web;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.cbioportal.model.*;
-import org.cbioportal.model.util.Select;
+import org.cbioportal.model.AlterationEnrichment;
+import org.cbioportal.model.AlterationFilter;
+import org.cbioportal.model.EnrichmentType;
+import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.service.AlterationEnrichmentService;
 import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.web.config.annotation.InternalApi;
-import org.cbioportal.web.parameter.*;
+import org.cbioportal.web.parameter.MolecularProfileCasesGroupAndAlterationTypeFilter;
+import org.cbioportal.web.parameter.MolecularProfileCasesGroupFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @InternalApi
 @RestController
@@ -44,7 +52,7 @@ public class AlterationEnrichmentController {
         // prevent reference to this attribute in the swagger-ui interface. this attribute is needed for the @PreAuthorize tag above.
         @Valid @RequestAttribute(required = false, value = "interceptedMolecularProfileCasesGroupFilters") List<MolecularProfileCasesGroupFilter> interceptedMolecularProfileCasesGroupFilters,
         @ApiIgnore
-        @Valid @RequestAttribute(required = false, value = "alterationEventTypes") AlterationEventTypeFilter alterationEventTypes,
+        @Valid @RequestAttribute(required = false, value = "alterationEventTypes") AlterationFilter alterationFilter,
         @ApiParam("Type of the enrichment e.g. SAMPLE or PATIENT")
         @RequestParam(defaultValue = "SAMPLE") EnrichmentType enrichmentType,
         @ApiParam(required = true, value = "List of groups containing sample identifiers and list of Alteration Types")
@@ -54,39 +62,10 @@ public class AlterationEnrichmentController {
             .collect(Collectors.toMap(MolecularProfileCasesGroupFilter::getName,
                 MolecularProfileCasesGroupFilter::getMolecularProfileCaseIdentifiers));
 
-        Stream<MutationEventType> selectedMutations = alterationEventTypes.getMutationEventTypes().entrySet().stream()
-            .filter(e -> e.getValue())
-            .map(e -> e.getKey());
-        Select<MutationEventType> mutationEventTypes = allOptionsSelected(alterationEventTypes.getMutationEventTypes()) ?
-            Select.all() : Select.byValues(selectedMutations);
-
-        Stream<CNA> selectedCnas = alterationEventTypes.getCopyNumberAlterationEventTypes().entrySet().stream()
-            .filter(e -> e.getValue())
-            .map(e -> e.getKey());
-        Select<CNA> cnaEventTypes = allOptionsSelected(alterationEventTypes.getCopyNumberAlterationEventTypes()) ?
-            Select.all() : Select.byValues(selectedCnas);
-
-        Select<String> selectedTiers = Select.byValues(
-            alterationEventTypes.getSelectedTiers().entrySet().stream()
-                .filter(e -> e.getValue())
-                .map(e -> e.getKey()));
-        if (alterationEventTypes.getSelectedTiers().keySet().size() > 0
-            && alterationEventTypes.getSelectedTiers().entrySet().stream().allMatch(e -> e.getValue()))
-            selectedTiers.hasAll(true);
-
         List<AlterationEnrichment> alterationEnrichments = alterationEnrichmentService.getAlterationEnrichments(
             groupCaseIdentifierSet,
-            mutationEventTypes,
-            cnaEventTypes,
             enrichmentType,
-            alterationEventTypes.isIncludeDriver(),
-            alterationEventTypes.isIncludeVUS(),
-            alterationEventTypes.isIncludeUnknownOncogenicity(),
-            selectedTiers,
-            alterationEventTypes.isIncludeUnknownTier(),
-            alterationEventTypes.isIncludeGermline(),
-            alterationEventTypes.isIncludeSomatic(),
-            alterationEventTypes.isIncludeUnknownStatus());
+            alterationFilter);
 
         return new ResponseEntity<>(alterationEnrichments, HttpStatus.OK);
     }

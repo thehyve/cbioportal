@@ -24,16 +24,14 @@ public class AlterationMyBatisRepository implements AlterationRepository {
     @Override
     public List<AlterationCountByGene> getSampleAlterationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                                  Select<Integer> entrezGeneIds,
-                                                                 final Select<MutationEventType> mutationEventTypes,
-                                                                 final Select<CNA> cnaEventTypes,
                                                                  QueryElement searchFusions,
                                                                  AlterationFilter alterationFilter) {
 
-        if (mutationEventTypes != null && !mutationEventTypes.hasAll() && searchFusions != QueryElement.PASS)
+        if (!alterationFilter.getMutationTypeSelect().hasAll() && searchFusions != QueryElement.PASS)
             throw new IllegalArgumentException("Filtering for mutations vs. fusions and specifying mutation types" +
                 "simultaneously is not permitted.");
 
-        if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
+        if ((alterationFilter.getMutationTypeSelect().hasNone() && alterationFilter.getCnaTypeSelect().hasNone())
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
             || (allAlterationsExcludedDriverAnnotation(alterationFilter) && allAlterationsExcludedMutationStatus(alterationFilter))) {
             return Collections.emptyList();
@@ -44,25 +42,30 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         return alterationCountsMapper.getSampleAlterationCounts(
             internalSampleIds,
             entrezGeneIds,
-            createMutationTypeList(mutationEventTypes),
-            createCnaTypeList(cnaEventTypes),
+            createMutationTypeList(alterationFilter),
+            createCnaTypeList(alterationFilter),
             searchFusions,
-            alterationFilter);
+            alterationFilter.getIncludeDriver(),
+            alterationFilter.getIncludeVUS(),
+            alterationFilter.getIncludeUnknownOncogenicity(),
+            alterationFilter.getSelectedTiers(),
+            alterationFilter.getIncludeUnknownTier(),
+            alterationFilter.getIncludeGermline(),
+            alterationFilter.getIncludeSomatic(),
+            alterationFilter.getIncludeUnknownStatus());
     }
 
     @Override
     public List<AlterationCountByGene> getPatientAlterationCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                                   Select<Integer> entrezGeneIds,
-                                                                  Select<MutationEventType> mutationEventTypes,
-                                                                  Select<CNA> cnaEventTypes,
                                                                   QueryElement searchFusions,
                                                                   AlterationFilter alterationFilter) {
 
-        if (mutationEventTypes != null && !mutationEventTypes.hasAll() && searchFusions != QueryElement.PASS)
+        if (!alterationFilter.getMutationTypeSelect().hasAll() && searchFusions != QueryElement.PASS)
             throw new IllegalArgumentException("Filtering for mutations vs. fusions and specifying mutation types" +
                 "simultaneously is not permitted.");
 
-        if (((mutationEventTypes == null || mutationEventTypes.hasNone()) && (cnaEventTypes == null || cnaEventTypes.hasNone()))
+        if ((alterationFilter.getMutationTypeSelect().hasNone() && alterationFilter.getCnaTypeSelect().hasNone())
             || (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty())
             || (allAlterationsExcludedDriverAnnotation(alterationFilter) && allAlterationsExcludedMutationStatus(alterationFilter))) {
             return Collections.emptyList();
@@ -73,42 +76,48 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         return alterationCountsMapper.getPatientAlterationCounts(
             internalPatientIds,
             entrezGeneIds,
-            createMutationTypeList(mutationEventTypes),
-            createCnaTypeList(cnaEventTypes),
+            createMutationTypeList(alterationFilter),
+            createCnaTypeList(alterationFilter),
             searchFusions,
-            alterationFilter);
+            alterationFilter.getIncludeDriver(),
+            alterationFilter.getIncludeVUS(),
+            alterationFilter.getIncludeUnknownOncogenicity(),
+            alterationFilter.getSelectedTiers(),
+            alterationFilter.getIncludeUnknownTier(),
+            alterationFilter.getIncludeGermline(),
+            alterationFilter.getIncludeSomatic(),
+            alterationFilter.getIncludeUnknownStatus());
     }
 
     @Override
     public List<CopyNumberCountByGene> getSampleCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                           Select<Integer> entrezGeneIds,
-                                                          Select<CNA> cnaEventTypes,
                                                           AlterationFilter alterationFilter) {
-
-        if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
-            || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
+        if (alterationFilter.getCnaTypeSelect().hasNone() || molecularProfileCaseIdentifiers == null
+            || molecularProfileCaseIdentifiers.isEmpty() || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
             return Collections.emptyList();
         }
 
         List<Integer> internalSampleIds = alterationCountsMapper.getSampleInternalIds(molecularProfileCaseIdentifiers);
-        
+
         return alterationCountsMapper.getSampleCnaCounts(
             internalSampleIds,
             entrezGeneIds,
-            createCnaTypeList(cnaEventTypes),
-            alterationFilter);
+            createCnaTypeList(alterationFilter),
+            alterationFilter.getIncludeDriver(),
+            alterationFilter.getIncludeVUS(),
+            alterationFilter.getIncludeUnknownOncogenicity(),
+            alterationFilter.getSelectedTiers(),
+            alterationFilter.getIncludeUnknownTier());
     }
 
     @Override
     public List<CopyNumberCountByGene> getPatientCnaCounts(List<MolecularProfileCaseIdentifier> molecularProfileCaseIdentifiers,
                                                            Select<Integer> entrezGeneIds,
-                                                           Select<CNA> cnaEventTypes,
                                                            AlterationFilter alterationFilter) {
 
-        if (molecularProfileCaseIdentifiers == null || molecularProfileCaseIdentifiers.isEmpty()
-            || cnaEventTypes == null || cnaEventTypes.hasNone()
-            || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
+        if (alterationFilter.getCnaTypeSelect().hasNone() || molecularProfileCaseIdentifiers == null
+            || molecularProfileCaseIdentifiers.isEmpty() || allAlterationsExcludedDriverAnnotation(alterationFilter)) {
             return Collections.emptyList();
         }
 
@@ -117,16 +126,28 @@ public class AlterationMyBatisRepository implements AlterationRepository {
         return alterationCountsMapper.getPatientCnaCounts(
             internalPatientIds,
             entrezGeneIds,
-            createCnaTypeList(cnaEventTypes),
-            alterationFilter);
+            createCnaTypeList(alterationFilter),
+            alterationFilter.getIncludeDriver(),
+            alterationFilter.getIncludeVUS(),
+            alterationFilter.getIncludeUnknownOncogenicity(),
+            alterationFilter.getSelectedTiers(),
+            alterationFilter.getIncludeUnknownTier());
     }
     
-    private Select<Short> createCnaTypeList(final Select<CNA> cnaEventTypes) {
-        return cnaEventTypes != null ? cnaEventTypes.map(CNA::getCode) : Select.none();
+    private Select<Short> createCnaTypeList(final AlterationFilter alterationFilter) {
+        if (alterationFilter.getCnaTypeSelect().hasNone())
+            return Select.none();
+        if (alterationFilter.getCnaTypeSelect().hasAll())
+            return Select.all();
+        return alterationFilter.getCnaTypeSelect().map(CNA::getCode);
     }
 
-    private Select<String> createMutationTypeList(final Select<MutationEventType> mutationEventTypes) {
-        return mutationEventTypes != null ? mutationEventTypes.map(MutationEventType::getMutationType) : Select.none();
+    private Select<String> createMutationTypeList(final AlterationFilter alterationFilter) {
+        if (alterationFilter.getMutationTypeSelect().hasNone())
+            return Select.none();
+        if (alterationFilter.getMutationTypeSelect().hasAll())
+            return Select.all();
+        return alterationFilter.getMutationTypeSelect().map(MutationEventType::getMutationType);
     }
 
     private boolean allAlterationsExcludedMutationStatus(AlterationFilter alterationFilter) {

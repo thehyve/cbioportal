@@ -23,21 +23,17 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
 
     @Override
     public List<AlterationEnrichment> getAlterationEnrichments(Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-                                                               final Select<MutationEventType> mutationEventTypes,
-                                                               final Select<CNA> cnaEventTypes,
                                                                EnrichmentType enrichmentType,
                                                                AlterationFilter alterationFilter) {
 
         Map<String, List<AlterationCountByGene>> alterationCountsbyEntrezGeneIdAndGroup = getAlterationCountsbyEntrezGeneIdAndGroup(
-            molecularProfileCaseSets, mutationEventTypes, cnaEventTypes, enrichmentType, alterationFilter);
+            molecularProfileCaseSets, enrichmentType, alterationFilter);
 
         return alterationEnrichmentUtil.createAlterationEnrichments(alterationCountsbyEntrezGeneIdAndGroup,
             molecularProfileCaseSets);
     }
 
     public Map<String, List<AlterationCountByGene>> getAlterationCountsbyEntrezGeneIdAndGroup(Map<String, List<MolecularProfileCaseIdentifier>> molecularProfileCaseSets,
-                                                                                              Select<MutationEventType> mutationEventTypes,
-                                                                                              Select<CNA> cnaEventTypes,
                                                                                               EnrichmentType enrichmentType,
                                                                                               AlterationFilter alterationFilter) {
         return molecularProfileCaseSets
@@ -54,8 +50,6 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                 Select.all(),
                                 true,
                                 true,
-                                mutationEventTypes,
-                                cnaEventTypes,
                                 QueryElement.PASS,
                                 alterationFilter);
                     } else {
@@ -65,8 +59,6 @@ public class AlterationEnrichmentServiceImpl implements AlterationEnrichmentServ
                                 Select.all(),
                                 true,
                                 true,
-                                mutationEventTypes,
-                                cnaEventTypes,
                                 QueryElement.PASS,
                                 alterationFilter);
                     }

@@ -59,14 +59,14 @@ public class CacheControllerTest {
 
     @Test
     public void clearAllCachesNoKeyProvided() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/cache"))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
         verify(cacheService, never()).clearCaches(true);
     }
 
     @Test
     public void clearAllCachesUnauthorized() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.post("/cache")
             .header("X-API-KEY", "incorrect-key"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -75,7 +75,7 @@ public class CacheControllerTest {
 
     @Test
     public void clearAllCachesSuccess() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.post("/cache")
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -85,7 +85,7 @@ public class CacheControllerTest {
     @Test
     public void clearAllCachesDisabled() throws Exception {
         ReflectionTestUtils.setField(cacheController, "cacheEndpointEnabled", false);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.post("/cache")
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isNotFound())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -95,7 +95,7 @@ public class CacheControllerTest {
 
     @Test
     public void clearAllCachesSkipSpringManaged() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache").param("springManagedCache", "false")
+        mockMvc.perform(MockMvcRequestBuilders.post("/cache").param("springManagedCache", "false")
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));

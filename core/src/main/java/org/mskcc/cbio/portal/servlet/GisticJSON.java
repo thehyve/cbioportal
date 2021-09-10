@@ -96,7 +96,20 @@ public class GisticJSON extends HttpServlet {
         ArrayList<String> sangerGenes = new ArrayList<String>();
 
         for (CanonicalGene g : gistic.getGenes_in_ROI()) {
-            nonSangerGenes.add(g.getHugoGeneSymbolAllCaps());
+            try {
+                if (g.isSangerGene()) {
+                    sangerGenes.add(g.getHugoGeneSymbolAllCaps());
+                } else {
+                    nonSangerGenes.add(g.getHugoGeneSymbolAllCaps());
+                }
+            } catch (DaoException e) {
+                // assume that it is not a Sanger Gene if causes an exception
+                nonSangerGenes.add(g.getHugoGeneSymbolAllCaps());
+
+                if (log.isDebugEnabled()) {
+                    log.debug(e + " :gene <" + g +">");
+                }
+            }
         }
 
         map.put("sangerGenes", sangerGenes);
@@ -152,7 +165,7 @@ public class GisticJSON extends HttpServlet {
                 out.close();
             }
         } catch (DaoException e) {
-            log.error("Error occurred", e);
+            log.debug(e);
             throw new ServletException(e);
         }
     }

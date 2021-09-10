@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cbioportal.web.parameter.*;
 import org.cbioportal.web.util.SessionServiceRequestHandler;
-import org.cbioportal.session_service.domain.Session;
-import org.cbioportal.session_service.domain.SessionType;
+import org.cbioportal.utils.removeme.Session;
+import org.cbioportal.utils.removeme.Session.SessionType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -39,7 +39,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.QueryOperators;
 
 @Controller
-@RequestMapping("/session")
+@RequestMapping("/api/session")
 public class SessionServiceController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionServiceController.class);
@@ -51,18 +51,15 @@ public class SessionServiceController {
     private String sessionServiceURL;
 
     private boolean isAuthorized() {
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return !(authentication == null || (authentication instanceof AnonymousAuthenticationToken));
     }
 
     private String userName() {
-
         return ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     }
 
     private boolean sameOrigin(Set<String> set1, Set<String> set2) {
-
         if (set1 == null || set2 == null) {
             return false;
         }

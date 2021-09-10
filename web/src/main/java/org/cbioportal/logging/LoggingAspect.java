@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.cbioportal.utils.config.annotation.ConditionalOnProperty;
 
+
 @Aspect
 @Component
 @ConditionalOnProperty(name = "aspect.enable.logging", havingValue = "true")

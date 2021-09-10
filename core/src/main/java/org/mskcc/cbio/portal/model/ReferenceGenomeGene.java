@@ -24,6 +24,7 @@ public class ReferenceGenomeGene {
     private long entrezGeneId;
     private String chr;
     private String cytoband;
+    private int exonicLength;
     private long start;
     private long end;
     
@@ -42,16 +43,18 @@ public class ReferenceGenomeGene {
      * @param referenceGenomeId REFERENCE_GENOME_ID  
      * @param chr Chromosome name
      * @param cytoband  CYTOBAND of the gene
+     * @param exonicLength  EXONIC LENGTH of the gene
      * @param start start point of the gene 
      * @param end end point of the gene             
      */
     public ReferenceGenomeGene(long entrezGeneId, int referenceGenomeId, String chr, 
-                               String cytoband, long start, long end) {
+                               String cytoband, int exonicLength, long start, long end) {
 
         this.referenceGenomeId = referenceGenomeId;
         this.entrezGeneId = entrezGeneId;
         this.chr = chr;
         this.cytoband = cytoband;
+        this.exonicLength = exonicLength;
         this.start = start;
         this.end = end;
     }
@@ -87,7 +90,15 @@ public class ReferenceGenomeGene {
     public void setCytoband(String cytoband) {
         this.cytoband = cytoband;
     }
-    
+
+    public int getExonicLength() {
+        return exonicLength;
+    }
+
+    public void setExonicLength(int exonicLength) {
+        this.exonicLength = exonicLength;
+    }
+
     public long getStart() { 
         return this.start; 
     }

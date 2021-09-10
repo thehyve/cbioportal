@@ -28,18 +28,12 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 package org.mskcc.cbio.maf;
 
-import static org.mskcc.cbio.maf.ValueTypeUtil.isDouble;
-import static org.mskcc.cbio.maf.ValueTypeUtil.isFloat;
-import static org.mskcc.cbio.maf.ValueTypeUtil.isInt;
-
-
 import java.util.*;
 import java.util.regex.Pattern;
-
 import joptsimple.internal.Strings;
 
 /**
@@ -50,7 +44,6 @@ import joptsimple.internal.Strings;
 public class MafUtil {
     private static final Pattern validNucleotidesPattern = Pattern.compile("^([ATGC]*)$");
     public static final String NAMESPACE_DELIMITER = ".";
-    public static final String NAMESPACE_DELIMITER_REGEX = "\\.";
     // standard header column names
     public static final String HUGO_SYMBOL = "Hugo_Symbol";
     public static final String ENTREZ_GENE_ID = "Entrez_Gene_Id";
@@ -375,23 +368,14 @@ public class MafUtil {
             } else if(header.equalsIgnoreCase(DRIVER_TIERS_FILTER_ANNOTATION)) {
                 driverTiersAnnIndex = i;
             }  else if (namespaces != null && !namespaces.isEmpty()) {
-                int columnIndex = i;
-                namespaces.stream()
-                    // Perform a case-insensitive match of namespace in meta file with the column name.
-                    .filter(namespace -> header.toLowerCase().startsWith(namespace.toLowerCase(
-                        Locale.ROOT) + NAMESPACE_DELIMITER))
-                    .findFirst()
-                    .ifPresent(namespace -> {
-                        String columnName = header.split(NAMESPACE_DELIMITER_REGEX)[1];
-                        // For legacy reasons perform lower-case transformation for ASCN column names. 
-                        if  (namespace.equalsIgnoreCase("ascn")) {
-                            columnName = columnName.toLowerCase();
-                        }
-                        // Key the namespaces with the format (upper-/lowercase) specified in the meta file.
-                        Map<String, Integer> nsKeyIndexMap = this.namespaceIndexMap.getOrDefault(namespace, new HashMap<>());
-                        nsKeyIndexMap.put(columnName, columnIndex);
-                        this.namespaceIndexMap.put(namespace, nsKeyIndexMap);
-                });
+                for (String ns : namespaces) {
+                    if (header.toLowerCase().startsWith(ns + NAMESPACE_DELIMITER)) {
+                        String nsKey = header.toLowerCase().replace(ns + NAMESPACE_DELIMITER, "");
+                        Map<String, Integer> nsKeyIndexMap = this.namespaceIndexMap.getOrDefault(ns, new HashMap<String, Integer>());
+                        nsKeyIndexMap.put(nsKey, i);
+                        this.namespaceIndexMap.put(ns, nsKeyIndexMap);
+                    }
+                }
             }
         }
     }
@@ -486,17 +470,16 @@ public class MafUtil {
         fixEndPointForInsertion(record);
 
         // extract namespace key-value pairs for json annotation support
-        Map<String, Map<String, Object>> recordNamespaceAnnotationJsonMap = new HashMap<>();
+        Map<String, Map<String, String>> recordNamespaceAnnotationJsonMap = new HashMap<String, Map<String, String>>();
         if (!namespaceIndexMap.isEmpty()) {
             for (Map.Entry<String, Map<String, Integer>> nsKeyIndexMap : namespaceIndexMap.entrySet()) {
                 String namespace = nsKeyIndexMap.getKey();
                 // construct map of the key-value pairs from the record
-                Map<String, Object> namespaceKeyValueMappings = new HashMap<>();
+                Map<String, String> namespaceKeyValueMappings = new HashMap<String, String>();
                 for (Map.Entry<String, Integer> nsKeyIndexPairs : nsKeyIndexMap.getValue().entrySet()) {
                     String keyName = nsKeyIndexPairs.getKey();
                     Integer keyIndex = nsKeyIndexPairs.getValue();
-                    String stringValue = TabDelimitedFileUtil.getPartStringAllowEmptyAndNA(keyIndex, parts);
-                    namespaceKeyValueMappings.put(keyName, parseNamespaceValue(stringValue));
+                    namespaceKeyValueMappings.put(keyName, TabDelimitedFileUtil.getPartStringAllowEmptyAndNA(keyIndex, parts));
                 }
                 // update namespace map with the key-value pairs extracted from record
                 recordNamespaceAnnotationJsonMap.put(namespace, namespaceKeyValueMappings);
@@ -844,18 +827,4 @@ public class MafUtil {
         return ((tumorSeqAllele1.equals("-") || tumorSeqAllele2.equals("-")) &&
                 (validNucleotidesPattern.matcher(tumorSeqAllele1.toUpperCase()).matches() || validNucleotidesPattern.matcher(tumorSeqAllele2.toUpperCase()).matches()));
     }
-    
-    private static Object parseNamespaceValue(String stringValue) {
-        if (stringValue == null || stringValue.isEmpty()) {
-            return null;
-        } else if (isInt(stringValue)) {
-            return Integer.parseInt(stringValue);
-        } else if (isFloat(stringValue)) {
-            return Float.parseFloat(stringValue);
-        } else if (isDouble(stringValue)) {
-            return Double.parseDouble(stringValue);
-        }
-        return stringValue;
-    }
-    
 }

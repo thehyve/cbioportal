@@ -4,10 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.model.GenePanel;
-import org.cbioportal.model.GenePanelData;
-import org.cbioportal.model.MolecularProfileCaseIdentifier;
 import org.cbioportal.service.exception.GenePanelNotFoundException;
-import org.cbioportal.service.exception.MolecularProfileNotFoundException;
 import org.cbioportal.service.GenePanelService;
 import org.cbioportal.web.config.PublicApiTags;
 import org.cbioportal.web.config.annotation.PublicApi;
@@ -18,24 +15,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
-import javax.validation.Valid;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @PublicApi
 @RestController
@@ -46,7 +37,7 @@ public class GenePanelController {
     @Autowired
     private GenePanelService genePanelService;
 
-    @RequestMapping(value = "/gene-panels", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/gene-panels", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all gene panels")
     public ResponseEntity<List<GenePanel>> getAllGenePanels(
@@ -76,7 +67,7 @@ public class GenePanelController {
         }
     }
 
-    @RequestMapping(value = "/gene-panels/{genePanelId}", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/gene-panels/{genePanelId}", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get gene panel")
     public ResponseEntity<GenePanel> getGenePanel(
@@ -86,7 +77,7 @@ public class GenePanelController {
         return new ResponseEntity<>(genePanelService.getGenePanel(genePanelId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/gene-panels/fetch", method = RequestMethod.POST,
+    @RequestMapping(value = "/api/gene-panels/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get gene panel")
     public ResponseEntity<List<GenePanel>> fetchGenePanels(

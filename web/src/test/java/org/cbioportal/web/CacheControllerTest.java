@@ -1,71 +1,64 @@
 package org.cbioportal.web;
 
-import org.cbioportal.model.CancerStudy;
-import org.cbioportal.persistence.StudyRepository;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
+
 import org.cbioportal.service.CacheService;
 import org.cbioportal.service.exception.CacheOperationException;
-import org.junit.Before;
 import org.junit.Ignore;
+import org.cbioportal.web.config.TestConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration("/applicationContext-web-test.xml")
-@Configuration
+@WebMvcTest(CacheController.class)
+@AutoConfigureMockMvc(addFilters = false) // The CacheController is excluded from Spring Security.
+@ContextConfiguration(classes = {CacheController.class, TestConfig.class})
+@TestPropertySource(
+    properties = {
+        "cache.endpoint.enabled=true",
+        "cache.endpoint.api-key=correct-key"
+    }
+)
 public class CacheControllerTest {
 
     @Autowired
-    private WebApplicationContext wac;
-
     private MockMvc mockMvc;
+
+    @MockBean
+    private CacheService cacheService;
 
     @Autowired
     private CacheController cacheController;
     
-    // ---- Imitate @MockBean annotations of Spring Boot
-    @Autowired
-    private CacheService cacheService;
-    @Bean
-    public CacheService cacheService() {
-        return mock(CacheService.class);
-    }
-    // ----
-
-    @Before
-    public void setUp() throws Exception {
-        reset(cacheService);
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
-
     @Test
     public void clearAllCachesNoKeyProvided() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cache").with(csrf()))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
         verify(cacheService, never()).clearCaches(true);
     }
 
     @Test
     public void clearAllCachesUnauthorized() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cache").with(csrf())
             .header("X-API-KEY", "incorrect-key"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -74,7 +67,7 @@ public class CacheControllerTest {
 
     @Test
     public void clearAllCachesSuccess() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cache").with(csrf())
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -84,7 +77,7 @@ public class CacheControllerTest {
     @Test
     public void clearAllCachesDisabled() throws Exception {
         ReflectionTestUtils.setField(cacheController, "cacheEndpointEnabled", false);
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cache").with(csrf())
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isNotFound())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));
@@ -94,7 +87,7 @@ public class CacheControllerTest {
 
     @Test
     public void clearAllCachesSkipSpringManaged() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/cache").param("springManagedCache", "false")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cache").param("springManagedCache", "false").with(csrf())
             .header("X-API-KEY", "correct-key"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN_VALUE));

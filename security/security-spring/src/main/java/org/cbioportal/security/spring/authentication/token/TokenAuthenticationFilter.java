@@ -45,17 +45,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cbioportal.service.DataAccessTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  *
  * @author Manda Wilson
  */
-@Component
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     @Autowired
@@ -68,6 +66,10 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
     public TokenAuthenticationFilter() {
         // allow any request to contain an authorization header
         super("/**");
+    }
+
+    public TokenAuthenticationFilter(String s, AuthenticationManager authenticationManagerBean) {
+        super(s, authenticationManagerBean);
     }
 
     @Override
@@ -116,12 +118,11 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
      */
     protected String extractHeaderToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
-        if (!StringUtils.isEmpty(authorizationHeader)) {
+        if (authorizationHeader != null && !authorizationHeader.isEmpty()) {
             if ((authorizationHeader.toLowerCase().startsWith(BEARER.toLowerCase()))) {
                 return authorizationHeader.substring(BEARER.length()).trim();
             }
         }
-
         return null;
     }
 }

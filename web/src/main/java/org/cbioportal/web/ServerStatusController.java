@@ -25,7 +25,7 @@ public class ServerStatusController {
     @Autowired
     private ServerStatusService serverStatusService;
 
-    @RequestMapping(value = "/health", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/health", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get the running status of the server")
     public ResponseEntity<ServerStatusMessage> getServerStatus() {
         return new ResponseEntity<>(serverStatusService.getServerStatus(), HttpStatus.OK);

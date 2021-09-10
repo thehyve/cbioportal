@@ -23,6 +23,9 @@
 # Imports Methylation Data
 ./importProfileData.pl --data $GDAC_CGDS_STAGING_HOME/ucec_tcga/data_methylation.txt --meta $GDAC_CGDS_STAGING_HOME/ucec_tcga/meta_methylation.txt --dbmsAction clobber
 
+# RPPA
+./importProteinArrayData.pl $GDAC_CGDS_STAGING_HOME/ucec_tcga/data_rppa.txt ucec_tcga
+
 # MutSig
 ./importMutSig.pl $GDAC_CGDS_STAGING_HOME/ucec_tcga/data_mutsig.txt $GDAC_CGDS_STAGING_HOME/ucec_tcga/meta_mutsig.txt
 

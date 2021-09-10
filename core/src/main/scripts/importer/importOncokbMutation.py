@@ -95,7 +95,7 @@ def main_import(args):
     else:
         portal_instance = validateData.load_portal_info(server_url, logger)
 
-    row_number_to_mutation_event = get_features(mutation_file_path, server_url, portal_instance.alias_entrez_map)
+    row_number_to_mutation_event = get_features(mutation_file_path)
     row_number_to_annotation = fetch_and_map_oncokb_annotations(row_number_to_mutation_event)
     write_annotations_to_file(row_number_to_annotation, mutation_file_path)
 
@@ -113,10 +113,8 @@ def check_disallowed_columns(header_elements):
                            "Disallowed column(s): [" + ", ".join(disallowed_columns) + "]")
 
 
-def get_features(mutation_file_path, server_url=None, alias_map=None):
+def get_features(mutation_file_path):
     """Extract Mutation events from MAF data file."""
-    assert server_url or alias_map, 'At least one of "server_url" or "alias_map" must be specified'
-    
     header_elements = libImportOncokb.get_first_line_cells(libImportOncokb.open_file(mutation_file_path), '\t')
     header_indexes = {}
     for required_column in required_mutation_columns + [FIELD_ENTREZ_ID]:
@@ -124,10 +122,6 @@ def get_features(mutation_file_path, server_url=None, alias_map=None):
     row_number_to_feature = {}
     row_counter = 0
     mutation_file = libImportOncokb.open_file(mutation_file_path)
-    
-    # reduce API requests
-    resolved_aliases = {}
-    
     print("Reading features from file ...", end = '')
     for line in mutation_file:
         row_counter += 1
@@ -154,12 +148,7 @@ def get_features(mutation_file_path, server_url=None, alias_map=None):
         if FIELD_ENTREZ_ID in feature and feature[FIELD_ENTREZ_ID] is not None and feature[FIELD_ENTREZ_ID] != '':
             entrez_gene_ids = [feature[FIELD_ENTREZ_ID]]
         else:
-            # in case of failure, try aliases
-            entrez_gene_ids = portal_instance.hugo_entrez_map.get(
-                feature[FIELD_HUGO_SYMBOL],
-                resolved_aliases.get(feature[FIELD_HUGO_SYMBOL])
-            ) or libImportOncokb.try_get_entrez_from_alias(feature[FIELD_HUGO_SYMBOL], server_url, alias_map)
-            resolved_aliases[feature[FIELD_HUGO_SYMBOL]] = entrez_gene_ids
+            entrez_gene_ids = portal_instance.hugo_entrez_map[feature[FIELD_HUGO_SYMBOL]]
 
         if len(entrez_gene_ids) > 1:
             logger.error(""" Multiple Entrez gene ids were found for a gene.
@@ -167,7 +156,7 @@ def get_features(mutation_file_path, server_url=None, alias_map=None):
                              Please fix and rerun. """,
                          extra={'symbol': feature[FIELD_HUGO_SYMBOL], 'row': str(row_counter)})
             feature[FIELD_ENTREZ_ID] = None
-        elif len(entrez_gene_ids) == 0:            
+        elif len(entrez_gene_ids) == 0:
             logger.error(""" Could not find the Entrez gene id for a gene.
                              OncoKB annotations will not be imported for this gene.
                              Please fix and rerun. """,

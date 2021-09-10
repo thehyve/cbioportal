@@ -34,9 +34,14 @@ package org.mskcc.cbio.portal.scripts;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.*;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.cbioportal.model.EntityType;
+import org.cbioportal.model.GeneticEntity;
+import org.cbioportal.model.meta.GenericAssayMeta;
 import org.mskcc.cbio.portal.dao.*;
 import org.mskcc.cbio.portal.model.*;
 import org.mskcc.cbio.portal.util.*;
@@ -133,10 +138,7 @@ public class ImportGenericAssayPatientLevelData {
             DaoGeneticProfileSamples.addGeneticProfileSamples(geneticProfileId, orderedSampleList);
     
             //Object to insert records in the generic 'genetic_alteration' table: 
-            DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();
-
-            // load entities map from database
-            Map<String, Integer> genericAssayStableIdToEntityIdMap = GenericAssayMetaUtils.buildGenericAssayStableIdToEntityIdMap();
+            DaoGeneticAlteration daoGeneticAlteration = DaoGeneticAlteration.getInstance();              
             
             String line = buf.readLine();
             while (line != null) {
@@ -144,7 +146,7 @@ public class ImportGenericAssayPatientLevelData {
                 ConsoleUtil.showProgress();
                 boolean recordAdded = false;
                 
-                recordAdded = parseGenericAssayLine(line, parts.length, patientStartIndex, genericAssayIdIndex, numSamplesInPatient, sampleCount, daoGeneticAlteration, genericAssayStableIdToEntityIdMap);
+                recordAdded = parseGenericAssayLine(line, parts.length, patientStartIndex, genericAssayIdIndex, numSamplesInPatient, sampleCount, daoGeneticAlteration);
                 
                 // increment number of records added or entries skipped
                 if (recordAdded) {
@@ -185,7 +187,7 @@ public class ImportGenericAssayPatientLevelData {
      * @throws DaoException 
      */
 
-    private boolean parseGenericAssayLine(String line, int nrColumns, int patientStartIndex, int genericAssayIdIndex, int[][] numSamplesInPatient, int sampleCount, DaoGeneticAlteration daoGeneticAlteration, Map<String, Integer> genericAssayStableIdToEntityIdMap) throws DaoException {
+    private boolean parseGenericAssayLine(String line, int nrColumns, int patientStartIndex, int genericAssayIdIndex, int[][] numSamplesInPatient, int sampleCount, DaoGeneticAlteration daoGeneticAlteration) throws DaoException {
 
         boolean recordIsStored = false;
         
@@ -215,14 +217,17 @@ public class ImportGenericAssayPatientLevelData {
 
             // trim whitespace from values
             values = Stream.of(values).map(String::trim).toArray(String[]::new);
-
-            String stableId = parts[genericAssayIdIndex];
-            Integer entityId = genericAssayStableIdToEntityIdMap.getOrDefault(stableId, null);
             
-            if (entityId ==  null) {
+            GenericAssayMeta genericAssayMeta = DaoGenericAssay.getGenericAssayMetaByStableId(parts[genericAssayIdIndex]);
+            
+            if (genericAssayMeta ==  null) {
                 ProgressMonitor.logWarning("Generic Assay entity " + parts[genericAssayIdIndex] + " not found in DB. Record will be skipped.");
             } else {
-                recordIsStored = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, entityId, stableId);
+                GeneticEntity geneticEntity = DaoGeneticEntity.getGeneticEntityByStableId(genericAssayMeta.getStableId());
+                if (geneticEntity == null) {
+                    ProgressMonitor.logWarning("Generic Assay entity " + parts[genericAssayIdIndex] + " not found in DB. Record will be skipped.");
+                }
+                recordIsStored = storeGeneticEntityGeneticAlterations(values, daoGeneticAlteration, geneticEntity.getId(), genericAssayMeta.getStableId());
             }
 
             return recordIsStored;

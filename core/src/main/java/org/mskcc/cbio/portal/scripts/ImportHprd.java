@@ -62,6 +62,7 @@ public class ImportHprd {
      */
     public void importData() throws IOException, DaoException {
         DaoGeneOptimized daoGene = DaoGeneOptimized.getInstance();
+        DaoInteraction daoInteraction = DaoInteraction.getInstance();
         int numInteractionsSaved = 0;
         int numInteractionsNotSaved = 0;
 
@@ -94,6 +95,8 @@ public class ImportHprd {
                 }
 
                 if (geneA != null && geneB != null) {
+                    daoInteraction.addInteraction(geneA, geneB, interactionType, dataSource,
+                            expTypes, pmids);
                     numInteractionsSaved++;
                 } else {
                     numInteractionsNotSaved++;

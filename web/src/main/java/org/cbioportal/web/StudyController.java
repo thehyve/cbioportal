@@ -81,7 +81,7 @@ public class StudyController {
         }
     }
 
-    @RequestMapping(value = "/studies", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/studies", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all studies")
     public ResponseEntity<List<CancerStudy>> getAllStudies(
         @ApiParam("Search keyword that applies to name and cancer type of the studies")
@@ -128,7 +128,7 @@ public class StudyController {
     }
 
     @PreAuthorize("hasPermission(#studyId, 'CancerStudyId', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/{studyId}", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/studies/{studyId}", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get a study")
     public ResponseEntity<CancerStudy> getStudy(
@@ -139,7 +139,7 @@ public class StudyController {
     }
 
     @PreAuthorize("hasPermission(#studyIds, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/api/studies/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
     produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch studies by IDs")
     public ResponseEntity<List<CancerStudy>> fetchStudies(
@@ -161,7 +161,8 @@ public class StudyController {
 
     }
 
-    @RequestMapping(value = "/studies/{studyId}/tags", method = RequestMethod.GET,
+    // FIXME why no PreAuthorize annotation here?
+    @RequestMapping(value = "/api/studies/{studyId}/tags", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get the tags of a study")
     public ResponseEntity<Object> getTags(
@@ -180,7 +181,7 @@ public class StudyController {
     }
 
     @PreAuthorize("hasPermission(#studyIds, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/tags/fetch", method = RequestMethod.POST,
+    @RequestMapping(value = "/api/studies/tags/fetch", method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get the study tags by IDs")
     public ResponseEntity<List<CancerStudyTags>> getTagsForMultipleStudies(

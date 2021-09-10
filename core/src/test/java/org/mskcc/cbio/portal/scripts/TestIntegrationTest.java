@@ -54,7 +54,6 @@ import org.cbioportal.service.GenericAssayService;
 import org.cbioportal.service.GenesetDataService;
 import org.cbioportal.service.StructuralVariantService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mskcc.cbio.portal.dao.DaoCancerStudy;
@@ -128,7 +127,6 @@ public class TestIntegrationTest {
      * 
      * @throws Throwable
      */
-    @Ignore("Skip TestIntegrationTest.testLoadStudyEs0 due to NullPointerException")
     @Test
     public void testLoadStudyEs0() throws Throwable {
         try {

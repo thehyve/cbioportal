@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.cbioportal.model.CancerStudy;
-import org.cbioportal.model.SampleList;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.model.Sample;
 import org.cbioportal.service.SampleListService;
@@ -68,7 +67,7 @@ public class SampleController {
     @Autowired
     private UniqueKeyExtractor uniqueKeyExtractor;
     
-    @RequestMapping(value = "/samples", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/samples", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all samples matching keyword")
     public ResponseEntity<List<Sample>> getSamplesByKeyword(
         @ApiParam("Search keyword that applies to the study ID")
@@ -130,7 +129,7 @@ public class SampleController {
     }
 
     @PreAuthorize("hasPermission(#studyId, 'CancerStudyId', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/{studyId}/samples", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/studies/{studyId}/samples", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all samples in a study")
     public ResponseEntity<List<Sample>> getAllSamplesInStudy(
@@ -163,7 +162,7 @@ public class SampleController {
     }
 
     @PreAuthorize("hasPermission(#studyId, 'CancerStudyId', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/{studyId}/samples/{sampleId}", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/studies/{studyId}/samples/{sampleId}", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get a sample in a study")
     public ResponseEntity<Sample> getSampleInStudy(
@@ -176,7 +175,7 @@ public class SampleController {
     }
 
     @PreAuthorize("hasPermission(#studyId, 'CancerStudyId', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/studies/{studyId}/patients/{patientId}/samples", method = RequestMethod.GET,
+    @RequestMapping(value = "/api/studies/{studyId}/patients/{patientId}/samples", method = RequestMethod.GET,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get all samples of a patient in a study")
     public ResponseEntity<List<Sample>> getAllSamplesOfPatientInStudy(
@@ -212,7 +211,7 @@ public class SampleController {
     }
 
     @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/samples/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+    @RequestMapping(value = "/api/samples/fetch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch samples by ID")
     public ResponseEntity<List<Sample>> fetchSamples(

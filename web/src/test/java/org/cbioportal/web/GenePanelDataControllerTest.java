@@ -7,6 +7,7 @@ import org.cbioportal.model.GenePanelToGene;
 import org.cbioportal.model.meta.BaseMeta;
 import org.cbioportal.service.GenePanelService;
 import org.cbioportal.service.exception.GenePanelNotFoundException;
+import org.cbioportal.web.config.TestConfig;
 import org.cbioportal.web.parameter.GenePanelDataFilter;
 import org.cbioportal.web.parameter.GenePanelDataMultipleStudyFilter;
 import org.cbioportal.web.parameter.HeaderKeyConstants;
@@ -17,9 +18,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,10 +37,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration("/applicationContext-web-test.xml")
-@Configuration
+@WebMvcTest(GenePanelDataController.class)
+@ContextConfiguration(classes = {GenePanelDataController.class, TestConfig.class})
 public class GenePanelDataControllerTest {
 
     private static final String TEST_GENE_PANEL_ID_1 = "test_gene_panel_id_1";
@@ -63,35 +69,27 @@ public class GenePanelDataControllerTest {
     private static final String TEST_HUGO_GENE_SYMBOL_4 = "test_hugo_gene_symbol_4";
     private static final String TEST_SAMPLE_LIST_ID = "test_sample_list_id";
 
-    @Autowired
-    private WebApplicationContext wac;
-
-    @Autowired
+    @MockBean
     private GenePanelService genePanelService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mockMvc;
     
-    @Before
-    public void setUp() throws Exception {
-
-        Mockito.reset(genePanelService);
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
-    
     @Test
+    @WithMockUser
     public void getGenePanelData() throws Exception {
 
         List<GenePanelData> genePanelDataList = createExampleGenePanelData();
 
-        Mockito.when(genePanelService.getGenePanelData(Mockito.anyString(), Mockito.anyString())).thenReturn(genePanelDataList);
+        when(genePanelService.getGenePanelData(anyString(), anyString())).thenReturn(genePanelDataList);
 
         GenePanelDataFilter genePanelDataFilter = new GenePanelDataFilter();
         genePanelDataFilter.setSampleListId(TEST_SAMPLE_LIST_ID);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
-            "/molecular-profiles/test_molecular_profile_id/gene-panel-data/fetch")
+            "/api/molecular-profiles/test_molecular_profile_id/gene-panel-data/fetch").with(csrf())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(genePanelDataFilter)))
@@ -113,11 +111,12 @@ public class GenePanelDataControllerTest {
     }
 
     @Test
+    @WithMockUser
     public void fetchGenePanelData() throws Exception {
 
         List<GenePanelData> genePanelDataList = createExampleGenePanelData();
 
-        Mockito.when(genePanelService.fetchGenePanelDataInMultipleMolecularProfiles(Mockito.anyList())).thenReturn(genePanelDataList);
+        when(genePanelService.fetchGenePanelDataInMultipleMolecularProfiles(anyList())).thenReturn(genePanelDataList);
 
         List<SampleMolecularIdentifier> sampleMolecularIdentifiers = new ArrayList<>();
         SampleMolecularIdentifier sampleMolecularIdentifier1 = new SampleMolecularIdentifier();
@@ -132,7 +131,7 @@ public class GenePanelDataControllerTest {
         genePanelDataMultipleStudyFilter.setSampleMolecularIdentifiers(sampleMolecularIdentifiers);
 
         mockMvc.perform(MockMvcRequestBuilders.post(
-            "/gene-panel-data/fetch")
+            "/api/gene-panel-data/fetch").with(csrf())
             .accept(MediaType.APPLICATION_JSON)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(genePanelDataMultipleStudyFilter)))

@@ -43,7 +43,7 @@ public class GenePanelDataController {
     private GenePanelService genePanelService;
 
     @PreAuthorize("hasPermission(#molecularProfileId, 'MolecularProfileId', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/molecular-profiles/{molecularProfileId}/gene-panel-data/fetch", method = RequestMethod.POST,
+    @RequestMapping(value = "/api/molecular-profiles/{molecularProfileId}/gene-panel-data/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Get gene panel data")
     public ResponseEntity<List<GenePanelData>> getGenePanelData(
@@ -65,7 +65,7 @@ public class GenePanelDataController {
     }
 
     @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
-    @RequestMapping(value = "/gene-panel-data/fetch", method = RequestMethod.POST,
+    @RequestMapping(value = "/api/gene-panel-data/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch gene panel data")
     public ResponseEntity<List<GenePanelData>> fetchGenePanelDataInMultipleMolecularProfiles(

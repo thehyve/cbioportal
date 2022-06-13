@@ -49,11 +49,6 @@ import java.util.stream.Collectors;
 public class StudyViewController {
     @Autowired
     private ApplicationContext applicationContext;
-    StudyViewController instance;
-    @PostConstruct
-    private void init() {
-        instance = applicationContext.getBean(StudyViewController.class);
-    }
 
     @Autowired
     private StudyViewFilterApplier studyViewFilterApplier;
@@ -101,7 +96,7 @@ public class StudyViewController {
             }
             boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(studyViewFilter);
             List<ClinicalDataCountItem> result = 
-                       instance.cachedClinicalDataCounts(interceptedClinicalDataCountFilter,singleStudyUnfiltered);
+                       cachedClinicalDataCounts(interceptedClinicalDataCountFilter,singleStudyUnfiltered);
             return new ResponseEntity<>(result, HttpStatus.OK);
                         
     }
@@ -150,7 +145,7 @@ public class StudyViewController {
         StudyViewFilter studyViewFilter = clinicalDataBinUtil.removeSelfFromFilter(interceptedClinicalDataBinCountFilter);
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(studyViewFilter);
         List<ClinicalDataBin> clinicalDataBins = 
-            instance.cachableFetchClinicalDataBinCounts(dataBinMethod, interceptedClinicalDataBinCountFilter, singleStudyUnfiltered);
+            cachableFetchClinicalDataBinCounts(dataBinMethod, interceptedClinicalDataBinCountFilter, singleStudyUnfiltered);
 
         return new ResponseEntity<>(clinicalDataBins, HttpStatus.OK);
     }
@@ -185,7 +180,7 @@ public class StudyViewController {
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter
     ) throws StudyNotFoundException {
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
-        List<AlterationCountByGene> alterationCountByGenes = instance.cachedFetchMutatedGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
+        List<AlterationCountByGene> alterationCountByGenes = cachedFetchMutatedGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(alterationCountByGenes, HttpStatus.OK);
     }
 
@@ -224,7 +219,7 @@ public class StudyViewController {
 
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
         List<AlterationCountByGene> alterationCountByGenes = 
-            instance.cacheableFetchStructuralVariantGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
+            cacheableFetchStructuralVariantGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(alterationCountByGenes, HttpStatus.OK);
     }
 
@@ -262,7 +257,7 @@ public class StudyViewController {
         @Valid @RequestAttribute(required = false, value = "interceptedStudyViewFilter") StudyViewFilter interceptedStudyViewFilter
     ) throws StudyNotFoundException {
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
-        List<CopyNumberCountByGene> copyNumberCountByGenes = instance.cacheableFetchCNAGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
+        List<CopyNumberCountByGene> copyNumberCountByGenes = cacheableFetchCNAGenes(interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(copyNumberCountByGenes, HttpStatus.OK);
     }
 
@@ -325,7 +320,7 @@ public class StudyViewController {
     )
     {
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
-        List<GenomicDataCount> sampleCounts = instance.cacheableFetchMolecularProfileSampleCounts(interceptedStudyViewFilter, singleStudyUnfiltered);
+        List<GenomicDataCount> sampleCounts = cacheableFetchMolecularProfileSampleCounts(interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(sampleCounts, HttpStatus.OK);
     }
 

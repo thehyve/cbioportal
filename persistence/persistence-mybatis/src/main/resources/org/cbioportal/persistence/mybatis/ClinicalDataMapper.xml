@@ -211,7 +211,7 @@
     <select id="fetchSampleClinicalDataCounts" resultType="org.cbioportal.model.ClinicalDataCount">
         SELECT count(*) as count,
         clinical_sample.ATTR_ID as attributeId,
-        clinical_sample.ATTR_VALUE as value
+        clinical_sample.ATTR_VALUE as "value"
         <include refid="fromSample"/>
         <include refid="whereSample"/>
         GROUP BY clinical_sample.ATTR_ID, clinical_sample.ATTR_VALUE
@@ -220,7 +220,7 @@
     <select id="fetchPatientClinicalDataCounts" resultType="org.cbioportal.model.ClinicalDataCount">
         SELECT count(*) as count,
         clinical_patient.ATTR_ID as attributeId,
-        clinical_patient.ATTR_VALUE as value
+        clinical_patient.ATTR_VALUE as "value"
         <include refid="fromPatient"/>
         <if test="projection == 'DETAILED'">
             INNER JOIN sample ON patient.INTERNAL_ID = sample.PATIENT_ID

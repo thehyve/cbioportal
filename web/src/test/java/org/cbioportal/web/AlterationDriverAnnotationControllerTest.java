@@ -43,11 +43,6 @@ public class AlterationDriverAnnotationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Before
-    public void setUp() {
-        Mockito.reset(alterationDriverAnnotationService);
-    }
-
     @Test
     @WithMockUser
     public void fetchCustomDriverAnnotationReport() throws Exception {

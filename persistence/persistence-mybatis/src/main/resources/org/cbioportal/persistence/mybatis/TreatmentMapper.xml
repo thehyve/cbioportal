@@ -5,7 +5,7 @@
 
     <select id="getAllTreatments" resultType="org.cbioportal.model.Treatment">
         SELECT
-            clinical_event_data.VALUE as treatment,
+            clinical_event_data.`VALUE` as treatment,
             patient.STABLE_ID as patientId,
             cancer_study.CANCER_STUDY_IDENTIFIER as studyId,
             clinical_event.START_DATE as start,
@@ -17,7 +17,7 @@
             INNER JOIN sample ON patient.INTERNAL_ID = sample.PATIENT_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <include refid="where"/>
-        AND clinical_event_data.KEY = #{key}
+        AND clinical_event_data.`KEY` = #{key}
     </select>
 
     <select id="getAllSamples" resultType="org.cbioportal.model.ClinicalEventSample">
@@ -30,10 +30,10 @@
             clinical_event
             INNER JOIN clinical_event_data ON clinical_event.CLINICAL_EVENT_ID = clinical_event_data.CLINICAL_EVENT_ID
             INNER JOIN patient ON clinical_event.PATIENT_ID = patient.INTERNAL_ID
-            INNER JOIN sample ON clinical_event_data.VALUE = sample.STABLE_ID
+            INNER JOIN sample ON clinical_event_data.`VALUE` = sample.STABLE_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <include refid="where"/>
-            AND clinical_event_data.KEY = 'SAMPLE_ID'
+            AND clinical_event_data.`KEY` = 'SAMPLE_ID'
     </select>
 
     <select id="getAllShallowSamples" resultType="org.cbioportal.model.ClinicalEventSample">
@@ -50,7 +50,7 @@
 
     <select id="getAllUniqueTreatments" resultType="java.lang.String">
         SELECT 
-            DISTINCT clinical_event_data.VALUE
+            DISTINCT clinical_event_data.`VALUE`
         FROM
             clinical_event
             INNER JOIN clinical_event_data ON clinical_event.CLINICAL_EVENT_ID = clinical_event_data.CLINICAL_EVENT_ID
@@ -58,7 +58,7 @@
             INNER JOIN sample ON patient.INTERNAL_ID = sample.PATIENT_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <include refid="where"/>
-            AND clinical_event_data.KEY = #{key}
+            AND clinical_event_data.`KEY` = #{key}
     </select>
 
     <select id="getTreatmentCount" resultType="java.lang.Integer">
@@ -71,7 +71,7 @@
             INNER JOIN sample ON patient.INTERNAL_ID = sample.PATIENT_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <include refid="where"/>
-            AND clinical_event_data.KEY = #{key}
+            AND clinical_event_data.`KEY` = #{key}
     </select>
 
     <select id="getSampleCount" resultType="java.lang.Integer">
@@ -81,10 +81,10 @@
             clinical_event
             INNER JOIN clinical_event_data ON clinical_event.CLINICAL_EVENT_ID = clinical_event_data.CLINICAL_EVENT_ID
             INNER JOIN patient ON clinical_event.PATIENT_ID = patient.INTERNAL_ID
-            INNER JOIN sample ON clinical_event_data.VALUE = sample.STABLE_ID
+            INNER JOIN sample ON clinical_event_data.`VALUE` = sample.STABLE_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         <include refid="where"/>
-            AND clinical_event_data.KEY = 'SAMPLE_ID'
+            AND clinical_event_data.`KEY` = 'SAMPLE_ID'
     </select>
     
     <select id="studyIdHasTreatments" resultType="java.lang.Boolean">
@@ -96,7 +96,7 @@
             INNER JOIN patient ON clinical_event.PATIENT_ID = patient.INTERNAL_ID
             INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
         WHERE
-            clinical_event_data.KEY = #{key}
+            clinical_event_data.`KEY` = #{key}
             AND cancer_study.CANCER_STUDY_IDENTIFIER = #{studyId}
     </select>
 

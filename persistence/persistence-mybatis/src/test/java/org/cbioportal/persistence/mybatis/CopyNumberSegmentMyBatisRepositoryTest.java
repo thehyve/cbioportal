@@ -2,6 +2,8 @@ package org.cbioportal.persistence.mybatis;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import org.cbioportal.model.CopyNumberSeg;
 import org.cbioportal.model.meta.BaseMeta;
@@ -85,17 +87,17 @@ public class CopyNumberSegmentMyBatisRepositoryTest {
         List<Integer> result3 = copyNumberSegmentMyBatisRepository.fetchSamplesWithCopyNumberSegments(
             studies, samples, "3"
         );
-        
+
         Assert.assertEquals(2, result0.size());
-        Assert.assertEquals((Integer)1, result0.get(0));
-        Assert.assertEquals((Integer)15, result0.get(1));
+        Assert.assertTrue(result0.contains(1));
+        Assert.assertTrue(result0.contains(15));
 
         Assert.assertEquals(1, result1.size());
-        Assert.assertEquals((Integer)1, result1.get(0));
+        Assert.assertTrue(result1.contains(1));
 
         Assert.assertEquals(2, result2.size());
-        Assert.assertEquals((Integer)1, result2.get(0));
-        Assert.assertEquals((Integer)15, result2.get(1));
+        Assert.assertTrue(result2.contains(1));
+        Assert.assertTrue(result2.contains(15));
 
         Assert.assertEquals(0, result3.size());
     }

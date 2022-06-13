@@ -36,12 +36,7 @@ import java.util.List;
 public class TreatmentController {
     @Autowired
     private ApplicationContext applicationContext;
-    TreatmentController instance;
-    @PostConstruct
-    private void init() {
-        instance = applicationContext.getBean(TreatmentController.class);
-    }
-    
+
     @Autowired
     private StudyViewFilterUtil studyViewFilterUtil;
     @Autowired
@@ -77,7 +72,7 @@ public class TreatmentController {
     ) {
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
         List<PatientTreatmentRow> treatments = 
-            instance.cachableGetAllPatientTreatments(tier, interceptedStudyViewFilter, singleStudyUnfiltered);
+            cachableGetAllPatientTreatments(tier, interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(treatments, HttpStatus.OK);
     }
 
@@ -121,7 +116,7 @@ public class TreatmentController {
     ) {
         boolean singleStudyUnfiltered = studyViewFilterUtil.isSingleStudyUnfiltered(interceptedStudyViewFilter);
         List<SampleTreatmentRow> treatments = 
-            instance.cacheableGetAllSampleTreatments(tier, interceptedStudyViewFilter, singleStudyUnfiltered);
+            cacheableGetAllSampleTreatments(tier, interceptedStudyViewFilter, singleStudyUnfiltered);
         return new ResponseEntity<>(treatments, HttpStatus.OK);
     }
 

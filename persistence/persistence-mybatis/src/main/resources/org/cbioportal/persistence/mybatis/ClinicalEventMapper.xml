@@ -60,8 +60,8 @@
     <select id="getDataOfClinicalEvents" resultType="org.cbioportal.model.ClinicalEventData">
         SELECT
         clinical_event_data.CLINICAL_EVENT_ID AS clinicalEventId,
-        clinical_event_data.KEY AS "key",
-        clinical_event_data.VALUE AS value
+        clinical_event_data.`KEY` AS "key",
+        clinical_event_data.`VALUE` AS "value"
         FROM clinical_event_data
         <where>
             <if test="list != null and !list.isEmpty()">

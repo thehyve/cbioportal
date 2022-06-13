@@ -17,8 +17,8 @@
     </select>
 
     <select id="getGenericAssayAdditionalproperties" resultType="org.cbioportal.model.GenericAssayAdditionalProperty">
-        SELECT generic_entity_properties.NAME as name,
-        generic_entity_properties.VALUE as value,
+        SELECT generic_entity_properties.`NAME` as name,
+        generic_entity_properties.`VALUE` as "value",
         genetic_entity.STABLE_ID as stableId
         FROM generic_entity_properties
         INNER JOIN genetic_entity ON genetic_entity.ID = generic_entity_properties.GENETIC_ENTITY_ID

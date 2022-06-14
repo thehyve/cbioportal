@@ -4,6 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
+        <!-- When changing Spring Boot version als update spring-boot-dependencies version!!! -->
         <version>2.6.8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -296,7 +297,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}}</version>
+                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

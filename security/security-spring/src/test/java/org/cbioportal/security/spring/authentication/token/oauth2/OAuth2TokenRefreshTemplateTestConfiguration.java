@@ -32,9 +32,7 @@
 
 package org.cbioportal.security.spring.authentication.token.oauth2;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 
 import org.mockito.Mockito;
@@ -66,7 +64,7 @@ public class OAuth2TokenRefreshTemplateTestConfiguration {
 
         Mockito.doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
-			final
+            final
             HttpEntity<LinkedMultiValueMap<String, Object>> httpEntity = (HttpEntity<LinkedMultiValueMap<String, Object>>) invocation.getArguments()[1];
             final String code = (String) httpEntity.getBody().get("refresh_token").get(0);
             if (code.equals(OAuth2TokenRefreshTemplateTest.OFFLINE_TOKEN_VALID)) {

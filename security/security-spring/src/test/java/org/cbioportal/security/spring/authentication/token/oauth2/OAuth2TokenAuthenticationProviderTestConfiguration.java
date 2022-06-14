@@ -33,7 +33,7 @@
 package org.cbioportal.security.spring.authentication.token.oauth2;
 
 import static org.cbioportal.security.spring.authentication.token.oauth2.OAuth2TokenTestUtils.createJwt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
 import org.mockito.Mockito;

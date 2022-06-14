@@ -32,13 +32,6 @@
 
 package org.cbioportal.security.spring.authentication.token.oauth2;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
@@ -47,6 +40,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import static org.mockito.Mockito.*;
 
 @Configuration
 public class OAuth2DataAccessTokenServiceImplTestConfiguration {
@@ -66,7 +61,7 @@ public class OAuth2DataAccessTokenServiceImplTestConfiguration {
         String jsonFailure = "{\"error\":\"invalid_grant\"}";
         ResponseEntity<String> responseFailure = new ResponseEntity<String>(jsonFailure, HttpStatus.UNAUTHORIZED);
 
-        Mockito.doAnswer(invocation -> {
+        doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
             HttpEntity<LinkedMultiValueMap<String, Object>> httpEntity = (HttpEntity<LinkedMultiValueMap<String, Object>>) invocation.getArguments()[1];
             String code = (String) httpEntity.getBody().get("code").get(0);
@@ -90,7 +85,7 @@ public class OAuth2DataAccessTokenServiceImplTestConfiguration {
         // create a builder that returns the verifier
         JwtTokenVerifierBuilder builder = mock(JwtTokenVerifierBuilder.class);
         try {
-            Mockito.when(builder.build(anyString())).thenReturn(verifier);
+            when(builder.build(anyString())).thenReturn(verifier);
         } catch (Exception e) {}
 
         return builder;

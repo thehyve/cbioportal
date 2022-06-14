@@ -35,7 +35,9 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <!--        TODO replace with version of cbioportal frontend with compatible login url-->
+        
+        <!--        TODO replace with version of cbioportal frontend
+             that has a login url compatible with Spring security 5.6 -->
         <frontend.groupId>com.github.pvannierop</frontend.groupId>
         <frontend.version>702993fa1cced293903b603bba7c8073113e9204</frontend.version>
 
@@ -44,6 +46,7 @@
 
         <!-- Version properties for dependencies that should have same version. -->
         <!-- The rest can be set in the dependencyManagement section -->
+        <spring.boot.version>2.6.8</spring.boot.version>
         <spring.social.version>1.1.6.RELEASE</spring.social.version>
         <springfox.version>2.9.2</springfox.version>
         <io.swagger.version>1.6.3</io.swagger.version>
@@ -293,7 +296,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.5.4</version>
+                <version>${spring.boot.version}}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -612,7 +615,6 @@
                 <version>2.3</version>
             </dependency>
 
-            <!-- Mockito -->
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
@@ -664,7 +666,6 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-tx</artifactId>
-                <version>5.3.9</version>
             </dependency>
             <dependency>
                 <groupId>org.easymock</groupId>

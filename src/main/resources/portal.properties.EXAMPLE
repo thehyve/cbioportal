@@ -12,7 +12,11 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQL5InnoDBDialect
 db.suppress_schema_version_mismatch_errors=false
 
 # authentication
-authenticate=saml
+authenticate=noauthsessionservice
+
+# needed for compatibility with SpringFox Swagger
+# (see https://github.com/springfox/springfox/issues/3462)
+spring.mvc.pathmatch.matching-strategy=ant-path-matcher
 
 # set tomcat_resource_name when using dbconnector=jndi instead of the default
 # dbconnector=dbcp. Note that dbconnector needs to be set in CATLINA_OPTS when

@@ -6,10 +6,8 @@ import io.swagger.annotations.ApiParam;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.math3.analysis.function.Gaussian;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.cbioportal.model.*;
 import org.cbioportal.service.*;
 import org.cbioportal.service.exception.StudyNotFoundException;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.*;
@@ -47,9 +44,6 @@ import java.util.stream.Collectors;
 @Validated
 @Api(tags = "Study View", description = " ")
 public class StudyViewController {
-    @Autowired
-    private ApplicationContext applicationContext;
-
     @Autowired
     private StudyViewFilterApplier studyViewFilterApplier;
     @Autowired
@@ -74,8 +68,6 @@ public class StudyViewController {
     private StudyViewService studyViewService;
     @Autowired
     private ClinicalDataBinUtil clinicalDataBinUtil;
-    @Autowired
-    private MolecularProfileService molecularProfileService;
 
     @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
     @RequestMapping(value = "/api/clinical-data-counts/fetch", method = RequestMethod.POST,

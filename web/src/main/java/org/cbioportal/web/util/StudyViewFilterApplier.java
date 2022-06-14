@@ -23,21 +23,13 @@ import javax.annotation.PostConstruct;
 
 @Component
 public class StudyViewFilterApplier {
-    @Autowired
-    private ApplicationContext applicationContext;
-    StudyViewFilterApplier instance;
     
     // This gets initialized and overwritten. We do this because Spring's unit tests
     // don't know how to autowire this, even though production Spring does. If we 
     // don't give this an initial value, we get NPEs.
     @Autowired
     private List<StudyViewSubFilterApplier> subFilterAppliers = new ArrayList<>();
-    
-    @PostConstruct
-    private void init() {
-        instance = applicationContext.getBean(StudyViewFilterApplier.class);
-    }
-
+  
     @Autowired
     private SampleService sampleService;
     @Autowired
@@ -83,15 +75,11 @@ public class StudyViewFilterApplier {
         }
     };
 
-    public List<SampleIdentifier> apply(StudyViewFilter studyViewFilter) {
-        return (instance == null ? this : instance).cachedApply(studyViewFilter);
-    }
-
     @Cacheable(
         cacheResolver = "generalRepositoryCacheResolver",
         condition = "@cacheEnabledConfig.getEnabled()"
     )
-    public List<SampleIdentifier> cachedApply(StudyViewFilter studyViewFilter) {
+    public List<SampleIdentifier> apply(StudyViewFilter studyViewFilter) {
         return this.apply(studyViewFilter, false);
     }
 

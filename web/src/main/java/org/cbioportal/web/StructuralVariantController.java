@@ -66,7 +66,8 @@ public class StructuralVariantController {
             @RequestAttribute(required = false, value = "involvedCancerStudies") Collection<String> involvedCancerStudies,
             @Valid @RequestAttribute(required = false, value = "interceptedStructuralVariantFilter") StructuralVariantFilter interceptedStructuralVariantFilter,
             @ApiParam(required = true, value = "List of entrezGeneIds and molecularProfileIds or sampleMolecularIdentifiers")
-            @Valid @RequestBody(required = false) StructuralVariantFilter structuralVariantFilter) {
+            @Valid @RequestBody(required = false) StructuralVariantFilter structuralVariantFilter
+    ) {
 
         List<String> molecularProfileIds = new ArrayList<>();
         List<String> sampleIds = new ArrayList<>();

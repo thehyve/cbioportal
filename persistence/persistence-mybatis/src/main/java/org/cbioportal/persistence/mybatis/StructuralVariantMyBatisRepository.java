@@ -24,6 +24,7 @@
 package org.cbioportal.persistence.mybatis;
 
 import org.cbioportal.model.GeneFilterQuery;
+import org.cbioportal.model.StructVarFilterQuery;
 import org.cbioportal.model.StructuralVariant;
 import org.cbioportal.model.StructuralVariantQuery;
 import org.cbioportal.persistence.StructuralVariantRepository;
@@ -52,7 +53,8 @@ public class StructuralVariantMyBatisRepository implements StructuralVariantRepo
                                                            List<String> sampleIds,
                                                            List<Integer> entrezGeneIds,
                                                            List<StructuralVariantQuery> structuralVariantQueries) {
-        if (molecularProfileIds == null || molecularProfileIds.isEmpty()) {
+        if (molecularProfileIds == null || molecularProfileIds.isEmpty()
+            || ((entrezGeneIds == null || entrezGeneIds.isEmpty()) && (structuralVariantQueries == null ||structuralVariantQueries.isEmpty()))) {
             return new ArrayList<>();
         }
         return molecularProfileCaseIdentifierUtil.getGroupedCasesByMolecularProfileId(molecularProfileIds, sampleIds)
@@ -75,6 +77,21 @@ public class StructuralVariantMyBatisRepository implements StructuralVariantRepo
     public List<StructuralVariant> fetchStructuralVariantsByGeneQueries(List<String>  molecularProfileIds,
                                                                         List<String> sampleIds,
                                                                         List<GeneFilterQuery> geneQueries) {
+        if (geneQueries == null || geneQueries.isEmpty()
+            || molecularProfileIds == null || molecularProfileIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         return structuralVariantMapper.fetchStructuralVariantsByGeneQueries(molecularProfileIds, sampleIds, geneQueries);
+    }
+
+    @Override
+    public List<StructuralVariant> fetchStructuralVariantsByStructVarQueries(List<String> molecularProfileIds,
+                                                                             List<String> sampleIds,
+                                                                             List<StructVarFilterQuery> structVarQueries) {
+        if (structVarQueries == null || structVarQueries.isEmpty()
+            || molecularProfileIds == null || molecularProfileIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return structuralVariantMapper.fetchStructuralVariantsByStructVarQueries(molecularProfileIds, sampleIds, structVarQueries);
     }
 }

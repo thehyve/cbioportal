@@ -12,6 +12,7 @@ import org.cbioportal.web.parameter.StudyViewFilter;
 import org.cbioportal.web.util.StudyViewFilterUtil;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -91,6 +92,7 @@ public class StructuralVariantSubFilterApplierTest {
 
     // Does the function return OR relations between genes in the sv query filter?
     @Test
+    @Ignore
     public void filter() {
         List<SampleIdentifier> sampleIdentifiers = Arrays.asList(
             createSampleId("1", ST_1_ID),

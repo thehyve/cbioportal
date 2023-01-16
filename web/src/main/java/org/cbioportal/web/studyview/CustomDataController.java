@@ -80,24 +80,8 @@ public class CustomDataController {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
 
-        List<CompletableFuture<CustomDataSession>> postFutures = attributes.stream().map(clinicalDataFilter -> {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    return (CustomDataSession) sessionServiceRequestHandler.getSession(SessionType.custom_data,
-                            clinicalDataFilter.getAttributeId());
-                } catch (Exception e) {
-                    return null;
-                }
-            });
-        }).collect(Collectors.toList());
-
-        CompletableFuture.allOf(postFutures.toArray(new CompletableFuture[postFutures.size()])).join();
-        
-        List<CustomDataSession> customDataSessions = postFutures
-        .stream()
-        .map(CompletableFuture::join)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+        final List<String> attributeIds = attributes.stream().map(ClinicalDataFilter::getAttributeId).collect(Collectors.toList());
+        List<CustomDataSession> customDataSessions = getCustomDataSessions(attributeIds);
 
         Map<String, SampleIdentifier> filteredSamplesMap = filteredSampleIdentifiers.stream()
                 .collect(Collectors.toMap(sampleIdentifier -> {
@@ -111,7 +95,7 @@ public class CustomDataController {
 
         long patientCustomDataSessionsCount = customDataSessions.stream()
                 .filter(customDataSession -> customDataSession.getData().getPatientAttribute()).count();
-        List<Patient> patients = new ArrayList<Patient>();
+        List<Patient> patients = new ArrayList<>();
         if (patientCustomDataSessionsCount > 0) {
             patients.addAll(patientService.getPatientsOfSamples(studyIds, sampleIds));
         }
@@ -120,6 +104,28 @@ public class CustomDataController {
                 filteredSamplesMap, patients);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    public List<CustomDataSession> getCustomDataSessions(List<String> attributes) {
+        List<CompletableFuture<CustomDataSession>> postFutures = attributes.stream().map(attributeId -> {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return (CustomDataSession) sessionServiceRequestHandler.getSession(SessionType.custom_data,
+                            attributeId);
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+        }).collect(Collectors.toList());
+
+        CompletableFuture.allOf(postFutures.toArray(new CompletableFuture[postFutures.size()])).join();
+
+        List<CustomDataSession> customDataSessions = postFutures
+        .stream()
+        .map(CompletableFuture::join)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+        return customDataSessions;
     }
 
 }

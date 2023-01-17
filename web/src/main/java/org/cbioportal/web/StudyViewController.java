@@ -13,6 +13,7 @@ import org.cbioportal.model.*;
 import org.cbioportal.service.*;
 import org.cbioportal.service.exception.StudyNotFoundException;
 import org.cbioportal.service.util.ClinicalAttributeUtil;
+import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.cbioportal.model.AlterationFilter;
 import org.cbioportal.web.parameter.*;
@@ -43,7 +44,6 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @InternalApi
 @RestController
@@ -203,14 +203,15 @@ public class StudyViewController {
         }
 
         final List<String> attributeIds = attributes.stream().map(ClinicalDataBinFilter::getAttributeId).collect(Collectors.toList());
-        List<CustomDataSession> customDataSessions = CustomDataController.getCustomDataSessions(attributeIds);
-                
-        List<ClinicalDataBin> clinicalDataBins = clinicalDataBinUtil.fetchCustomDataBinCounts(
-            dataBinMethod,
-            interceptedClinicalDataBinCountFilter,
-            false
-        );
-
+        // TODO remove
+        List<ClinicalDataBin> clinicalDataBins = new ArrayList<>();
+//        List<CustomDataSession> customDataSessions = CustomDataController.getCustomDataSessions(attributeIds);
+//                
+//        List<ClinicalDataBin> clinicalDataBins = clinicalDataBinUtil.fetchCustomDataBinCounts(
+//            dataBinMethod,
+//            interceptedClinicalDataBinCountFilter,
+//            false
+//        );
         return new ResponseEntity<>(clinicalDataBins, HttpStatus.OK);
     }
 

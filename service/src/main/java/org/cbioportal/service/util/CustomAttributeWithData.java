@@ -1,4 +1,4 @@
-package org.cbioportal.web;
+package org.cbioportal.service.util;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
-
-import org.cbioportal.web.parameter.CustomDataValue;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

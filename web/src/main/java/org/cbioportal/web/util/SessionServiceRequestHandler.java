@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.cbioportal.session_service.domain.Session;
 import org.cbioportal.session_service.domain.SessionType;
-import org.cbioportal.web.parameter.CustomDataSession;
+import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.web.parameter.CustomGeneList;
 import org.cbioportal.web.parameter.PageSettings;
 import org.cbioportal.web.parameter.VirtualStudy;

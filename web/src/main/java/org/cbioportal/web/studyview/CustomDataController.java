@@ -18,7 +18,7 @@ import org.cbioportal.session_service.domain.SessionType;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.cbioportal.web.parameter.ClinicalDataCountFilter;
 import org.cbioportal.web.parameter.ClinicalDataFilter;
-import org.cbioportal.web.parameter.CustomDataSession;
+import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.web.parameter.SampleIdentifier;
 import org.cbioportal.web.parameter.StudyViewFilter;
 import org.cbioportal.web.util.SessionServiceRequestHandler;

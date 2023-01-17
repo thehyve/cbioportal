@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Size;
 
 import com.google.common.collect.ImmutableMap;
+import org.cbioportal.service.util.CustomAttributeWithData;
+import org.cbioportal.service.util.CustomDataSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cbioportal.web.parameter.*;

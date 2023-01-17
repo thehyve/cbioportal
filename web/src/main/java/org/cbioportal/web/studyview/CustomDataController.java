@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,15 +11,14 @@ import javax.validation.Valid;
 
 import org.cbioportal.model.ClinicalDataCountItem;
 import org.cbioportal.model.Patient;
+import org.cbioportal.service.CustomDataService;
 import org.cbioportal.service.PatientService;
-import org.cbioportal.session_service.domain.SessionType;
 import org.cbioportal.web.config.annotation.InternalApi;
 import org.cbioportal.web.parameter.ClinicalDataCountFilter;
 import org.cbioportal.web.parameter.ClinicalDataFilter;
 import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.web.parameter.SampleIdentifier;
 import org.cbioportal.web.parameter.StudyViewFilter;
-import org.cbioportal.web.util.SessionServiceRequestHandler;
 import org.cbioportal.web.util.StudyViewFilterApplier;
 import org.cbioportal.web.util.StudyViewFilterUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +49,7 @@ public class CustomDataController {
     @Autowired
     private StudyViewFilterUtil studyViewFilterUtil;
     @Autowired
-    private SessionServiceRequestHandler sessionServiceRequestHandler;
+    private CustomDataService customDataService;
     @Autowired
     private PatientService patientService;
 
@@ -81,7 +78,7 @@ public class CustomDataController {
         }
 
         final List<String> attributeIds = attributes.stream().map(ClinicalDataFilter::getAttributeId).collect(Collectors.toList());
-        List<CustomDataSession> customDataSessions = getCustomDataSessions(attributeIds);
+        List<CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
 
         Map<String, SampleIdentifier> filteredSamplesMap = filteredSampleIdentifiers.stream()
                 .collect(Collectors.toMap(sampleIdentifier -> {
@@ -104,28 +101,6 @@ public class CustomDataController {
                 filteredSamplesMap, patients);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    public List<CustomDataSession> getCustomDataSessions(List<String> attributes) {
-        List<CompletableFuture<CustomDataSession>> postFutures = attributes.stream().map(attributeId -> {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    return (CustomDataSession) sessionServiceRequestHandler.getSession(SessionType.custom_data,
-                            attributeId);
-                } catch (Exception e) {
-                    return null;
-                }
-            });
-        }).collect(Collectors.toList());
-
-        CompletableFuture.allOf(postFutures.toArray(new CompletableFuture[postFutures.size()])).join();
-
-        List<CustomDataSession> customDataSessions = postFutures
-        .stream()
-        .map(CompletableFuture::join)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-        return customDataSessions;
     }
 
 }

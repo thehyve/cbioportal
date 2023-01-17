@@ -3,15 +3,15 @@ package org.cbioportal.web.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.cbioportal.service.ClinicalDataService;
+import org.cbioportal.service.CustomDataService;
 import org.cbioportal.service.PatientService;
-import org.cbioportal.session_service.domain.SessionType;
 import org.cbioportal.web.parameter.ClinicalDataFilter;
 import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.web.parameter.SampleIdentifier;
@@ -28,46 +28,36 @@ public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
     }
 
     @Autowired
-    private SessionServiceRequestHandler sessionServiceRequestHandler;
+    private CustomDataService customDataService;
+
+    @Autowired
+    private ObjectMapper sessionServiceObjectMapper;
 
     @Override
     public List<SampleIdentifier> apply(List<SampleIdentifier> sampleIdentifiers,
             List<ClinicalDataFilter> customDataFilters, Boolean negateFilters) {
         if (!customDataFilters.isEmpty() && !sampleIdentifiers.isEmpty()) {
 
-            List<CompletableFuture<CustomDataSession>> postFutures = customDataFilters.stream()
-                    .map(clinicalDataFilter -> {
-                        return CompletableFuture.supplyAsync(() -> {
-                            try {
-                                return (CustomDataSession) sessionServiceRequestHandler
-                                        .getSession(SessionType.custom_data, clinicalDataFilter.getAttributeId());
-                            } catch (Exception e) {
-                                return null;
-                            }
-                        });
-                    }).collect(Collectors.toList());
+            final List<String> attributeIds = customDataFilters.stream()
+                .map(customDataFilter -> customDataFilter.getAttributeId())
+                .collect(Collectors.toList());
 
-            CompletableFuture.allOf(postFutures.toArray(new CompletableFuture[postFutures.size()])).join();
+            final List<CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
 
-            Map<String, CustomDataSession> customDataSessionById = postFutures
-                    .stream()
-                    .map(CompletableFuture::join)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toMap(CustomDataSession::getId, Function.identity()));
+            Map<String, CustomDataSession> customDataSessionById = customDataSessions.stream()
+                .collect(Collectors.toMap(CustomDataSession::getId, Function.identity()));
 
             MultiKeyMap clinicalDataMap = new MultiKeyMap();
-
-            customDataSessionById.values()
-            .stream()
-            .forEach(customDataSession -> {
-                customDataSession.getData().getData().forEach(datum -> {
-                    String value = datum.getValue().toUpperCase();
-                    if (value.equals("NAN") || value.equals("N/A")) {
-                        value = "NA";
-                    }
-                    clinicalDataMap.put(datum.getStudyId(), datum.getSampleId(), customDataSession.getId(), value);
+            customDataSessionById.values().stream()
+                .forEach(customDataSession -> {
+                    customDataSession.getData().getData().forEach(datum -> {
+                        String value = datum.getValue().toUpperCase();
+                        if (value.equals("NAN") || value.equals("N/A")) {
+                            value = "NA";
+                        }
+                        clinicalDataMap.put(datum.getStudyId(), datum.getSampleId(), customDataSession.getId(), value);
+                    });
                 });
-            });
 
             List<SampleIdentifier> newSampleIdentifiers = new ArrayList<>();
 

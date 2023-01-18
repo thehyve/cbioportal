@@ -78,26 +78,26 @@ public class CustomDataController {
         }
 
         final List<String> attributeIds = attributes.stream().map(ClinicalDataFilter::getAttributeId).collect(Collectors.toList());
-        List<CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
+        Map<String, CustomDataSession> customDataSessionsMap = customDataService.getCustomDataSessions(attributeIds);
 
         Map<String, SampleIdentifier> filteredSamplesMap = filteredSampleIdentifiers.stream()
-                .collect(Collectors.toMap(sampleIdentifier -> {
-                    return studyViewFilterUtil.getCaseUniqueKey(sampleIdentifier.getStudyId(),
-                            sampleIdentifier.getSampleId());
-                }, Function.identity()));
+            .collect(Collectors.toMap(sampleIdentifier -> studyViewFilterUtil.getCaseUniqueKey(
+                sampleIdentifier.getStudyId(),
+                sampleIdentifier.getSampleId()
+            ), Function.identity()));
 
         List<String> studyIds = new ArrayList<>();
         List<String> sampleIds = new ArrayList<>();
         studyViewFilterUtil.extractStudyAndSampleIds(filteredSampleIdentifiers, studyIds, sampleIds);
 
-        long patientCustomDataSessionsCount = customDataSessions.stream()
+        long patientCustomDataSessionsCount = customDataSessionsMap.values().stream()
                 .filter(customDataSession -> customDataSession.getData().getPatientAttribute()).count();
         List<Patient> patients = new ArrayList<>();
         if (patientCustomDataSessionsCount > 0) {
             patients.addAll(patientService.getPatientsOfSamples(studyIds, sampleIds));
         }
 
-        List<ClinicalDataCountItem> result = studyViewFilterUtil.getClinicalDataCountsFromCustomData(customDataSessions,
+        List<ClinicalDataCountItem> result = studyViewFilterUtil.getClinicalDataCountsFromCustomData(customDataSessionsMap.values(),
                 filteredSamplesMap, patients);
 
         return new ResponseEntity<>(result, HttpStatus.OK);

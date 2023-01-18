@@ -30,9 +30,6 @@ public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
     @Autowired
     private CustomDataService customDataService;
 
-    @Autowired
-    private ObjectMapper sessionServiceObjectMapper;
-
     @Override
     public List<SampleIdentifier> apply(List<SampleIdentifier> sampleIdentifiers,
             List<ClinicalDataFilter> customDataFilters, Boolean negateFilters) {
@@ -42,9 +39,9 @@ public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
                 .map(customDataFilter -> customDataFilter.getAttributeId())
                 .collect(Collectors.toList());
 
-            final List<CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
+            final Map<String, CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
 
-            Map<String, CustomDataSession> customDataSessionById = customDataSessions.stream()
+            Map<String, CustomDataSession> customDataSessionById = customDataSessions.values().stream()
                 .collect(Collectors.toMap(CustomDataSession::getId, Function.identity()));
 
             MultiKeyMap clinicalDataMap = new MultiKeyMap();

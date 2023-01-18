@@ -104,7 +104,7 @@ public class StudyViewFilterUtil {
         return count;
     }
 
-    public List<ClinicalDataCountItem> getClinicalDataCountsFromCustomData(List<CustomDataSession> customDataSessions,
+    public List<ClinicalDataCountItem> getClinicalDataCountsFromCustomData(Collection<CustomDataSession> customDataSessions,
             Map<String, SampleIdentifier> filteredSamplesMap, List<Patient> patients) {
         int totalSamplesCount = filteredSamplesMap.keySet().size();
         int totalPatientsCount = patients.size();
@@ -112,10 +112,9 @@ public class StudyViewFilterUtil {
         return customDataSessions.stream().map(customDataSession -> {
 
             Map<String, List<CustomDataValue>> groupedDatabyValue = customDataSession.getData().getData().stream()
-                    .filter(datum -> {
-                        return filteredSamplesMap
-                                .containsKey(getCaseUniqueKey(datum.getStudyId(), datum.getSampleId()));
-                    }).collect(Collectors.groupingBy(CustomDataValue::getValue));
+                .filter(datum -> filteredSamplesMap
+                    .containsKey(getCaseUniqueKey(datum.getStudyId(), datum.getSampleId()))
+                ).collect(Collectors.groupingBy(CustomDataValue::getValue));
 
             ClinicalDataCountItem clinicalDataCountItem = new ClinicalDataCountItem();
             clinicalDataCountItem.setAttributeId(customDataSession.getId());

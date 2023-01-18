@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -20,29 +20,38 @@ public class CustomDataServiceImpl implements CustomDataService {
     
     @Autowired
     private ObjectMapper sessionServiceObjectMapper;
-    
+
+    /**
+     * Retrieve CustomDataSession from session service for custom data attributes. 
+     * @param customAttributeIds - attribute id/hash of custom data used as session service key.
+     * @return Map of custom data attribute id to the CustomDataSession
+     */
     @Override
-    public List<CustomDataSession> getCustomDataSessions(List<String> customAttributeIds) {
-        List<CompletableFuture<CustomDataSession>> postFutures = customAttributeIds.stream()
-            .map(attributeId -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    String customDataSessionJson = sessionServiceRequestHandler.getSessionDataJson(
-                        SessionType.custom_data,
-                        attributeId
-                    );
-                    return sessionServiceObjectMapper.readValue(customDataSessionJson, CustomDataSession.class);
-                } catch (Exception e) {
-                    return null;
-                }
-            })).collect(Collectors.toList());
+    public Map<String, CustomDataSession> getCustomDataSessions(List<String> customAttributeIds) {
+        Map<String, CompletableFuture<CustomDataSession>> postFuturesMap = customAttributeIds.stream()
+            .collect(Collectors.toMap(
+                attributeId -> attributeId,
+                attributeId -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        String customDataSessionJson = sessionServiceRequestHandler.getSessionDataJson(
+                            SessionType.custom_data,
+                            attributeId
+                        );
+                        return sessionServiceObjectMapper.readValue(customDataSessionJson, CustomDataSession.class);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+            ));
 
-        CompletableFuture.allOf(postFutures.toArray(new CompletableFuture[postFutures.size()])).join();
+        CompletableFuture.allOf(postFuturesMap.values().toArray(new CompletableFuture[postFuturesMap.size()])).join();
 
-        List<CustomDataSession> customDataSessions = postFutures
-            .stream()
-            .map(CompletableFuture::join)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        Map<String, CustomDataSession> customDataSessions = postFuturesMap.entrySet().stream()
+            .filter(entry -> entry.getValue().join() != null)
+            .collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> entry.getValue().join()
+            ));
 
         return customDataSessions;
     }

@@ -85,6 +85,8 @@ public class StudyViewController {
     private StudyViewService studyViewService;
     @Autowired
     private ClinicalDataBinUtil clinicalDataBinUtil;
+    @Autowired
+    private CustomDataService customDataService;
 
     @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
     @RequestMapping(value = "/clinical-data-counts/fetch", method = RequestMethod.POST,
@@ -202,20 +204,12 @@ public class StudyViewController {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
 
-        final List<String> attributeIds = attributes.stream().map(ClinicalDataBinFilter::getAttributeId).collect(Collectors.toList());
-        // TODO remove
-        List<ClinicalDataBin> clinicalDataBins = new ArrayList<>();
-//        List<CustomDataSession> customDataSessions = CustomDataController.getCustomDataSessions(attributeIds);
-//                
-//        List<ClinicalDataBin> clinicalDataBins = clinicalDataBinUtil.fetchCustomDataBinCounts(
-//            dataBinMethod,
-//            interceptedClinicalDataBinCountFilter,
-//            false
-//        );
+        final List<ClinicalDataBin> clinicalDataBins = clinicalDataBinUtil.fetchCustomDataBinCounts(dataBinMethod, interceptedClinicalDataBinCountFilter, false);
+
         return new ResponseEntity<>(clinicalDataBins, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>', T(org.cbioportal.utils.security.AccessLevel).READ)")
+    @PreAuthorize("hasPermission(#involvedCancerStudies, 'Collection<CancerStudyId>',T(org.cbioportal.utils.security.AccessLevel).READ)")
     @RequestMapping(value = "/mutated-genes/fetch", method = RequestMethod.POST,
         consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Fetch mutated genes by study view filter")

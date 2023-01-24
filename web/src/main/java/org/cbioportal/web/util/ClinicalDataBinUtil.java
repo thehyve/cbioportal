@@ -279,6 +279,8 @@ public class ClinicalDataBinUtil {
                         clinicalAttribute.setAttrId(attributeId);
                         clinicalAttribute.setDatatype(customAttributeWithData.getDatatype());
                         
+                        clinicalDatum.setClinicalAttribute(clinicalAttribute);
+                        
                         return clinicalDatum;
                     }).collect(Collectors.toList())
             ));

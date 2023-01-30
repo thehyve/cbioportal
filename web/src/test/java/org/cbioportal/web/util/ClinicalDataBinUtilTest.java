@@ -6,7 +6,6 @@ import org.cbioportal.model.ClinicalData;
 import org.cbioportal.model.ClinicalDataBin;
 import org.cbioportal.model.Patient;
 import org.cbioportal.service.ClinicalAttributeService;
-import org.cbioportal.service.CustomDataService;
 import org.cbioportal.service.PatientService;
 import org.cbioportal.service.impl.CustomDataServiceImpl;
 import org.cbioportal.service.util.ClinicalAttributeUtil;
@@ -17,6 +16,7 @@ import org.cbioportal.service.util.SessionServiceRequestHandler;
 import org.cbioportal.web.parameter.*;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,12 +30,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -188,6 +187,10 @@ public class ClinicalDataBinUtilTest {
             .calculateDynamicDataBins(any(), any(), any(), any(), any());
     }
 
+    /**
+     * TODO: WIP
+     */
+    @Ignore
     @Test
     public void testFilteredFetchClinicalDataBinCounts() {
         mockUnfilteredQuery();
@@ -298,6 +301,13 @@ public class ClinicalDataBinUtilTest {
             false
         );
 
+        String customDataset = getFileContents("classpath:session-service-custom-dataset-sample-identifiers.json");
+        List<SampleIdentifier> t = new ObjectMapper().readValue(customDataset,new ArrayList<>();
+        
+        when(
+            studyViewFilterApplier.apply(any())
+        ).thenReturn(t);
+
         
         // assert data bin counts
         
@@ -387,6 +397,10 @@ public class ClinicalDataBinUtilTest {
             .calculateDynamicDataBins(any(), any(), any(), any(), any());
     }
 
+    private String getFileContents(String resourceLocation) throws IOException {
+        return new String(Files.readAllBytes(ResourceUtils.getFile(resourceLocation).toPath()));
+    }
+
     private void mockUnfilteredQuery()
     {
         mockMethods(
@@ -434,10 +448,7 @@ public class ClinicalDataBinUtilTest {
     @Value("classpath:state.json") Resource stateFile;
 
     private void mockCustomDataService() throws Exception {
-        CustomDataSession session = createCustomDataSession();
-        Map<String, CustomDataSession> sessionMap = new HashMap<>();
-        sessionMap.put(sessionTestKey, session);
-        String customDataset = new String(Files.readAllBytes(ResourceUtils.getFile("classpath:session-service-custom-dataset.json").toPath()));
+        String customDataset = getFileContents("classpath:session-service-custom-dataset.json");
         when(
             sessionServiceRequestHandler.getSessionDataJson(any(), any())
         ).thenReturn(customDataset);

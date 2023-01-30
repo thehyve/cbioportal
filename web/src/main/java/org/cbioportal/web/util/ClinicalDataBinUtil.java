@@ -248,9 +248,6 @@ public class ClinicalDataBinUtil {
         List<String> attributeIds = attributes.stream()
             .map(ClinicalDataBinFilter::getAttributeId).collect(Collectors.toList());
 
-        // filter only by study id and sample identifiers, ignore rest
-        List<SampleIdentifier> studyViewFilterSamples = filterByStudyAndSample(studyViewFilter);
-
         Map<String, CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
         
         // FIXME translate CustomDataSession to ClinicalData collections
@@ -308,6 +305,12 @@ public class ClinicalDataBinUtil {
         // patient attributes which are also sample attributes in other studies
         List<String> unfilteredConflictingPatientAttributeIds = new ArrayList<>();
 
+        Map<String, ClinicalDataType> attributeDatatypeMap = customDataSessions.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().getData().getPatientAttribute()? ClinicalDataType.PATIENT : ClinicalDataType.SAMPLE
+            ));
+        
         populateIdLists(
             // input
             unfilteredSampleIdentifiers,
@@ -320,9 +323,9 @@ public class ClinicalDataBinUtil {
             studyIdsOfUnfilteredPatients,
             unfilteredUniqueSampleKeys,
             unfilteredUniquePatientKeys,
-            unfilteredSampleAttributeIds,
-            unfilteredPatientAttributeIds,
-            unfilteredConflictingPatientAttributeIds
+            unfilteredSampleAttributeIds, // 0
+            unfilteredPatientAttributeIds, // 0
+            unfilteredConflictingPatientAttributeIds // 0
         );
 
         // TODO: change:
@@ -339,12 +342,6 @@ public class ClinicalDataBinUtil {
             .filter(e -> !e.get(0).getClinicalAttribute().getPatientAttribute())
             .flatMap(List::stream)
             .collect(Collectors.toList());
-
-        Map<String, ClinicalDataType> attributeDatatypeMap = constructAttributeDataMap(
-            unfilteredSampleAttributeIds,
-            unfilteredPatientAttributeIds,
-            unfilteredConflictingPatientAttributeIds
-        );
         
         List<ClinicalData> unfilteredClinicalDataForConflictingPatientAttributes = clinicalDataFetcher.fetchClinicalDataForConflictingPatientAttributes(
             studyIdsOfUnfilteredPatients,
@@ -372,9 +369,9 @@ public class ClinicalDataBinUtil {
         if (filteredSampleIdentifiers.equals(unfilteredSampleIdentifiers)) {
             filteredUniqueSampleKeys = unfilteredUniqueSampleKeys;
             filteredUniquePatientKeys = unfilteredUniquePatientKeys;
-            filteredClinicalData = unfilteredClinicalData;
         }
         else {
+            // TODO: can we reach this branch with custom data?
             List<String> filteredStudyIds = new ArrayList<>();
             List<String> filteredSampleIds = new ArrayList<>();
             List<String> filteredPatientIds = new ArrayList<>();
@@ -694,14 +691,14 @@ public class ClinicalDataBinUtil {
     }
 
     public List<ClinicalDataBin> calculateStaticDataBins(
-        List<ClinicalDataBinFilter> attributes,
-        Map<String, ClinicalDataType> attributeDatatypeMap,
-        Map<String, List<ClinicalData>> unfilteredClinicalDataByAttributeId,
-        Map<String, List<ClinicalData>> filteredClinicalDataByAttributeId,
-        List<String> unfilteredUniqueSampleKeys,
-        List<String> unfilteredUniquePatientKeys,
-        List<String> filteredUniqueSampleKeys,
-        List<String> filteredUniquePatientKeys
+        List<ClinicalDataBinFilter> attributes, // 4 
+        Map<String, ClinicalDataType> attributeDatatypeMap, // 4
+        Map<String, List<ClinicalData>> unfilteredClinicalDataByAttributeId, // 4
+        Map<String, List<ClinicalData>> filteredClinicalDataByAttributeId, // 4
+        List<String> unfilteredUniqueSampleKeys, // 845
+        List<String> unfilteredUniquePatientKeys, // 841
+        List<String> filteredUniqueSampleKeys, // 845
+        List<String> filteredUniquePatientKeys //841
     ) {
         List<ClinicalDataBin> clinicalDataBins = new ArrayList<>();
 

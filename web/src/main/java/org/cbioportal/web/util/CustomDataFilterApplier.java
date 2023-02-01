@@ -21,14 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
 
-    @Autowired
-    public CustomDataFilterApplier(PatientService patientService, ClinicalDataService clinicalDataService,
-            StudyViewFilterUtil studyViewFilterUtil) {
-        super(patientService, clinicalDataService, studyViewFilterUtil);
-    }
+    private final CustomDataService customDataService;
 
     @Autowired
-    private CustomDataService customDataService;
+    public CustomDataFilterApplier(PatientService patientService, ClinicalDataService clinicalDataService,
+                                   StudyViewFilterUtil studyViewFilterUtil, CustomDataService customDataService) {
+        super(patientService, clinicalDataService, studyViewFilterUtil);
+        this.customDataService = customDataService;
+    }
 
     @Override
     public List<SampleIdentifier> apply(List<SampleIdentifier> sampleIdentifiers,

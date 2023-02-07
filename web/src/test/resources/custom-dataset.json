@@ -1,17 +1,17 @@
 {
-    "id": "63d13cf9d4d88d40a8b50c7b",
+    "id": "test",
     "data": {
-        "owner": "testuser@thehyve.nl",
+        "owner": "foo@bar.com",
         "origin": [
-            "study_es_0"
+            "none"
         ],
         "created": 1674657017813,
         "lastUpdated": 1674657017813,
         "users": [
-            "testuser@thehyve.nl"
+            "foo@bar.com"
         ],
-        "displayName": "Custom Data 1",
-        "description": "Custom Data 1",
+        "displayName": "Foo",
+        "description": "Bar",
         "datatype": "NUMBER",
         "patientAttribute": false,
         "priority": "0",

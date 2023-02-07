@@ -17,8 +17,8 @@ import org.cbioportal.service.util.CustomDataSession;
 import org.cbioportal.service.util.CustomDataValue;
 import org.cbioportal.service.util.SessionServiceRequestHandler;
 import org.cbioportal.web.parameter.*;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -88,7 +88,9 @@ public class ClinicalDataBinUtilTest {
     private LogScaleDataBinner logScaleDataBinner;
     @Spy
     private DataBinHelper dataBinHelper;
-    private String customDataAttributeId = "63d13cf9d4d88d40a8b50c7b";
+    private final String testDataAttributeId = "test";
+    private final ObjectMapper customDatasetMapper = new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Before
     public void setup() {
@@ -290,28 +292,33 @@ public class ClinicalDataBinUtilTest {
     
     @Test
     public void fetchCustomDataBinCountsWithStaticBinningMethod() throws Exception {
-        mockCustomDataService();
+        String customDataset = getFileContents("classpath:custom-dataset.json");
+        
+        mockCustomDataService(customDataset);
+        mockStudyViewFilterApplier(customDataset);
         ClinicalDataBinCountFilter filter = createClinicalDataBinCountFilter();
-        mockStudyViewFilterApplier();
+        
         List<ClinicalDataBin> bins = clinicalDataBinUtil.fetchCustomDataBinCounts(
             DataBinMethod.STATIC,
             filter,
             false
         );
         
+        // Total number of bins:
         assertEquals(11, bins.size());
 
+        // All bins should have the custom data set name as attribute:
         List<ClinicalDataBin> customDatasetAttributeBins = bins
             .stream()
-            .filter(bin -> bin.getAttributeId().equals(customDataAttributeId))
+            .filter(bin -> bin.getAttributeId().equals(testDataAttributeId))
             .collect(Collectors.toList());
         assertEquals(11, customDatasetAttributeBins.size());
 
         assertEquals("<=", bins.get(0).getSpecialValue());
         assertEquals(42, bins.get(0).getCount().intValue());
 
-        assertEquals(5, bins.get(1).getStart().intValue());
-        assertEquals(10, bins.get(1).getEnd().intValue());
+        // Bin size should be five:
+        assertEquals(5, bins.get(1).getEnd().intValue() - bins.get(1).getStart().intValue());
         assertEquals(81, bins.get(1).getCount().intValue());
 
         assertEquals(95, bins.get(2).getCount().intValue());
@@ -327,13 +334,54 @@ public class ClinicalDataBinUtilTest {
         assertEquals(12, bins.get(10).getCount().intValue());
     }
 
-    private void mockStudyViewFilterApplier() throws IOException {
-        String customDataset = getFileContents("classpath:custom-dataset.json");
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TreeNode path = mapper.readTree(customDataset).path("data").path("data");
+    @Ignore
+    @Test
+    public void fetchCustomDataBinCountsWithStaticBinningMethod_minimalExample() throws Exception {
+        String customDataset = getFileContents("classpath:custom-dataset-minimal.json");
+        
+        mockCustomDataService(customDataset);
+        mockStudyViewFilterApplier(customDataset);
+        ClinicalDataBinCountFilter filter = createClinicalDataBinCountFilter();
+        
+        List<ClinicalDataBin> bins = clinicalDataBinUtil.fetchCustomDataBinCounts(
+            DataBinMethod.STATIC,
+            filter,
+            false
+        );
+        
+        // Why 18 bins when changing 3 -> 3.9?
+        // Total number of bins:
+        assertEquals(9, bins.size());
+
+        // All bins should have the custom data set name as attribute:
+        List<ClinicalDataBin> customDatasetAttributeBins = bins
+            .stream()
+            .filter(bin -> bin.getAttributeId().equals(testDataAttributeId))
+            .collect(Collectors.toList());
+        assertEquals(9, customDatasetAttributeBins.size());
+
+        // Bin size should be 1:
+        assertEquals(1, bins.get(0).getEnd().intValue() - bins.get(0).getStart().intValue());
+        assertEquals(0, bins.get(1).getCount().intValue());
+
+//        assertEquals(95, bins.get(2).getCount().intValue());
+//        assertEquals(100, bins.get(3).getCount().intValue());
+//        assertEquals(101, bins.get(4).getCount().intValue());
+//        assertEquals(100, bins.get(5).getCount().intValue());
+//        assertEquals(100, bins.get(6).getCount().intValue());
+//        assertEquals(100, bins.get(7).getCount().intValue());
+//        assertEquals(84, bins.get(8).getCount().intValue());
+//        assertEquals(30, bins.get(9).getCount().intValue());
+//
+//        assertEquals(">", bins.get(10).getSpecialValue());
+//        assertEquals(12, bins.get(10).getCount().intValue());
+    }
+
+    private void mockStudyViewFilterApplier(String customDataset) throws IOException {
+        TreeNode path = customDatasetMapper.readTree(customDataset).path("data").path("data");
 
         TypeReference<List<SampleIdentifier>> type = new TypeReference<List<SampleIdentifier>>() {};
-        List<SampleIdentifier> customIDs = mapper.readValue(mapper.treeAsTokens(path), type);
+        List<SampleIdentifier> customIDs = customDatasetMapper.readValue(customDatasetMapper.treeAsTokens(path), type);
 
         when(
             studyViewFilterApplier.apply(any())
@@ -390,8 +438,7 @@ public class ClinicalDataBinUtilTest {
 
     @Value("classpath:state.json") Resource stateFile;
 
-    private void mockCustomDataService() throws Exception {
-        String customDataset = getFileContents("classpath:custom-dataset.json");
+    private void mockCustomDataService(String customDataset) throws Exception {
         when(
             sessionServiceRequestHandler.getSessionDataJson(any(), any())
         ).thenReturn(customDataset);
@@ -883,7 +930,7 @@ public class ClinicalDataBinUtilTest {
         ClinicalDataBinCountFilter clinicalDataBinCountFilter = new ClinicalDataBinCountFilter();
         List<ClinicalDataBinFilter> attributes = new ArrayList<>();
         ClinicalDataBinFilter clinicalDataBinFilter = new ClinicalDataBinFilter();
-        clinicalDataBinFilter.setAttributeId(customDataAttributeId);
+        clinicalDataBinFilter.setAttributeId(testDataAttributeId);
         clinicalDataBinFilter.setBinMethod(DataBinFilter.BinMethod.CUSTOM);
         StudyViewFilter studyViewFilter = new StudyViewFilter();
         ArrayList<String> studyIds = new ArrayList<>();

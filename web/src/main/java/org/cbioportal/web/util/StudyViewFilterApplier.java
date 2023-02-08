@@ -53,6 +53,8 @@ public class StudyViewFilterApplier {
     @Autowired
     private ClinicalDataIntervalFilterApplier clinicalDataIntervalFilterApplier;
     @Autowired
+    private CustomDataFilterApplier customDataFilterApplier;
+    @Autowired
     private StudyViewFilterUtil studyViewFilterUtil;
     @Autowired
     private GeneService geneService;
@@ -68,8 +70,6 @@ public class StudyViewFilterApplier {
     private DataBinner dataBinner;
     @Autowired
     private StructuralVariantService structuralVariantService;
-    @Autowired
-    private CustomDataFilterApplier customDataFilterApplier;
     @Autowired
     private MolecularProfileUtil molecularProfileUtil;
 

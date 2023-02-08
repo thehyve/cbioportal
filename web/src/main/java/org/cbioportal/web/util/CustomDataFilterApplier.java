@@ -1,77 +1,88 @@
 package org.cbioportal.web.util;
 
+import org.apache.commons.collections4.map.MultiKeyMap;
+import org.cbioportal.service.CustomDataService;
+import org.cbioportal.service.util.CustomDataSession;
+import org.cbioportal.web.parameter.ClinicalDataFilter;
+import org.cbioportal.web.parameter.SampleIdentifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.map.MultiKeyMap;
-import org.cbioportal.service.ClinicalDataService;
-import org.cbioportal.service.CustomDataService;
-import org.cbioportal.service.PatientService;
-import org.cbioportal.web.parameter.ClinicalDataFilter;
-import org.cbioportal.service.util.CustomDataSession;
-import org.cbioportal.web.parameter.SampleIdentifier;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component
-public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
+public class CustomDataFilterApplier implements DataFilterApplier<ClinicalDataFilter> {
 
     private final CustomDataService customDataService;
 
-    @Autowired
-    private ClinicalDataEqualityFilterApplier clinicalDataEqualityFilterApplier;
-    @Autowired
-    private ClinicalDataIntervalFilterApplier clinicalDataIntervalFilterApplier;
+    private final ClinicalDataEqualityFilterApplier equalityFilterApplier;
+    private final ClinicalDataIntervalFilterApplier intervalFilterApplier;
     
     @Autowired
     public CustomDataFilterApplier(
-        PatientService patientService, 
-        ClinicalDataService clinicalDataService,
-        StudyViewFilterUtil studyViewFilterUtil, 
-        CustomDataService customDataService
+        CustomDataService customDataService,
+        ClinicalDataEqualityFilterApplier equalityFilterApplier, 
+        ClinicalDataIntervalFilterApplier intervalFilterApplier
     ) {
-        super(patientService, clinicalDataService, studyViewFilterUtil);
         this.customDataService = customDataService;
+        this.equalityFilterApplier = equalityFilterApplier;
+        this.intervalFilterApplier = intervalFilterApplier;
     }
 
     @Override
-    public List<SampleIdentifier> apply(List<SampleIdentifier> sampleIdentifiers,
-            List<ClinicalDataFilter> customDataFilters, Boolean negateFilters) {
-        if (customDataFilters.isEmpty() || sampleIdentifiers.isEmpty()) {
+    public List<SampleIdentifier> apply(
+        List<SampleIdentifier> sampleIdentifiers,
+        List<ClinicalDataFilter> dataFilters,
+        Boolean negateFilters
+    ) {
+        if (dataFilters.isEmpty() || sampleIdentifiers.isEmpty()) {
             return sampleIdentifiers;
         }
 
-        final List<String> attributeIds = customDataFilters.stream()
-            .map(customDataFilter -> customDataFilter.getAttributeId())
+        final List<String> attributeIds = dataFilters.stream()
+            .map(ClinicalDataFilter::getAttributeId)
             .collect(Collectors.toList());
 
         final Map<String, CustomDataSession> customDataSessions = customDataService.getCustomDataSessions(attributeIds);
 
-        Map<String, CustomDataSession> customDataSessionById = customDataSessions.values().stream()
-            .collect(Collectors.toMap(CustomDataSession::getId, Function.identity()));
+        Map<String, CustomDataSession> customDataSessionById = customDataSessions
+            .values()
+            .stream()
+            .collect(Collectors.toMap(
+                CustomDataSession::getId, 
+                Function.identity()
+            ));
 
-        // Custom data entry by key1=studyId; key2=sampleId and key3=sessionId:
-        MultiKeyMap<String, String> customDataMap = new MultiKeyMap<>();
+        /* 
+        Custom data entry with: 
+        - key1: studyId; 
+        - key2: sampleId; 
+        - key3: sessionId.
+        */
+        MultiKeyMap<String, String> customDataByStudySampleSession = new MultiKeyMap<>();
 
-        customDataSessionById.values().forEach(customDataSession -> {
-            customDataSession.getData().getData().forEach(datum -> {
+        customDataSessionById.values().forEach(customDataSession -> customDataSession
+            .getData()
+            .getData()
+            .forEach(datum -> {
                 String value = datum.getValue().toUpperCase();
                 if (value.equals("NAN") || value.equals("N/A")) {
                     value = "NA";
                 }
-                customDataMap.put(datum.getStudyId(), datum.getSampleId(), customDataSession.getId(), value);
-            });
-        });
+                customDataByStudySampleSession.put(datum.getStudyId(), datum.getSampleId(), customDataSession.getId(), value);
+            })
+        );
 
         return filterCustomData(
-            customDataFilters, 
+            dataFilters, 
             negateFilters, 
             sampleIdentifiers, 
             customDataSessionById,
-            customDataMap
+            customDataByStudySampleSession
         );
     }
     
@@ -94,7 +105,7 @@ public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
                 .get(attributeId)
                 .getData()
                 .getDatatype()
-                .equals("STRING")
+                .equals(CustomDataDatatype.STRING.name())
             ) {
                 customDataEqualityFilters.add(filter);
             } else {
@@ -104,12 +115,12 @@ public class CustomDataFilterApplier extends ClinicalDataEqualityFilterApplier {
 
         List<SampleIdentifier> filtered = new ArrayList<>();
         sampleIdentifiers.forEach(sampleIdentifier -> {
-            int customEqualityFilterCount = clinicalDataEqualityFilterApplier.apply(customDataEqualityFilters, clinicalDataMap,
+            int equalityFilterCount = equalityFilterApplier.apply(customDataEqualityFilters, clinicalDataMap,
                 sampleIdentifier.getSampleId(), sampleIdentifier.getStudyId(), negateFilters);
-            int customIntervalFilterCount = clinicalDataIntervalFilterApplier.apply(customDataIntervalFilters, clinicalDataMap,
+            int intervalFilterCount = intervalFilterApplier.apply(customDataIntervalFilters, clinicalDataMap,
                 sampleIdentifier.getSampleId(), sampleIdentifier.getStudyId(), negateFilters);
-            if (customEqualityFilterCount == customDataEqualityFilters.size() 
-                && customIntervalFilterCount == customDataIntervalFilters.size()
+            if (equalityFilterCount == customDataEqualityFilters.size() 
+                && intervalFilterCount == customDataIntervalFilters.size()
             ) {
                 filtered.add(sampleIdentifier);
             }

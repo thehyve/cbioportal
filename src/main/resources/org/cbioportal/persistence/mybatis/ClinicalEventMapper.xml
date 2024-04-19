@@ -96,6 +96,73 @@
         <include refid="whereStudy"/>
     </select>
     
+    <sql id="selectSamples">
+        SELECT
+            clinical_event.CLINICAL_EVENT_ID AS clinicalEventId,
+            clinical_event.EVENT_TYPE AS eventType,
+            sample.STABLE_ID AS uniqueSampleKey,
+            patient.STABLE_ID AS patientId
+        FROM sample  <!-- Materialized view option, probably quite common across study view endpoints. -->
+            INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+            Inner JOIN clinical_event ON clinical_event.PATIENT_ID = patient.INTERNAL_ID
+            Inner JOIN cancer_study ON cancer_study.CANCER_STUDY_ID = patient.CANCER_STUDY_ID
+    </sql>
+
+    <sql id="selectSamplesFromStudies">
+        <include refid="selectSamples">
+        <where>
+            cancer_study.cancer_study_identifier in 
+            <if test="studyIds.isEmpty()">
+                    (NULL)
+            </if>
+            <if test="!studyIds.isEmpty()">
+                <foreach item="item" collection="studyIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+        </where>
+    </sql>
+
+    <select id="getFilteredSamplesOfPatientsPerEventType" resultType="hashmap">
+        WITH selectFromStudies as
+        (
+            <include refid="selectSamplesFromStudies">
+        )  <!-- Keeps the subquery in memory, so it does not get executed in each UNION block -->
+        <trim prefix="INTERSECT">
+            <foreach item="collection", collection="eventTypes", open="UNION",>
+                INTERSECT  <!-- Takes care of the AND functionality -->
+                SELECT 
+                    DISTINCT uniqueSampleKey,
+                FROM
+                    selectFromStudies
+                <where>
+                    eventType IN         
+                    <foreach item="item", collection="collection", open="(" separator="," close=")">
+                        #{item}  <!-- Takes care of the OR functionality -->
+                    </foreach>
+                </where>
+            </foreach>
+        </trim>
+    </select>
+
+
+    <select id="getEventTypeCounts" resultType="hashmap">
+        SELECT 
+            eventType, 
+            count(*) AS count
+        FROM
+            (
+                <include refid="selectSamplesFromStudies">
+            )
+        WHERE
+            uniqueSampleKey in (<include refid="getFilteredSamplesOfPatientsPerEventType">) <!-- This should be changed to the full studyviewfilter -->
+        GROUP BY
+            eventType
+        ORDER BY 
+            count DESC
+    </select>
+         
+
+
     <select id="getSamplesOfPatientsPerEventType" resultType="org.cbioportal.model.ClinicalEvent">
         SELECT
         clinical_event.CLINICAL_EVENT_ID as clinicalEventId,

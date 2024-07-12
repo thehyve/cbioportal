@@ -75,15 +75,24 @@ public class ImportGeneData extends ConsoleRunnable {
 
                 String species = GlobalProperties.getSpecies();
                 String parts[] = line.split("\t");
+//                ProgressMonitor.logWarning("Is it a dog gene?");
                 int taxonomy = Integer.parseInt(parts[0]);
+//                ProgressMonitor.logWarning("Taxonomy: " + taxonomy);
+//                ProgressMonitor.logWarning("Species: " + species);
                 if (species.equals("human")) {
                     if (taxonomy!=9606) {
                         // only import human genes
                         continue;
                     }
                 } else if (species.equals("mouse")) {
-                    if (taxonomy!=10090) {
+                    if (taxonomy != 10090) {
                         // only import mouse genes
+                        continue;
+                    }
+                } else if (species.equals("dog")) {
+                    if (taxonomy != 9615) {
+                        // only import mouse genes
+//                        ProgressMonitor.logWarning("It's a dog gene!");
                         continue;
                     }
                 } else {
@@ -481,6 +490,7 @@ public class ImportGeneData extends ConsoleRunnable {
         //Set the variables needed for the method
         FileReader reader = new FileReader(geneFile);
         BufferedReader buf = new BufferedReader(reader);
+        ProgressMonitor.setCurrentMessage(genomeBuild);
         int referenceGenomeId = DaoReferenceGenome.getReferenceGenomeByBuildName(genomeBuild).getReferenceGenomeId();
         String line;
         ProgressMonitor.setCurrentMessage("\nUpdating gene lengths... \n"); //Display a message in the console
@@ -715,7 +725,7 @@ public class ImportGeneData extends ConsoleRunnable {
 
             if(options.has("genes")) {
                 File geneFile = new File((String) options.valueOf("genes"));
-                System.out.println("Reading gene data from:  " + geneFile.getAbsolutePath());
+                System.out.println("Reading gene data from GENES:  " + geneFile.getAbsolutePath());
                 int numLines = FileUtil.getNumLines(geneFile);
                 System.out.println(" --> total number of lines:  " + numLines);
                 ProgressMonitor.setMaxValue(numLines);
@@ -760,7 +770,8 @@ public class ImportGeneData extends ConsoleRunnable {
                 if (options.has("species")) {
                     species = (String)options.valueOf("species");
                 }
-                System.out.println("Reading loci data from:  " + lociFile.getAbsolutePath());
+                System.out.println("Species is:  " + species);
+                System.out.println("Reading loci data from test:  " + lociFile.getAbsolutePath());
                 int numLines = FileUtil.getNumLines(lociFile);
                 System.out.println(" --> total number of lines:  " + numLines);
                 ProgressMonitor.setMaxValue(numLines);

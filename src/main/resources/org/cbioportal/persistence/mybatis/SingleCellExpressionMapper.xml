@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.cbioportal.persistence.mybatis.SingleCellExpressionMapper">
+
+    <select id="fetchSingleCellExpressionInMolecularProfile" resultType="org.cbioportal.model.SingleCellExpression">
+        SELECT
+            genetic_profile.STABLE_ID as "molecularProfileId",
+            sample.STABLE_ID as "sampleId",
+            patient.STABLE_ID as "patientId",
+            single_cell_expression.ENTREZ_GENE_ID as "entrezGeneId",
+            cancer_study.CANCER_STUDY_IDENTIFIER AS "studyId",
+            single_cell_expression.TISSUE as "tissue",
+            single_cell_expression.CELL_TYPE as "cellType",
+            single_cell_expression.EXPRESSION_VALUE as "expressionValue"
+
+        FROM single_cell_expression
+        INNER JOIN genetic_profile ON single_cell_expression.GENETIC_PROFILE_ID = genetic_profile.GENETIC_PROFILE_ID
+        INNER JOIN sample ON single_cell_expression.SAMPLE_ID = sample.INTERNAL_ID
+        INNER JOIN patient ON sample.PATIENT_ID = patient.INTERNAL_ID
+        INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID
+
+        <include refid="whereBySampleListIdAndEntrezGeneId"/>
+        <include refid="projectionAndLimitFilter"/>
+    </select>
+
+    <sql id="whereBySampleListIdAndEntrezGeneId">
+        <where>
+            genetic_profile.STABLE_ID = #{molecularProfileId}
+            AND single_cell_expression.SAMPLE_ID IN
+            (
+                SELECT sample_list_list.SAMPLE_ID FROM sample_list_list
+                INNER JOIN sample_list ON sample_list_list.LIST_ID = sample_list.LIST_ID
+                WHERE sample_list.STABLE_ID = #{sampleListId}
+                AND sample_list_list.SAMPLE_ID = single_cell_expression.SAMPLE_ID
+            )
+            <if test="entrezGeneIds != null and !entrezGeneIds.isEmpty()">
+                AND single_cell_expression.ENTREZ_GENE_ID IN
+                <foreach item="item" collection="entrezGeneIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="projectionAndLimitFilter">
+        <if test="sortBy != null">
+        <!-- <if test="sortBy != null and projection != 'ID'"> -->
+            ORDER BY "${sortBy}" ${direction}
+        </if>
+        <!-- <if test="projection == 'ID'"> -->
+        <!--     ORDER BY genetic_profile.STABLE_ID ASC, sample.STABLE_ID ASC, single_cell_expression.ENTREZ_GENE_ID ASC -->
+        <!-- </if> -->
+        <if test="limit != null and limit != 0">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </sql>
+</mapper>

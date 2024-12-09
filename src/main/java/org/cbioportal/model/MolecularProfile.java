@@ -26,7 +26,7 @@ public class MolecularProfile implements Serializable {
         PROTEIN_ARRAY_PHOSPHORYLATION,
         GENESET_SCORE,
         GENERIC_ASSAY,
-        SINGLE_CELL_EXPRESSION
+        SINGLE_CELL_EXPRESSION,
     }
     
     public enum DataType {

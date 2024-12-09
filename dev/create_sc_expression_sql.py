@@ -7,7 +7,7 @@ import json
 import pandas as pd
 
 # STUDY_ID = msk_spectrum_tme_2022
-cancer_study_id = 40
+cancer_study_id = 1
 # THIS DOESNT MATTER, JUST A HIGH NUMBER?
 genetic_profile_id = 10000
 
@@ -28,12 +28,12 @@ CREATE TABLE IF NOT EXISTS single_cell_expression (
 """
 
 add_genetic_profile = f"""
-DELETE FROM genetic_profile WHERE STABLE_ID = "single_cell_expression";
+DELETE FROM genetic_profile WHERE STABLE_ID = "SINGLE_CELL_EXPRESSION";
 INSERT INTO genetic_profile (
     GENETIC_PROFILE_ID, STABLE_ID, CANCER_STUDY_ID, GENETIC_ALTERATION_TYPE,
     DATATYPE, NAME, DESCRIPTION, SHOW_PROFILE_IN_ANALYSIS_TAB
 ) VALUES (
-     {genetic_profile_id}, "SINGLE_CELL_EXPRESSION", {cancer_study_id}, "single_cell_expression",
+     {genetic_profile_id}, "SINGLE_CELL_EXPRESSION", {cancer_study_id}, "SINGLE_CELL_EXPRESSION",
     "single_cell_expression", "Single Cell Expression", "Single Cell Expression", 1
 );
 """
@@ -53,18 +53,18 @@ def create_sample_map():
     INNER JOIN cancer_study ON patient.CANCER_STUDY_ID = cancer_study.CANCER_STUDY_ID 
     WHERE cancer_study.CANCER_STUDY_IDENTIFIER = "msk_spectrum_tme_2022";
     """
-    data = pd.read_csv("sample_map.tsv", skiprows=1, sep="\t")
+    data = pd.read_csv("sample_map.tsv", skiprows=0, sep="\t")
     data = data.dropna(how="any")
-    return dict(zip(data["INTERNAL_ID"], data["STABLE_ID"]))
+    return dict(zip(data["STABLE_ID"], data["INTERNAL_ID"]))
 
 
 def create_gene_map():
     """SQL:
     select ENTREZ_GENE_ID, HUGO_GENE_SYMBOL from gene;
     """
-    data = pd.read_csv("gene_map.tsv", skiprows=1, sep="\t")
+    data = pd.read_csv("gene_map.tsv", skiprows=0, sep="\t")
     data = data.dropna(how="any")
-    return dict(zip(data["ENTREZ_GENE_ID"], data["HUGO_GENE_SYMBOL"]))
+    return dict(zip(data["HUGO_GENE_SYMBOL"], data["ENTREZ_GENE_ID"]))
 
 
 def create_data_sql() -> str:
@@ -86,10 +86,12 @@ def create_data_sql() -> str:
                     if mapped_gene_id is None:
                         continue
                     if not first:
-                        sql += "), ("
+                        sql += "\n), (\n"
+                    if pd.isna(value):
+                        value = "NULL"
                     sql += f"{genetic_profile_id}, {mapped_sample_id}, \"{tissue}\", \"{cell_type}\", {mapped_gene_id}, {value} "
                     first = False
-    sql += ");"
+    sql += "\n);"
     print(sql)
     return sql
 

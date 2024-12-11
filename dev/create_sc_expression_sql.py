@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS single_cell_expression (
     FOREIGN KEY(SAMPLE_ID) REFERENCES sample(INTERNAL_ID),
     FOREIGN KEY(ENTREZ_GENE_ID) REFERENCES gene(ENTREZ_GENE_ID)
 );
+
+
+CREATE INDEX single_cell_sortby ON single_cell_expression (GENETIC_PROFILE_ID, SAMPLE_ID, TISSUE, CELL_TYPE);
+CREATE INDEX sample_index ON single_cell_expression (GENETIC_PROFILE_ID, SAMPLE_ID);
+CREATE INDEX entrez_index ON single_cell_expression (ENTREZ_GENE_ID);
 """
 
 add_genetic_profile = f"""

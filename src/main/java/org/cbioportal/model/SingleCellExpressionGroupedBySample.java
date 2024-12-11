@@ -1,5 +1,7 @@
 package org.cbioportal.model;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,8 +28,8 @@ public class SingleCellExpressionGroupedBySample extends UniqueKeyBase {
         this.patientId = singleCellExpressions.get(0).getPatientId();
         this.studyId = singleCellExpressions.get(0).getStudyId();
 
-        Map<String, List<SingleCellExpression>> tissueMap = singleCellExpressions.stream()
-            .collect(Collectors.groupingBy(SingleCellExpression::getTissue));
+        Map<String, List<SingleCellExpression>> tissueMap = SingleCellExpressionGroupedBySample
+            .createSingleCellExpressionGroupedMap(singleCellExpressions, "tissue");
         this.singleCellExpressionGroupedByTissues = tissueMap.entrySet().stream()
             .map(e -> new SingleCellExpressionGroupedByTissue(e.getKey(), e.getValue()))
             .collect(Collectors.toList());
@@ -75,8 +77,9 @@ public class SingleCellExpressionGroupedBySample extends UniqueKeyBase {
                 List<SingleCellExpression> singleCellExpressions) {
             this.tissue = tissue;
 
-            Map<String, List<SingleCellExpression>> cellTypeMap = singleCellExpressions.stream()
-                .collect(Collectors.groupingBy(SingleCellExpression::getCellType));
+            Map<String, List<SingleCellExpression>> cellTypeMap = SingleCellExpressionGroupedBySample
+            .createSingleCellExpressionGroupedMap(singleCellExpressions, "cellType");
+
             this.singleCellExpressionGroupedByCellTypes = cellTypeMap.entrySet().stream()
                 .map(e -> new SingleCellExpressionGroupedByCellType(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
@@ -146,5 +149,44 @@ public class SingleCellExpressionGroupedBySample extends UniqueKeyBase {
                 }
             }
         }
+    }
+
+    public static Map<String, List<SingleCellExpression>> createSingleCellExpressionGroupedMap(List<SingleCellExpression> singleCellExpressionData, String sortBy) {
+        // singleCellExpressionData NEEDS TO BE SORTED in order for this to work correctly.
+        // This is done this way in order to improve efficiency. Sorting is done in the DB query,
+        // and indices on the relevant columns increase query speed
+        Map<String, List<SingleCellExpression>> singleCellExpressionGroupedBy = new LinkedHashMap<>();
+        String currentValue = "";
+        String forLoopValue = "";
+        List<SingleCellExpression> singleCellExpressionList = new LinkedList<>();
+        for (SingleCellExpression singleCellExpression : singleCellExpressionData) {
+            switch (sortBy) {
+                case "sampleId":
+                    forLoopValue = singleCellExpression.getSampleId();
+                    break;
+                case "tissue":
+                    forLoopValue = singleCellExpression.getTissue();
+                    break;
+                case "cellType":
+                    forLoopValue = singleCellExpression.getCellType();
+                    break;
+                default:
+                    throw new RuntimeException("sortBy option " + sortBy + " not supported.");
+            }
+            if (currentValue.equals("")) {
+                currentValue = forLoopValue;
+                singleCellExpressionList = new LinkedList<>();
+            }
+            if (!currentValue.equals(forLoopValue)) {
+                singleCellExpressionGroupedBy.put(currentValue, singleCellExpressionList);
+                currentValue = forLoopValue;
+                singleCellExpressionList = new LinkedList<>();
+            }
+            singleCellExpressionList.add(singleCellExpression);
+        }
+        if (!currentValue.equals("")) {
+            singleCellExpressionGroupedBy.put(currentValue, singleCellExpressionList);
+        }
+        return singleCellExpressionGroupedBy;
     }
 }

@@ -19,6 +19,8 @@ import org.cbioportal.model.SampleClinicalDataCollection;
 import org.cbioportal.model.StructuralVariantFilterQuery;
 import org.cbioportal.model.StructuralVariantSpecialValue;
 import org.cbioportal.model.StudyViewStructuralVariantFilter;
+import org.cbioportal.model.NamespaceDataCount;
+import org.cbioportal.model.NamespaceDataCountItem;
 import org.cbioportal.model.util.Select;
 import org.cbioportal.persistence.AlterationRepository;
 import org.cbioportal.service.AlterationCountService;
@@ -46,6 +48,8 @@ import org.cbioportal.web.parameter.ClinicalDataFilter;
 import org.cbioportal.web.parameter.GenericAssayDataCountFilter;
 import org.cbioportal.web.parameter.GenericAssayDataFilter;
 import org.cbioportal.web.parameter.GenomicDataCountFilter;
+import org.cbioportal.web.parameter.NamespaceDataFilter;
+import org.cbioportal.web.parameter.NamespaceDataCountFilter;
 import org.cbioportal.web.parameter.GenomicDataFilter;
 import org.cbioportal.web.parameter.SampleIdentifier;
 import org.cbioportal.web.parameter.StudyViewFilter;
@@ -128,6 +132,10 @@ public class StudyViewControllerTest {
     private static final String TEST_CNA_ALTERATION_VALUE_2 = "-2";
     private static final String TEST_MOLECULAR_PROFILE_TYPE = "test_molecular_profile_type";
     private static final String TEST_MUTATION_TYPE = "test_mutation_type";
+    private static final String TEST_OUTER_KEY = "test_outer_key";
+    private static final String TEST_INNER_KEY = "test_inner_key";
+    private static final String TEST_NAMESPACE_DATA_VALUE_1 = "value1";
+    private static final String TEST_NAMESPACE_DATA_VALUE_2 = "value2";
 
     private List<SampleIdentifier> filteredSampleIdentifiers = new ArrayList<>();
     private List<ClinicalData> clinicalData = new ArrayList<>();
@@ -1336,5 +1344,62 @@ public class StudyViewControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].label").value(TEST_MUTATION_TYPE))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].value").value(TEST_MUTATION_TYPE))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].counts[1].count").value(1));
+    }
+
+    @Test
+    @WithMockUser
+    public void fetchNamespaceDataCounts() throws Exception {
+
+        List<SampleIdentifier> filteredSampleIdentifiers = new ArrayList<>();
+        SampleIdentifier sampleIdentifier = new SampleIdentifier();
+        sampleIdentifier.setSampleId(TEST_SAMPLE_ID_1);
+        sampleIdentifier.setStudyId(TEST_STUDY_ID);
+        filteredSampleIdentifiers.add(sampleIdentifier);
+        when(studyViewFilterApplier.apply(any())).thenReturn(filteredSampleIdentifiers);
+
+        List<NamespaceDataCountItem> namespaceDataCountItems = new ArrayList<>();
+        NamespaceDataCountItem namespaceDataCountItem = new NamespaceDataCountItem();
+        namespaceDataCountItem.setOuterKey(TEST_OUTER_KEY);
+        namespaceDataCountItem.setInnerKey(TEST_INNER_KEY);
+        List<NamespaceDataCount> namespaceDataCounts = new ArrayList<>();
+        NamespaceDataCount namespaceDataCount1 = new NamespaceDataCount();
+        namespaceDataCount1.setValue(TEST_NAMESPACE_DATA_VALUE_1);
+        namespaceDataCount1.setCount(3);
+        namespaceDataCounts.add(namespaceDataCount1);
+        NamespaceDataCount namespaceDataCount2 = new NamespaceDataCount();
+        namespaceDataCount2.setValue(TEST_NAMESPACE_DATA_VALUE_2);
+        namespaceDataCount2.setCount(1);
+        namespaceDataCounts.add(namespaceDataCount2);
+        namespaceDataCountItem.setCounts(namespaceDataCounts);
+        namespaceDataCountItems.add(namespaceDataCountItem);
+        
+        when(studyViewService.fetchNamespaceDataCounts(anyList(), anyList(),
+            anyList())).thenReturn(namespaceDataCountItems);
+
+        NamespaceDataCountFilter namespaceDataCountFilter = new NamespaceDataCountFilter();
+        NamespaceDataFilter namespaceDataFilter = new NamespaceDataFilter();
+        namespaceDataFilter.setOuterKey(TEST_OUTER_KEY);
+        namespaceDataFilter.setInnerKey(TEST_INNER_KEY);
+        namespaceDataCountFilter.setAttributes(Arrays.asList(namespaceDataFilter));
+        StudyViewFilter studyViewFilter = new StudyViewFilter();
+        studyViewFilter.setStudyIds(Arrays.asList(TEST_STUDY_ID));
+        namespaceDataCountFilter.setStudyViewFilter(studyViewFilter);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/namespace-data-counts/fetch").with(csrf())
+            .accept(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(namespaceDataCountFilter)))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].outerKey").value(TEST_OUTER_KEY))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].innerKey").value(TEST_INNER_KEY))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].outerKey").doesNotExist())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].innerKey").doesNotExist())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].value").value(TEST_NAMESPACE_DATA_VALUE_1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[0].count").value(3))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].outerKey").doesNotExist())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].innerKey").doesNotExist())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].value").value(TEST_NAMESPACE_DATA_VALUE_2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].counts[1].count").value(1));
     }
 }

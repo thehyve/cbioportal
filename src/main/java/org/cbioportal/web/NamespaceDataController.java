@@ -1,4 +1,4 @@
-package org.cbioportal.legacy.web;
+package org.cbioportal.web;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.cbioportal.legacy.model.NamespaceAttribute;
-import org.cbioportal.legacy.model.NamespaceData;
-import org.cbioportal.legacy.service.NamespaceDataService;
-import org.cbioportal.legacy.web.config.InternalApiTags;
-import org.cbioportal.legacy.web.config.annotation.InternalApi;
-import org.cbioportal.legacy.web.parameter.NamespaceComparisonFilter;
-import org.cbioportal.legacy.web.parameter.SampleIdentifier;
+import org.cbioportal.model.NamespaceAttribute;
+import org.cbioportal.model.NamespaceData;
+import org.cbioportal.service.NamespaceDataService;
+import org.cbioportal.web.config.InternalApiTags;
+import org.cbioportal.web.config.annotation.InternalApi;
+import org.cbioportal.web.parameter.NamespaceComparisonFilter;
+import org.cbioportal.web.parameter.SampleIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
